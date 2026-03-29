@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PizzeriaApp.Views.Login"
+             Title="Inicio de Sesión"
+             BackgroundColor="#FDF0ED">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="25" Padding="30" VerticalOptions="Center">
+
+            <Image Source="pizzasteve.png" 
+                   HeightRequest="250" 
+                   HorizontalOptions="Center"
+                   Aspect="AspectFit"
+                   Margin="0,0,0,10">
+                <Image.Shadow>
+                    <Shadow Brush="Black" Offset="5,5" Radius="10" Opacity="0.2" />
+                </Image.Shadow>
+            </Image>
+            <Label Text="Pizzas Steve" 
+                   FontSize="32" 
+                   TextColor="#E63946"
+                   FontAttributes="Bold" 
+                   HorizontalOptions="Center" />
+
+            <Label Text="¡Bienvenido!" 
+                   FontSize="32" 
+                   TextColor="#E63946"
+                   FontAttributes="Bold" 
+                   HorizontalOptions="Center" />
+
+            <Label Text="Pide tu pizza favorita en segundos" 
+                   TextColor="#555555"
+                   FontSize="16"
+                   HorizontalOptions="Center"
+                   HorizontalTextAlignment="Center"/>
+
+            <Button Text="Iniciar sesión con Google"
+                    ImageSource="googleicon.png"
+                    ContentLayout="Left, 15"
+                    BackgroundColor="White"
+                    TextColor="#333333"
+                    CornerRadius="25"
+                    HeightRequest="55"
+                    BorderColor="#DDDDDD"
+                    BorderWidth="1"
+                    Margin="0,20,0,0"
+                    Clicked="OnGoogleLoginClicked">
+                <Button.Shadow>
+                    <Shadow Brush="Black" Offset="0,2" Radius="5" Opacity="0.1" />
+                </Button.Shadow>
+            </Button>
+
+           
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
