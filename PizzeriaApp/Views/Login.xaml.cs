@@ -1,82 +1,75 @@
-
-using PizzeriaApp.Controllers;
 using PizzeriaApp.GoogleAuth;
-using Supabase;
-using Supabase.Gotrue;
-using static Supabase.Gotrue.Constants;
 using PizzeriaApp.Models;
-namespace PizzeriaApp.Views;
+using PizzeriaApp.Data;
+using PizzeriaApp.Views; // Asumiendo que MenuAdmin y MenuClient están aquí
 
+namespace PizzeriaApp.Views;
 
 public partial class Login : ContentPage
 {
+    // 1. Usamos readonly pero NO los instanciamos con "new" aquí.
+    private readonly IGoogleAuthService _googleAuthService;
+    private readonly DataBaseServices _dataBaseServices;
 
-    private readonly IGoogleAuthService _googleAuthService = new GoogleAuthService(); //Instancia del servicio de autenticacion de Google para manejar el proceso de login
-    private readonly DataBaseServices _dataBaseServices = new DataBaseServices(new Supabase.Client("https://aggsgpvobhnrbpwxhdor.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFnZ3NncHZvYmhucmJwd3hoZG9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NDUxMzYsImV4cCI6MjA5MDAyMTEzNn0.vl5wlweNtIZF01FQlZnb_zgRqEvtAu7IrgbAiV7q8Aw"));//Instancia del servicio de base de datos para manejar las operaciones relacionadas con los perfiles de usuario en la base de datos Supabase
-
-
-    public Login()
-	{
-		InitializeComponent();
+    // 2. INYECCIÓN DE DEPENDENCIAS: 
+    // Al ponerlos en el constructor, .NET MAUI se encarga de ir a buscar la conexión 
+    // de Supabase que dejaste en MauiProgram.cs y entregártela lista para usar.
+    // ¡Adiós a repetir el link de Supabase!
+    public Login(IGoogleAuthService googleAuthService, DataBaseServices dataBaseServices)
+    {
+        InitializeComponent();
+        _googleAuthService = googleAuthService;
+        _dataBaseServices = dataBaseServices;
     }
 
     private async void OnGoogleLoginClicked(object sender, EventArgs e)
     {
         try
         {
-            
-            var loggedUser = await _googleAuthService.GetCurrentUserAsync();//Intentar obtener el usuario actual, si no hay ninguno se inicia el proceso de autenticacion
-            bool key = true;
-
+            // 3. Obtenemos el usuario de Google
+            var loggedUser = await _googleAuthService.GetCurrentUserAsync();
             if (loggedUser == null)
             {
                 loggedUser = await _googleAuthService.AuthenticateAsync();
             }
-            //Apartado de verificacion de usuario en la base de datos, si no existe se crea un nuevo perfil, si existe se redirige a la pantalla correspondiente segun el rol del usuario
 
-            while (key) //La neta este while no me convence del todo pero fue la forma que pensé de ahorrar codigo repetido, si conoces una mejor forma de hacerlo sin repetir codigo adelante
+            // 4. LÓGICA LINEAL (Adiós al ciclo while)
+            // Primero preguntamos: ¿Este correo ya está en mi base de datos?
+            string _idUser = await _dataBaseServices.ObtenerIdPorEmailAsync(loggedUser.Email);
+
+            // Si es null, significa que es un cliente nuevo. Lo registramos inmediatamente.
+            if (_idUser == null)
             {
-                string _idUser = await _dataBaseServices.ObtenerIdPorEmailAsync(loggedUser.Email); //Metodo para obtener el id por medio del Email
-                if (_idUser != null)
+                // NOTA: Asumo que loggedUser tiene un .Id (el de Google). Si no, puedes generar uno con Guid.NewGuid().ToString()
+                _idUser = Guid.NewGuid().ToString(); // Generamos un ID único
+
+                // CUIDADO: Antes mandabas el FullName, pero el método pide un ID.
+                bool exitoAlGuardar = await _dataBaseServices.InsertarPerfilAsync(_idUser, loggedUser.Email);
+
+                if (!exitoAlGuardar)
                 {
-                    bool _esAdmin = await _dataBaseServices.EsUsuarioAdminAsync(_idUser);//Metodo para verificar si el usuario es admin o cliente
-
-                    if (_esAdmin)//Verificar el rol del usuario y redirigir a la pantalla correspondiente
-                    {
-                        var parametros = new Dictionary<string, object>//Se crea un diccionario para enviar los parametros necesarios a la pantalla del admin, en este caso el id del usuario para mostrar su perfil
-                    {
-                        {"UsuarioId", _idUser }
-                    };
-                        key = false;
-                        Application.Current.MainPage = new MenuAdmin(_idUser);//Redirigir a la pantalla del admin, pasando el id del usuario como parametro
-                    }
-                    else
-                    {
-                        var parametros = new Dictionary<string, object>//Se crea un diccionario para enviar los parametros necesarios a la pantalla del cliente, en este caso el id del usuario para mostrar su perfil
-                    {
-                        {"UsuarioId", _idUser }
-                    };
-                        key = false;
-                        
-                        Application.Current.MainPage = new MenuClient(_idUser);//Redirigir a la pantalla del cliente, pasando el id del usuario como parametro
-
-
-                    }
-                }
-                else
-                {
-                    await _dataBaseServices.InsertarPerfilAsync(loggedUser.FullName, loggedUser.Email);//Si el usuario no existe en la base de datos, se crea un nuevo perfil con el nombre completo y el email del usuario autenticado
+                    // Si la base de datos falla, abortamos el login para no dejarlo pasar con error.
+                    throw new Exception("No se pudo crear tu perfil en la base de datos.");
                 }
             }
-        }
-        catch(Exception ex)
-        {
-            await Application.Current.MainPage.DisplayAlert("Login Error", $"An error occurred: {ex.Message}", "Ok");
-            return;
-        }
-        
 
+            // 5. En este punto de la línea de código, ya estamos 100% seguros de que el usuario
+            // existe (ya sea porque lo encontramos, o porque lo acabamos de registrar).
+            // Ahora solo preguntamos su rol.
+            bool _esAdmin = await _dataBaseServices.EsUsuarioAdminAsync(_idUser);
+
+            if (_esAdmin)
+            {
+                Application.Current.MainPage = new MenuAdmin(_idUser);
+            }
+            else
+            {
+                Application.Current.MainPage = new MenuClient(_idUser);
+            }
+        }
+        catch (Exception ex)
+        {
+            await Application.Current.MainPage.DisplayAlert("Login Error", $"Ocurrió un error: {ex.Message}", "Ok");
+        }
     }
 }
-
-

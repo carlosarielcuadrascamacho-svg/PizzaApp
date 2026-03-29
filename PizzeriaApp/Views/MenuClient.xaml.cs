@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using PizzeriaApp.GoogleAuth;
 
 namespace PizzeriaApp.Views;
@@ -33,6 +34,7 @@ public partial class MenuClient : FlyoutPage
 
         await Application.Current.MainPage.DisplayAlert("Login Message", "Goodbye", "Ok");
 
-        Application.Current.MainPage = new Login();
+        var loginPage = App.Services.GetRequiredService<Login>();
+        Application.Current.MainPage = loginPage;
     }
 }
