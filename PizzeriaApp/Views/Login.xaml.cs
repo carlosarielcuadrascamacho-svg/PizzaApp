@@ -33,6 +33,8 @@ public partial class Login : ContentPage
                 loggedUser = await _googleAuthService.AuthenticateAsync();
             }
 
+            if (loggedUser == null) return;
+
             // 4. LÓGICA LINEAL (Adiós al ciclo while)
             // Primero preguntamos: ¿Este correo ya está en mi base de datos?
             string _idUser = await _dataBaseServices.ObtenerIdPorEmailAsync(loggedUser.Email);

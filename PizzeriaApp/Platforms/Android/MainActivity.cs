@@ -3,6 +3,7 @@ using Android.Content;
 using Android.Content.PM;
 using Android.Gms.Auth.Api.SignIn;
 using Android.OS;
+
 namespace PizzeriaApp
 {
     [Activity(Theme = "@style/Maui.SplashTheme", MainLauncher = true, LaunchMode = LaunchMode.SingleTop, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize | ConfigChanges.Density)]
@@ -12,20 +13,21 @@ namespace PizzeriaApp
 
         protected override async void OnActivityResult(int requestCode, Result resultCode, Intent data)
         {
+            base.OnActivityResult(requestCode, resultCode, data);
+
             if (requestCode == 9001)
             {
                 try
                 {
                     var currentAccount = await GoogleSignIn.GetSignedInAccountFromIntentAsync(data);
 
-                    ResultGoogleAuth.Invoke(this, (currentAccount.Email != null, currentAccount));
+                    // Usamos ?.Invoke para evitar que la app crashee si nadie escucha
+                    ResultGoogleAuth?.Invoke(this, (currentAccount.Email != null, currentAccount));
                 }
                 catch (Exception ex)
                 {
-                    ResultGoogleAuth.Invoke(this, (false, null));
+                    ResultGoogleAuth?.Invoke(this, (false, null));
                 }
-
-
             }
         }
     }
