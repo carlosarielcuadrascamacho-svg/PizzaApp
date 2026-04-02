@@ -12,29 +12,24 @@ namespace PizzeriaApp.Views
             ConfigurarMenu(usuario);
         }
 
+        // Fragmento a modificar en Views/MainNavigation.xaml.cs
         private void ConfigurarMenu(UsuarioPerfil usuario)
         {
-            // 1. Personalizamos la UI con los datos del usuario
-            lblNombreUsuario.Text = $"Hola, {usuario.Id}";
-
             // Limpiamos el contenedor por seguridad
             MenuContainer.Children.Clear();
 
-            // 2. Evaluamos el rol (Lógica de presentación simple)
+            // Ahora evaluamos tu propiedad booleana
             if (usuario.EsAdmin)
             {
-                // Vistas para el perfil Administrador
                 AgregarBotonMenu("Ver Pedidos", new MenuAdmin(usuario.Id));
-                // AgregarBotonMenu("Reportes", new ReportesAdmin()); // Lo descomentarás cuando crees esta vista
+                // AgregarBotonMenu("Reportes", new ReportesAdmin());
             }
-            else if (usuario.EsAdmin)
+            else
             {
-                // Vistas para el perfil Cliente
                 AgregarBotonMenu("Realizar Pedido", new MenuClient(usuario.Id));
-                // AgregarBotonMenu("Mi Historial", new HistorialClient()); // Lo descomentarás cuando crees esta vista
+                // AgregarBotonMenu("Mi Historial", new HistorialClient());
             }
 
-            // 3. Siempre agregamos la opción de salir al final
             AgregarBotonCerrarSesion();
         }
 

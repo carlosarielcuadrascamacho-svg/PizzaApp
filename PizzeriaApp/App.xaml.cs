@@ -5,10 +5,10 @@ namespace PizzeriaApp
 {
     public partial class App : Application
     {
-        public App(AppShell shell)
+        public App()
         {
             InitializeComponent();
-            MainPage = shell;
+            MainPage = new NavigationPage(new Views.Login());
         }
 
         protected override Window CreateWindow(IActivationState? activationState)
