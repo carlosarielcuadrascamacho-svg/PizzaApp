@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
+using PizzeriaApp.Services;
 using PizzeriaApp.Views;
-using Supabase;
+// using Supabase; // Nota: Si no usas el SDK oficial y usas HttpClient, puedes quitar este using.
 
 namespace PizzeriaApp
 {
@@ -16,17 +17,11 @@ namespace PizzeriaApp
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
-            var url = "https://aggsgpvobhnrbpwxhdor.supabase.co";
-            var key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFnZ3NncHZvYmhucmJwd3hoZG9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NDUxMzYsImV4cCI6MjA5MDAyMTEzNn0.vl5wlweNtIZF01FQlZnb_zgRqEvtAu7IrgbAiV7q8Aw";
-            var options = new SupabaseOptions
-            {
-                AutoRefreshToken = true,
-                AutoConnectRealtime = true,
-            };
 
-            var supabase = new Supabase.Client(url, key, options);
-            builder.Services.AddSingleton(supabase);
-            builder.Services.AddSingleton<AppShell>();
+            // 1. Capa de Infraestructura (Nuestra fábrica de conexiones REST)
+            builder.Services.AddSingleton<SupabaseClientFactory>();
+
+            // 2. Vistas (Registramos Login para poder inyectarle dependencias si lo requiere a futuro)
             builder.Services.AddTransient<Login>();
 
 #if DEBUG
