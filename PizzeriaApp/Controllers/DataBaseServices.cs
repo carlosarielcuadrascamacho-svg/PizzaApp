@@ -66,7 +66,7 @@ namespace PizzeriaApp.Controllers
                 return null;
             }
         }
-        }
+        
 
         public async Task<bool> EsUsuarioAdminAsync(string IdBusqueda)
         {
