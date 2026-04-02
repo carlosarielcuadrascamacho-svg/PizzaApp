@@ -5,9 +5,6 @@ namespace PizzeriaApp
 {
     public partial class App : Application
     {
-        // Expose the application's IServiceProvider so pages can resolve services when needed
-        public static IServiceProvider Services { get; set; }
-
         public App(AppShell shell)
         {
             InitializeComponent();

@@ -53,7 +53,7 @@ namespace PizzeriaApp.GoogleAuth
                 {
                     var currentAccount = e.Account;
 
-                    _taskCompletionSource.TrySetResult(
+                    _taskCompletionSource.SetResult(
                         new GoogleUserDTO
                         {
                             Email = currentAccount.Email,
@@ -64,16 +64,11 @@ namespace PizzeriaApp.GoogleAuth
                 }
                 catch (Exception ex)
                 {
-                    
-                    _taskCompletionSource.TrySetException(ex);
+                    _taskCompletionSource.SetException(ex);
                 }
             }
-            else
-            {
-                _taskCompletionSource.TrySetResult(null);
-            }
+
         }
-        
 
         public async Task<GoogleUserDTO> GetCurrentUserAsync()
         {

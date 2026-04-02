@@ -1,6 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using PizzeriaApp.Data;
-using PizzeriaApp.GoogleAuth;
 using PizzeriaApp.Views;
 using Supabase;
 
@@ -30,18 +28,12 @@ namespace PizzeriaApp
             builder.Services.AddSingleton(supabase);
             builder.Services.AddSingleton<AppShell>();
             builder.Services.AddTransient<Login>();
-            builder.Services.AddSingleton<DataBaseServices>();
-            builder.Services.AddSingleton<IGoogleAuthService, GoogleAuthService>();
 
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
 
-            var app = builder.Build();
-            // Store the IServiceProvider so pages can resolve services when not using constructor injection
-            App.Services = app.Services;
-
-            return app;
+            return builder.Build();
         }
     }
 }

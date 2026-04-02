@@ -5,7 +5,7 @@ using System.Text;
 using PizzeriaApp.Models;
 using Supabase;
 
-namespace PizzeriaApp.Data
+namespace PizzeriaApp.Controllers
 {
     public class DataBaseServices
     {
@@ -33,7 +33,8 @@ namespace PizzeriaApp.Data
             }
             catch (Exception ex)
             {
-                throw new Exception($"Fallo en la base de datos al registrar el usuario: {ex.Message}");
+                Console.WriteLine($"Error al insertar: {ex.Message}");
+                return false;
             }
         }
 
