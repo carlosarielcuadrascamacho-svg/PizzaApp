@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using PizzeriaApp.Services;
 using PizzeriaApp.Views;
+using PizzeriaApp.GoogleAuth;
 // using Supabase; // Nota: Si no usas el SDK oficial y usas HttpClient, puedes quitar este using.
 
 namespace PizzeriaApp
@@ -17,12 +18,11 @@ namespace PizzeriaApp
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
-
-            // 1. Capa de Infraestructura (Nuestra fábrica de conexiones REST)
             builder.Services.AddSingleton<SupabaseClientFactory>();
 
-            // 2. Vistas (Registramos Login para poder inyectarle dependencias si lo requiere a futuro)
+            builder.Services.AddSingleton<IGoogleAuthService, GoogleAuthService>();
             builder.Services.AddTransient<Login>();
+
 
 #if DEBUG
             builder.Logging.AddDebug();

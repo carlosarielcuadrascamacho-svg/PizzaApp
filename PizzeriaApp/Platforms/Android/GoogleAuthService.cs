@@ -88,14 +88,12 @@ namespace PizzeriaApp.GoogleAuth
                 return null;
             }
         }
-        public Task LogoutAsync()
+        public async Task LogoutAsync()
         {
             if (_googleSignInClient != null)
             {
-                _googleSignInClient.SignOut();
+                await _googleSignInClient.SignOutAsync();
             }
-
-            return Task.CompletedTask;
         }
     }
 }

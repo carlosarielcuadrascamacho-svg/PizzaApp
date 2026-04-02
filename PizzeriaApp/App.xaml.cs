@@ -5,10 +5,13 @@ namespace PizzeriaApp
 {
     public partial class App : Application
     {
-        public App()
+        public App(IServiceProvider serviceProvider)
         {
             InitializeComponent();
-            MainPage = new NavigationPage(new Views.Login());
+
+            // Resolvemos el Login desde el contenedor para que reciba sus dependencias
+            var loginPage = serviceProvider.GetService<Login>();
+            MainPage = new NavigationPage(loginPage);
         }
 
         protected override Window CreateWindow(IActivationState? activationState)

@@ -10,19 +10,18 @@ public partial class Login : ContentPage
     private IGoogleAuthService _googleAuthService;
     private Controllers.DataBaseServices _dataBaseServices;
 
-    public Login()
+    public Login(IGoogleAuthService googleAuthService)
     {
         InitializeComponent();
+        _googleAuthService = googleAuthService;
+        _dataBaseServices = new Controllers.DataBaseServices();
     }
 
     private async void OnGoogleLoginClicked(object sender, EventArgs e)
     {
         try
         {
-            if (_googleAuthService == null)
-            {
-                _googleAuthService = new GoogleAuthService();
-            }
+            var loggedUser = await _googleAuthService.GetCurrentUserAsync() ?? await _googleAuthService.AuthenticateAsync();
 
             if (_dataBaseServices == null)
             {

@@ -29,6 +29,6 @@ public partial class MenuAdmin : FlyoutPage
 
         await Application.Current.MainPage.DisplayAlert("Login Message", "Goodbye", "Ok");
 
-        Application.Current.MainPage = new Login();
+        Application.Current.MainPage = new Login(_googleAuthService);
     }
 }
