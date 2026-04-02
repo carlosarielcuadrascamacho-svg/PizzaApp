@@ -1,35 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
+using System.Linq;
+using System.Threading.Tasks;
 using PizzeriaApp.Models;
 using Supabase;
+using PizzeriaApp.Config;
 
 namespace PizzeriaApp.Controllers
 {
     public class DataBaseServices
     {
-        private readonly Supabase.Client _supabase; //Instancia del cliente de Supabase para realizar las operaciones de base de datos relacionadas con los perfiles de usuario
-        public DataBaseServices(Supabase.Client supabase) //Constructor que recibe una instancia del cliente de Supabase para inicializar el servicio de base de datos
+        private readonly Supabase.Client _supabase;
+
+        public DataBaseServices()
         {
-            _supabase = supabase;
+            var options = new SupabaseOptions { AutoConnectRealtime = true };
+
+            _supabase = new Client(Secretos.SupabaseUrl, Secretos.SupabaseApiKey, options);
         }
-        public async Task<bool> InsertarPerfilAsync(string nuevoId, string correo) // Método asíncrono para insertar un nuevo perfil de usuario en la base de datos, recibe el nuevo ID y el correo electrónico como parámetros
+        public async Task<bool> InsertarPerfilAsync(string nuevoId, string correo)
         {
             try
             {
-                bool isAdmin = false;// Por defecto, el nuevo perfil no es admin
-                var nuevoPerfil = new UsuarioPerfil// Creamos una nueva instancia de UsuarioPerfil con los datos proporcionados
+                bool isAdmin = false;
+                var nuevoPerfil = new UsuarioPerfil
                 {
                     Id = nuevoId,
                     Email = correo,
                     EsAdmin = isAdmin
                 };
 
-                // Realiza la inserción
                 var respuesta = await _supabase.From<UsuarioPerfil>().Insert(nuevoPerfil);
 
-                return respuesta.Models.Count > 0;// Si la inserción fue exitosa, el número de modelos devueltos será mayor que 0
+                return respuesta.Models.Count > 0;
             }
             catch (Exception ex)
             {
@@ -38,25 +41,24 @@ namespace PizzeriaApp.Controllers
             }
         }
 
-        public async Task<string> ObtenerIdPorEmailAsync(string correoBusqueda) // Método asíncrono para obtener el ID de un perfil de usuario a partir de su correo electrónico, recibe el correo electrónico como parámetro
+        public async Task<string> ObtenerIdPorEmailAsync(string correoBusqueda)
         {
             try
             {
-                // Realizamos la consulta filtrando por la columna 'email'
+                // Esto ya no lanzará NullReferenceException
                 var resultado = await _supabase
                     .From<UsuarioPerfil>()
                     .Where(p => p.Email == correoBusqueda)
                     .Get();
 
-                
-                var perfil = resultado.Models.FirstOrDefault(); // Extraemos el primer modelo encontrado
+                var perfil = resultado.Models.FirstOrDefault();
 
                 if (perfil != null)
                 {
-                    return perfil.Id; // Retorna el UUID encontrado
+                    return perfil.Id;
                 }
 
-                return null; // Si no existe el perfil
+                return null;
             }
             catch (Exception ex)
             {
@@ -64,27 +66,24 @@ namespace PizzeriaApp.Controllers
                 return null;
             }
         }
+        }
 
-        public async Task<bool> EsUsuarioAdminAsync(string IdBusqueda) // Método asíncrono para verificar si un usuario es admin a partir de su ID, recibe el ID del usuario como parámetro
+        public async Task<bool> EsUsuarioAdminAsync(string IdBusqueda)
         {
             try
             {
-                // Realizamos la consulta filtrando por el id del usuario
                 var resultado = await _supabase
                     .From<UsuarioPerfil>()
                     .Where(p => p.Id == IdBusqueda)
                     .Get();
 
-                // Obtenemos el primer registro que coincida
                 var perfil = resultado.Models.FirstOrDefault();
 
-                // Si el perfil existe, devolvemos el valor de la columna 'es_admin'
                 if (perfil != null)
                 {
                     return perfil.EsAdmin;
                 }
 
-                // Si no se encuentra el perfil, asumimos que no es admin
                 return false;
             }
             catch (Exception ex)

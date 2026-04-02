@@ -7,5 +7,6 @@ namespace PizzeriaApp.GoogleAuth
         public Task<GoogleUserDTO> AuthenticateAsync();
         public Task<GoogleUserDTO> GetCurrentUserAsync();
         public Task LogoutAsync();
+
     }
 }

@@ -62,9 +62,16 @@ namespace PizzeriaApp.Views
                 Margin = new Thickness(0, 30, 0, 0) // Separarlo del resto del menú
             };
 
-            btnCerrar.Clicked += (s, e) =>
+            // En Views/MainNavigation.xaml.cs, dentro de tu método AgregarBotonCerrarSesion()
+            btnCerrar.Clicked += async (s, e) =>
             {
-                // Al cerrar sesión, destruimos la navegación actual y volvemos al Login
+                // Instanciamos el servicio de auth
+                var authService = new PizzeriaApp.GoogleAuth.GoogleAuthService();
+
+                // Le pedimos a Android que olvide la cuenta
+                await authService.LogoutAsync();
+
+                // Redirigimos al inicio
                 Application.Current.MainPage = new NavigationPage(new Login());
             };
 

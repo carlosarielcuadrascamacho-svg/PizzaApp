@@ -1,5 +1,4 @@
-﻿
-using Android.Gms.Auth.Api.SignIn;
+﻿using Android.Gms.Auth.Api.SignIn;
 using Android.App;
 
 namespace PizzeriaApp.GoogleAuth
@@ -89,7 +88,14 @@ namespace PizzeriaApp.GoogleAuth
                 return null;
             }
         }
+        public Task LogoutAsync()
+        {
+            if (_googleSignInClient != null)
+            {
+                _googleSignInClient.SignOut();
+            }
 
-        public Task LogoutAsync() => _googleSignInClient.SignOutAsync();
+            return Task.CompletedTask;
+        }
     }
 }

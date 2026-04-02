@@ -19,9 +19,6 @@ public partial class Login : ContentPage
     {
         try
         {
-            // 2. LAZY INITIALIZATION: 
-            // Como el usuario ya pudo ver el botón y hacerle clic, te aseguro al 100% 
-            // que la Activity de Android ya existe y no será nula.
             if (_googleAuthService == null)
             {
                 _googleAuthService = new GoogleAuthService();
@@ -30,10 +27,8 @@ public partial class Login : ContentPage
             if (_dataBaseServices == null)
             {
                 // Reemplaza "URL" y "KEY" por tus credenciales de Supabase
-                _dataBaseServices = new Controllers.DataBaseServices(new Supabase.Client("URL", "KEY"));
+                _dataBaseServices = new Controllers.DataBaseServices();
             }
-
-            // 3. Autenticación (El resto de tu código se mantiene intacto)
             var loggedUser = await _googleAuthService.GetCurrentUserAsync() ?? await _googleAuthService.AuthenticateAsync();
 
             if (loggedUser == null) return;
