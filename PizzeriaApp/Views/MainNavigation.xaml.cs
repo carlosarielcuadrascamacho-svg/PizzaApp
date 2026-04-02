@@ -72,7 +72,7 @@ namespace PizzeriaApp.Views
                 await authService.LogoutAsync();
 
                 // Redirigimos al inicio
-                Application.Current.MainPage = new NavigationPage(new Login());
+                Application.Current.MainPage = new NavigationPage(new Login(authService));
             };
 
             MenuContainer.Children.Add(btnCerrar);

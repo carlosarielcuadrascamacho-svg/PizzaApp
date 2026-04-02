@@ -28,8 +28,7 @@ public partial class Login : ContentPage
                 // Reemplaza "URL" y "KEY" por tus credenciales de Supabase
                 _dataBaseServices = new Controllers.DataBaseServices();
             }
-            var loggedUser = await _googleAuthService.GetCurrentUserAsync() ?? await _googleAuthService.AuthenticateAsync();
-
+            
             if (loggedUser == null) return;
 
             string idUser = await _dataBaseServices.ObtenerIdPorEmailAsync(loggedUser.Email);
