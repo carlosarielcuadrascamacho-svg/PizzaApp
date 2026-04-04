@@ -2,7 +2,7 @@
 using PizzeriaApp.Services;
 using PizzeriaApp.Views;
 using PizzeriaApp.GoogleAuth;
-// using Supabase; // Nota: Si no usas el SDK oficial y usas HttpClient, puedes quitar este using.
+using Syncfusion.Maui.Core.Hosting;
 
 namespace PizzeriaApp
 {
@@ -13,6 +13,7 @@ namespace PizzeriaApp
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
+                .ConfigureSyncfusionCore()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

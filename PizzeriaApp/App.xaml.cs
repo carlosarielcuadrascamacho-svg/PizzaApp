@@ -5,12 +5,18 @@ namespace PizzeriaApp
 {
     public partial class App : Application
     {
+        public static IServiceProvider Services { get; private set; }
+
         public App(IServiceProvider serviceProvider)
         {
+            // 1. Registramos la clave oficial de Syncfusion antes que todo
+            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1JHaF5cWWdCe0x0WmFZfVhgdl9FaVZQQ2YuP1ZhSXxVdkFjW39cc31XQmFVWUZ9XEE=");
+
             InitializeComponent();
 
-            // Resolvemos el Login desde el contenedor para que reciba sus dependencias
-            var loginPage = serviceProvider.GetService<Login>();
+            Services = serviceProvider;
+
+            var loginPage = Services.GetService<Login>();
             MainPage = new NavigationPage(loginPage);
         }
 
