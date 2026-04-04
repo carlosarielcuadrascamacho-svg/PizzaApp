@@ -15,10 +15,9 @@ namespace PizzeriaApp.Controllers
         public DataBaseServices()
         {
             var options = new SupabaseOptions { AutoConnectRealtime = true };
-
             _supabase = new Client(Secretos.SupabaseUrl, Secretos.SupabaseApiKey, options);
         }
-        // Solo pedimos el correo. El ID se genera en PostgreSQL y el Nombre no se guarda.
+
         public async Task<bool> InsertarPerfilAsync(string correo)
         {
             try
@@ -26,12 +25,10 @@ namespace PizzeriaApp.Controllers
                 var nuevoPerfil = new UsuarioPerfil
                 {
                     Email = correo,
-                    EsAdmin = false // Por defecto, nadie es admin al registrarse
+                    EsAdmin = false
                 };
 
-                // Supabase solo enviará 'email' y 'es_admin' gracias al [JsonIgnore]
                 var respuesta = await _supabase.From<UsuarioPerfil>().Insert(nuevoPerfil);
-
                 return respuesta.Models.Count > 0;
             }
             catch (Exception ex)
@@ -40,11 +37,11 @@ namespace PizzeriaApp.Controllers
                 return false;
             }
         }
+
         public async Task<string> ObtenerIdPorEmailAsync(string correoBusqueda)
         {
             try
             {
-                // Esto ya no lanzará NullReferenceException
                 var resultado = await _supabase
                     .From<UsuarioPerfil>()
                     .Where(p => p.Email == correoBusqueda)
@@ -65,7 +62,6 @@ namespace PizzeriaApp.Controllers
                 return null;
             }
         }
-        
 
         public async Task<bool> EsUsuarioAdminAsync(string IdBusqueda)
         {
@@ -96,39 +92,72 @@ namespace PizzeriaApp.Controllers
         {
             try
             {
-                // Traemos todos los pedidos, ordenados de forma descendente por fecha
                 var respuesta = await _supabase.From<Pedido>()
                     .Order(p => p.Fecha, Supabase.Postgrest.Constants.Ordering.Descending)
                     .Get();
 
-                // Retornamos la lista de modelos ya mapeados a C#
                 return respuesta.Models;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error al obtener pedidos: {ex.Message}");
-                return new List<Pedido>(); // Retornamos lista vacía si hay error para que no crashee
+                return new List<Pedido>();
             }
         }
-        public async Task<bool> CrearPedidoAsync(string clienteId, decimal totalFicticio)
+
+        public async Task<List<Producto>> ObtenerProductosActivosAsync()
+        {
+            try
+            {
+                var respuesta = await _supabase.From<Producto>()
+                    .Where(p => p.Activo == true)
+                    .Get();
+
+                return respuesta.Models;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al obtener catálogo: {ex.Message}");
+                return new List<Producto>();
+            }
+        }
+
+        public async Task<bool> CrearPedidoCompletoAsync(string clienteId, List<ItemCarrito> carrito, decimal totalCalculado)
         {
             try
             {
                 var nuevoPedido = new Pedido
                 {
                     ClienteId = clienteId,
-                    Total = totalFicticio,
+                    Total = totalCalculado,
                     Estado = "En preparación",
-                    Fecha = DateTime.UtcNow // Siempre es mejor guardar en UTC en bases de datos relacionales
+                    Fecha = DateTime.UtcNow
                 };
 
-                var respuesta = await _supabase.From<Pedido>().Insert(nuevoPedido);
+                var respuestaPedido = await _supabase.From<Pedido>().Insert(nuevoPedido);
+                var pedidoInsertado = respuestaPedido.Models.FirstOrDefault();
 
-                return respuesta.Models.Count > 0;
+                if (pedidoInsertado == null) return false;
+                
+                var detalles = new List<DetallePedido>();
+                foreach (var item in carrito)
+                {
+                    detalles.Add(new DetallePedido
+                    {
+                        PedidoId = pedidoInsertado.Id,
+                        ProductoId = item.Producto.Id,
+                        Cantidad = item.Cantidad,
+                        PrecioUnitario = item.Producto.Precio
+                    });
+                }
+
+                await _supabase.From<DetallePedido>().Insert(detalles);
+
+                return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al crear pedido: {ex.Message}");
+                Console.WriteLine($"Error en transacción de pedido: {ex.Message}");
                 return false;
             }
         }

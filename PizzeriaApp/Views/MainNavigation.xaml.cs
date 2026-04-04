@@ -10,6 +10,15 @@ namespace PizzeriaApp.Views
         {
             InitializeComponent();
             ConfigurarMenu(usuario);
+
+            if (usuario.EsAdmin)
+            {
+                Detail = new NavigationPage(new MenuAdmin());
+            }
+            else
+            {
+                Detail = new NavigationPage(new MenuClient(usuario));
+            }
         }
 
         private void ConfigurarMenu(UsuarioPerfil usuario)

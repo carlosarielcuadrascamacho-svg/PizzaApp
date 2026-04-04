@@ -2,32 +2,59 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="PizzeriaApp.Views.MenuClient"
-             Title="Realizar Pedido"
+             Title="Nuestro Menú"
              BackgroundColor="#F5F5F5">
 
-    <VerticalStackLayout Padding="30" Spacing="25" VerticalOptions="Center">
+    <Grid RowDefinitions="*, Auto">
 
-        <Label Text="🍕 Promoción del Día" 
-               FontSize="24" 
-               FontAttributes="Bold" 
-               HorizontalOptions="Center" />
+        <CollectionView Grid.Row="0" x:Name="ListaProductos" Margin="10">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame Margin="5,5,5,10" Padding="15" CornerRadius="12" HasShadow="True" BorderColor="Transparent">
+                        <Grid ColumnDefinitions="*, Auto">
 
-        <Frame BackgroundColor="White" CornerRadius="15" Padding="20" HasShadow="True">
-            <VerticalStackLayout Spacing="10">
-                <Label Text="Pizza Pepperoni Grande" FontSize="18" FontAttributes="Bold"/>
-                <Label Text="Incluye orilla de queso y un refresco de 2L." TextColor="Gray" />
-                <Label Text="$250.00" FontSize="22" TextColor="DarkGreen" FontAttributes="Bold" HorizontalOptions="End"/>
-            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="0" Spacing="4" VerticalOptions="Center">
+                                <Label Text="{Binding Nombre}" FontSize="18" FontAttributes="Bold" TextColor="#333333" />
+                                <Label Text="{Binding Descripcion}" FontSize="13" TextColor="Gray" />
+                                <Label Text="{Binding Precio, StringFormat='{0:C}'}" FontSize="16" TextColor="#2E7D32" FontAttributes="Bold" Margin="0,5,0,0"/>
+                            </VerticalStackLayout>
+
+                            <Button Grid.Column="1" 
+                                    Text="+ Agregar" 
+                                    BackgroundColor="#E53935" 
+                                    TextColor="White"
+                                    FontAttributes="Bold"
+                                    CornerRadius="8"
+                                    HeightRequest="40"
+                                    VerticalOptions="Center"
+                                    CommandParameter="{Binding .}"
+                                    Clicked="OnAgregarAlCarritoClicked" />
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Frame Grid.Row="1" BackgroundColor="White" Padding="20" HasShadow="True" CornerRadius="0" BorderColor="LightGray">
+            <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, Auto">
+
+                <Label Grid.Row="0" Grid.Column="0" x:Name="lblArticulos" Text="0 artículos" FontSize="16" TextColor="Gray" VerticalOptions="Center"/>
+                <Label Grid.Row="0" Grid.Column="1" x:Name="lblTotal" Text="Total: $0.00" FontSize="22" FontAttributes="Bold" TextColor="Black" VerticalOptions="Center"/>
+
+                <Button Grid.Row="1" Grid.ColumnSpan="2" 
+                        x:Name="btnOrdenar"
+                        Text="Confirmar Orden" 
+                        BackgroundColor="#E53935" 
+                        TextColor="White" 
+                        FontSize="18" 
+                        FontAttributes="Bold"
+                        CornerRadius="25" 
+                        Margin="0,15,0,0"
+                        HeightRequest="55"
+                        Clicked="OnConfirmarOrdenClicked" 
+                        IsEnabled="False"/>
+            </Grid>
         </Frame>
 
-        <Button x:Name="btnOrdenar"
-                Text="Confirmar y Ordenar"
-                BackgroundColor="#E53935"
-                TextColor="White"
-                FontSize="18"
-                CornerRadius="25"
-                HeightRequest="55"
-                Clicked="OnOrdenarClicked" />
-
-    </VerticalStackLayout>
+    </Grid>
 </ContentPage>
