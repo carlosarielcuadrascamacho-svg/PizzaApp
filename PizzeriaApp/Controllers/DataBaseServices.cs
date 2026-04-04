@@ -18,18 +18,18 @@ namespace PizzeriaApp.Controllers
 
             _supabase = new Client(Secretos.SupabaseUrl, Secretos.SupabaseApiKey, options);
         }
-        public async Task<bool> InsertarPerfilAsync(string nuevoId, string correo)
+        // Solo pedimos el correo. El ID se genera en PostgreSQL y el Nombre no se guarda.
+        public async Task<bool> InsertarPerfilAsync(string correo)
         {
             try
             {
-                bool isAdmin = false;
                 var nuevoPerfil = new UsuarioPerfil
                 {
-                    Id = nuevoId,
                     Email = correo,
-                    EsAdmin = isAdmin
+                    EsAdmin = false // Por defecto, nadie es admin al registrarse
                 };
 
+                // Supabase solo enviará 'email' y 'es_admin' gracias al [JsonIgnore]
                 var respuesta = await _supabase.From<UsuarioPerfil>().Insert(nuevoPerfil);
 
                 return respuesta.Models.Count > 0;
@@ -40,7 +40,6 @@ namespace PizzeriaApp.Controllers
                 return false;
             }
         }
-
         public async Task<string> ObtenerIdPorEmailAsync(string correoBusqueda)
         {
             try
@@ -89,6 +88,47 @@ namespace PizzeriaApp.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"Error al verificar permisos: {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<List<Pedido>> ObtenerPedidosActivosAsync()
+        {
+            try
+            {
+                // Traemos todos los pedidos, ordenados de forma descendente por fecha
+                var respuesta = await _supabase.From<Pedido>()
+                    .Order(p => p.Fecha, Supabase.Postgrest.Constants.Ordering.Descending)
+                    .Get();
+
+                // Retornamos la lista de modelos ya mapeados a C#
+                return respuesta.Models;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al obtener pedidos: {ex.Message}");
+                return new List<Pedido>(); // Retornamos lista vacía si hay error para que no crashee
+            }
+        }
+        public async Task<bool> CrearPedidoAsync(string clienteId, decimal totalFicticio)
+        {
+            try
+            {
+                var nuevoPedido = new Pedido
+                {
+                    ClienteId = clienteId,
+                    Total = totalFicticio,
+                    Estado = "En preparación",
+                    Fecha = DateTime.UtcNow // Siempre es mejor guardar en UTC en bases de datos relacionales
+                };
+
+                var respuesta = await _supabase.From<Pedido>().Insert(nuevoPedido);
+
+                return respuesta.Models.Count > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al crear pedido: {ex.Message}");
                 return false;
             }
         }

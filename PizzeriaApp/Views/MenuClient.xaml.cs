@@ -1,35 +1,42 @@
-using PizzeriaApp.GoogleAuth;
+using PizzeriaApp.Models;
+using PizzeriaApp.Controllers;
 
-namespace PizzeriaApp.Views;
-
-
-public partial class MenuClient : FlyoutPage
+namespace PizzeriaApp.Views
 {
-    private readonly IGoogleAuthService _googleAuthService = new GoogleAuthService();
-
-    private readonly string UsuarioId;
-    public MenuClient() //Constructor de la clase MenuClient, recibe el id del usuario como parametro para mostrar su perfil en la pantalla del cliente
+    public partial class MenuClient : ContentPage
     {
-		InitializeComponent();
-    }
+        private readonly UsuarioPerfil _clienteActual;
+        private readonly DataBaseServices _dbService;
 
-    protected override async void OnAppearing() //Metodo que se ejecuta cuando la pantalla del cliente aparece, muestra un mensaje de confirmacion con el id del usuario recibido como parametro (para verificar que se ha recibido correctamente el id del usuario y se ha redirigido a la pantalla del cliente)
-    {
-        base.OnAppearing();
-
-        if (!string.IsNullOrEmpty(UsuarioId))
+        // Modificamos el constructor para exigir el perfil del cliente
+        public MenuClient(UsuarioPerfil cliente)
         {
-            // Mostramos el mensaje de confirmación
-            await DisplayAlert("Conexión Exitosa", $"ID de usuario recibido: {UsuarioId}", "Aceptar");
+            InitializeComponent();
+            _clienteActual = cliente;
+            _dbService = new DataBaseServices();
         }
-    }
 
-    private async void Logout_Clicked(object sender, EventArgs e) //Metodo que se ejecuta cuando el usuario hace clic en el boton de logout, cierra la sesion del usuario y redirige a la pantalla de login
-    {
-        await _googleAuthService?.LogoutAsync();
+        private async void OnOrdenarClicked(object sender, EventArgs e)
+        {
+            // Deshabilitamos el botón para evitar dobles envíos
+            btnOrdenar.IsEnabled = false;
+            btnOrdenar.Text = "Procesando...";
 
-        await Application.Current.MainPage.DisplayAlert("Login Message", "Goodbye", "Ok");
+            // Enviamos el ID real del usuario validado en Google y el costo de la pizza
+            bool exito = await _dbService.CrearPedidoAsync(_clienteActual.Id, 250.00m);
 
-        Application.Current.MainPage = new Login(_googleAuthService);
+            if (exito)
+            {
+                await DisplayAlert("¡Éxito!", "Tu pedido ha sido enviado a la cocina.", "Excelente");
+            }
+            else
+            {
+                await DisplayAlert("Error", "No pudimos procesar tu pedido. Intenta de nuevo.", "Ok");
+            }
+
+            // Restauramos el botón
+            btnOrdenar.IsEnabled = true;
+            btnOrdenar.Text = "Confirmar y Ordenar";
+        }
     }
 }

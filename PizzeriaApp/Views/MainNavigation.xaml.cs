@@ -18,16 +18,14 @@ namespace PizzeriaApp.Views
             lblNombreUsuario.Text = $"Hola, {usuario.Nombre ?? "Usuario"}";
             MenuContainer.Children.Clear();
 
-            // 2. Evaluamos el booleano que definimos antes
             if (usuario.EsAdmin)
             {
                 AgregarBotonMenu("Ver Pedidos", new MenuAdmin());
-                // AgregarBotonMenu("Reportes", new ReportesAdmin());
             }
             else
             {
-                AgregarBotonMenu("Realizar Pedido", new MenuClient());
-                // AgregarBotonMenu("Mi Historial", new HistorialClient());
+                // AQUÍ: Le pasamos la información del usuario en memoria a la vista del cliente
+                AgregarBotonMenu("Realizar Pedido", new MenuClient(usuario));
             }
 
             AgregarBotonCerrarSesion();

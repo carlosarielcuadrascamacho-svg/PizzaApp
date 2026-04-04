@@ -1,71 +1,33 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<FlyoutPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="PizzeriaApp.Views.MenuClient"
-             Title="MenuClient"
-            FlyoutLayoutBehavior="Popover">
+             Title="Realizar Pedido"
+             BackgroundColor="#F5F5F5">
 
-    <FlyoutPage.Flyout>
-        <ContentPage Title="Menú Cliente" BackgroundColor="#121212">
-            <VerticalStackLayout Padding="20" Spacing="20">
-                <Label Text="ADMIN STATS" 
-                       TextColor="#8B0000" 
-                       FontSize="22" 
-                       FontAttributes="Bold" 
-                       HorizontalOptions="Center" />
+    <VerticalStackLayout Padding="30" Spacing="25" VerticalOptions="Center">
 
-                <BoxView HeightRequest="1" Color="#333333" />
+        <Label Text="🍕 Promoción del Día" 
+               FontSize="24" 
+               FontAttributes="Bold" 
+               HorizontalOptions="Center" />
 
-                <VerticalStackLayout Spacing="5">
-                    <Label Text="ADMIN ID:" TextColor="Gray" FontSize="10" CharacterSpacing="2" />
-                    <Label x:Name="lblIdFlyout" Text="---" TextColor="White" FontSize="14" />
-                </VerticalStackLayout>
-
-                <Button Text="" BackgroundColor="Transparent" TextColor="Red" HorizontalOptions="Start"  />
-
-                <BoxView HeightRequest="1" Color="#333333" Margin="0,10" />
-
-                <Button Text="Cerrar Sesión" BackgroundColor="Transparent" TextColor="#8B0000" HorizontalOptions="Start" Clicked="Logout_Clicked" />
+        <Frame BackgroundColor="White" CornerRadius="15" Padding="20" HasShadow="True">
+            <VerticalStackLayout Spacing="10">
+                <Label Text="Pizza Pepperoni Grande" FontSize="18" FontAttributes="Bold"/>
+                <Label Text="Incluye orilla de queso y un refresco de 2L." TextColor="Gray" />
+                <Label Text="$250.00" FontSize="22" TextColor="DarkGreen" FontAttributes="Bold" HorizontalOptions="End"/>
             </VerticalStackLayout>
-        </ContentPage>
-    </FlyoutPage.Flyout>
+        </Frame>
 
-    <FlyoutPage.Detail>
-        <NavigationPage>
-            <x:Arguments>
-                <ContentPage Title="Dashboard" BackgroundColor="Black">
-                    <Grid>
-                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="20">
-                            <Label Text="PANEL DE CONTROL" 
-                                   TextColor="White" 
-                                   FontSize="18" 
-                                   CharacterSpacing="3"
-                                   HorizontalOptions="Center"/>
+        <Button x:Name="btnOrdenar"
+                Text="Confirmar y Ordenar"
+                BackgroundColor="#E53935"
+                TextColor="White"
+                FontSize="18"
+                CornerRadius="25"
+                HeightRequest="55"
+                Clicked="OnOrdenarClicked" />
 
-                            <Border Stroke="#8B0000" 
-                                    StrokeThickness="2"
-                                    Padding="20" 
-                                    BackgroundColor="#151515"
-                                    WidthRequest="280">
-                                <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="10" />
-                                </Border.StrokeShape>
-
-                                <VerticalStackLayout Spacing="10">
-                                    <Label Text="SESIÓN DE CLIENTE" TextColor="Gray" FontSize="12" HorizontalOptions="Center"/>
-                                    <Label x:Name="lblIdDetail" 
-                                           Text="Verificando..." 
-                                           TextColor="#FF0000" 
-                                           FontSize="18"
-                                           FontAttributes="Bold" 
-                                           HorizontalOptions="Center"/>
-                                </VerticalStackLayout>
-                            </Border>
-                        </VerticalStackLayout>
-                    </Grid>
-                </ContentPage>
-            </x:Arguments>
-        </NavigationPage>
-    </FlyoutPage.Detail>
-
-</FlyoutPage>
+    </VerticalStackLayout>
+</ContentPage>

@@ -15,7 +15,6 @@ public partial class Login : ContentPage
         _googleAuthService = googleAuthService;
         _dataBaseServices = new Controllers.DataBaseServices();
     }
-
     private async void OnGoogleLoginClicked(object sender, EventArgs e)
     {
         try
@@ -24,35 +23,32 @@ public partial class Login : ContentPage
 
             if (loggedUser == null) return;
 
-            // 1. Resolvemos el nombre AQUÍ ARRIBA para que exista en toda la función.
-            // Si FullName tiene algo, lo usamos. Si está vacío, cortamos el correo.
+            string idUser = await _dataBaseServices.ObtenerIdPorEmailAsync(loggedUser.Email);
+
+            // 1. Lógica de Base de Datos (Solo el correo)
+            if (string.IsNullOrEmpty(idUser))
+            {
+                // Ya no mandamos el nombre aquí, el método solo pide el correo
+                await _dataBaseServices.InsertarPerfilAsync(loggedUser.Email);
+                idUser = await _dataBaseServices.ObtenerIdPorEmailAsync(loggedUser.Email);
+            }
+
+            bool esAdmin = await _dataBaseServices.EsUsuarioAdminAsync(idUser);
+
+            // 2. Lógica de Vista (Calculamos el nombre solo para la pantalla)
             string nombreUsuario = !string.IsNullOrWhiteSpace(loggedUser.FullName)
                                     ? loggedUser.FullName
                                     : loggedUser.Email.Split('@')[0];
 
-            string idUser = await _dataBaseServices.ObtenerIdPorEmailAsync(loggedUser.Email);
-
-            // 2. Si el usuario no existe, lo insertamos
-            if (string.IsNullOrEmpty(idUser))
-            {
-                // Usamos la variable que ya resolvimos arriba
-                await _dataBaseServices.InsertarPerfilAsync(nombreUsuario, loggedUser.Email);
-                idUser = await _dataBaseServices.ObtenerIdPorEmailAsync(loggedUser.Email);
-            }
-
-            // 3. Validamos si es administrador
-            bool esAdmin = await _dataBaseServices.EsUsuarioAdminAsync(idUser);
-
-            // 4. Construimos el perfil final
+            // 3. Armamos el perfil en memoria
             var perfil = new UsuarioPerfil
             {
                 Id = idUser,
                 Email = loggedUser.Email,
-                Nombre = nombreUsuario, // Usamos la variable global de esta función
-                EsAdmin = esAdmin
+                EsAdmin = esAdmin,
+                Nombre = nombreUsuario // Esto vive en RAM, nunca toca PostgreSQL
             };
 
-            // 5. Navegamos pasando el perfil correctamente
             Application.Current.MainPage = new MainNavigation(perfil);
         }
         catch (Exception ex)
