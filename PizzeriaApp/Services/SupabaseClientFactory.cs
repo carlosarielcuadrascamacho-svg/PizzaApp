@@ -1,25 +1,35 @@
-﻿using System.Net.Http.Headers;
-using PizzeriaApp.Config;
+﻿using System;
+using System.Threading.Tasks;
+using Supabase;
 
 namespace PizzeriaApp.Services
 {
-    public class SupabaseClientFactory
+    public static class SupabaseClientFactory
     {
-        public HttpClient CreateClient()
+        private static Supabase.Client? _client;
+        private static bool _initialized = false;
+
+        public static Supabase.Client? Client => _client;
+
+        public static bool IsInitialized => _initialized;
+
+        public static Supabase.Client GetClientOrThrow()
         {
-            var cliente = new HttpClient();
+            if (_client == null)
+                throw new InvalidOperationException("Supabase client not initialized. Call InitializeAsync first.");
+            return _client;
+        }
 
-            // 1. Establecemos la URL base a la API de PostgreSQL
-            cliente.BaseAddress = new Uri(Secretos.SupabaseUrl);
+        public static async Task InitializeAsync(string url, string key)
+        {
+            if (_initialized)
+                return;
 
-            // 2. Inyectamos los Headers obligatorios de Supabase
-            cliente.DefaultRequestHeaders.Add("apikey", Secretos.SupabaseApiKey);
-            cliente.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Secretos.SupabaseApiKey);
+            var options = new SupabaseOptions { AutoConnectRealtime = true };
+            _client = new Supabase.Client(url, key, options);
 
-            // 3. Forzamos a que toda la comunicación de ida y vuelta sea en formato JSON
-            cliente.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-            return cliente;
+            await _client.InitializeAsync();
+            _initialized = true;
         }
     }
 }

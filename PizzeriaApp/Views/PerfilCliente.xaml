@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:PizzeriaApp.Converters"
+             x:Class="PizzeriaApp.Views.PerfilCliente"
+             Title="Mi Perfil"
+             BackgroundColor="#FCFCFC">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:Base64ToImageConverter x:Key="Base64Converter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="25" Padding="25">
+            <!-- Avatar Circular Interactivo -->
+            <VerticalStackLayout HorizontalOptions="Center" Spacing="10">
+                <Frame WidthRequest="150" HeightRequest="150" CornerRadius="75" Padding="0" IsClippedToBounds="True" HasShadow="True" BorderColor="#E53935" BackgroundColor="#FFF3E0">
+                    <Frame.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnCambiarFotoTapped"/>
+                    </Frame.GestureRecognizers>
+                    <Grid>
+                        <Image x:Name="imgAvatar" Aspect="AspectFill" Source="{Binding FotoPerfil, Converter={StaticResource Base64Converter}}" />
+                        <Label x:Name="lblPlaceholderFoto" Text="📷" FontSize="50" HorizontalOptions="Center" VerticalOptions="Center" TextColor="#B71C1C"/>
+                    </Grid>
+                </Frame>
+                <Label Text="Tocar para actualizar" FontSize="12" TextColor="Gray" HorizontalOptions="Center"/>
+            </VerticalStackLayout>
+
+            <!-- Formulario de Contacto -->
+            <Border StrokeThickness="0" BackgroundColor="White" Padding="20" StrokeShape="RoundRectangle 15">
+                <VerticalStackLayout Spacing="20">
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Correo Electrónico (No editable)" FontSize="12" TextColor="Gray" FontAttributes="Bold"/>
+                        <Entry x:Name="txtEmail" IsReadOnly="True" TextColor="#999" BackgroundColor="#F5F5F5" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Nombre Completo" FontSize="12" TextColor="#B71C1C" FontAttributes="Bold"/>
+                        <Entry x:Name="txtNombre" Placeholder="Ej. Juan Pérez" TextColor="#333" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Dirección de Entrega" FontSize="12" TextColor="#B71C1C" FontAttributes="Bold"/>
+                        <Entry x:Name="txtDireccion" Placeholder="Calle, Número, Colonia..." TextColor="#333" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Teléfono" FontSize="12" TextColor="#B71C1C" FontAttributes="Bold"/>
+                        <Entry x:Name="txtTelefono" Placeholder="10 Dígitos" Keyboard="Telephone" MaxLength="10" TextColor="#333" />
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Boton Guardar -->
+            <Button x:Name="btnGuardar"
+                    Text="Guardar Cambios" 
+                    BackgroundColor="#E53935" 
+                    TextColor="White" 
+                    FontAttributes="Bold"
+                    FontSize="18"
+                    CornerRadius="25"
+                    HeightRequest="55"
+                    Margin="0,15,0,20"
+                    Clicked="OnGuardarClicked" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

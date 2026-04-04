@@ -1,4 +1,4 @@
-﻿using Supabase.Postgrest.Attributes;
+using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
 
 namespace PizzeriaApp.Models
@@ -18,8 +18,11 @@ namespace PizzeriaApp.Models
         [Column("precio")]
         public decimal Precio { get; set; }
 
-        [Column("imagen_url")]
-        public string ImagenUrl { get; set; }
+        [Column("imagen_base64")]
+        public string ImagenBase64 { get; set; }
+
+        [Column("categoria")]
+        public string Categoria { get; set; }
 
         [Column("activo")]
         public bool Activo { get; set; }

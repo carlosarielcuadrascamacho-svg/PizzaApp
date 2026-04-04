@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PizzeriaApp.Views.EditMenu"
+             Title="Gestión de Catálogo"
+             BackgroundColor="#F5F5F5">
+
+    <Grid RowDefinitions="Auto, *">
+        <!-- Header -->
+        <Border Grid.Row="0" Margin="15" Padding="15" StrokeThickness="0" BackgroundColor="White" StrokeShape="RoundRectangle 15">
+            <HorizontalStackLayout Spacing="15" VerticalOptions="Center">
+                <Label Text="🛠️" FontSize="32" VerticalOptions="Center"/>
+                <VerticalStackLayout VerticalOptions="Center">
+                    <Label Text="Inventario Activo" FontSize="18" FontAttributes="Bold" TextColor="#B71C1C"/>
+                    <Label Text="Habilita o deshabilita los productos a la venta." FontSize="14" TextColor="Gray" />
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
+        </Border>
+
+        <!-- Lista de Productos para Editar -->
+        <CollectionView Grid.Row="1" x:Name="ListaInventario" Margin="10,0,10,10">
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Orientation="Vertical" Span="1" VerticalItemSpacing="10" />
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame Margin="5" Padding="15" CornerRadius="12" HasShadow="True" BorderColor="Transparent" BackgroundColor="White">
+                        <Grid ColumnDefinitions="Auto, *, Auto, Auto" ColumnSpacing="15">
+                            <Frame Grid.Column="0" WidthRequest="60" HeightRequest="60" CornerRadius="8" IsClippedToBounds="True" HasShadow="False" BorderColor="Transparent" Padding="0" VerticalOptions="Center">
+                                <Image Source="{Binding ImagenUrl}" Aspect="AspectFill" />
+                            </Frame>
+                            
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                                <Label Text="{Binding Nombre}" FontSize="16" FontAttributes="Bold" TextColor="#222"/>
+                                <Label Text="{Binding Precio, StringFormat='{0:C}'}" FontSize="14" TextColor="#B71C1C" FontAttributes="Bold"/>
+                            </VerticalStackLayout>
+
+                            <!-- Switch de Disponibilidad -->
+                            <VerticalStackLayout Grid.Column="2" VerticalOptions="Center" HorizontalOptions="Center">
+                                <Label Text="Público" FontSize="10" TextColor="Gray" HorizontalOptions="Center" />
+                                <Switch IsToggled="{Binding Activo}" Toggled="OnDisponibilidadToggled" BindingContext="{Binding .}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

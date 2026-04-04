@@ -12,7 +12,7 @@ namespace PizzeriaApp.Views
 
         // Estructuras de datos para manejar el estado visual
         private ObservableCollection<ItemCarrito> _carrito;
-        private decimal _totalCarrito = 0;
+        private List<Producto> _catalogoCompleto;
 
         public MenuClient(UsuarioPerfil cliente)
         {
@@ -25,75 +25,80 @@ namespace PizzeriaApp.Views
         protected override async void OnAppearing()
         {
             base.OnAppearing();
-            // Disparamos la consulta a PostgreSQL al abrir la pantalla
+            CargarFiltrosCategorias();
+            
             await CargarCatalogoAsync();
+
+            int totalArticulos = _carrito.Sum(i => i.Cantidad);
+            tbCart.Text = $"🛒 Carrito ({totalArticulos})";
+            
+            ListaProductos.SelectedItem = null;
         }
 
         private async Task CargarCatalogoAsync()
         {
             var productos = await _dbService.ObtenerProductosActivosAsync();
-            ListaProductos.ItemsSource = productos;
+            _catalogoCompleto = productos;
+            ListaProductos.ItemsSource = _catalogoCompleto;
         }
 
-        private void OnAgregarAlCarritoClicked(object sender, EventArgs e)
+        private void CargarFiltrosCategorias()
         {
-            var button = sender as Button;
-            // El XAML nos envía el objeto completo usando el CommandParameter
-            var productoSeleccionado = button?.CommandParameter as Producto;
+            slCategorias.Children.Clear();
+            var categorias = new List<string> { "Todas", "Pizzas", "Bebidas", "Postres", "Complementos" };
 
-            if (productoSeleccionado != null)
+            foreach (var cat in categorias)
             {
-                // Buscamos si la pizza ya estaba en el carrito
-                var itemExistente = _carrito.FirstOrDefault(i => i.Producto.Id == productoSeleccionado.Id);
-
-                if (itemExistente != null)
+                var btn = new Button
                 {
-                    itemExistente.Cantidad++;
-                }
-                else
+                    Text = cat,
+                    BackgroundColor = Colors.White,
+                    TextColor = Color.FromArgb("#333"),
+                    BorderColor = Color.FromArgb("#E0E0E0"),
+                    BorderWidth = 1,
+                    Padding = new Thickness(15, 5),
+                    CornerRadius = 20,
+                    FontAttributes = FontAttributes.Bold
+                };
+                
+                btn.Clicked += (sender, e) => 
                 {
-                    _carrito.Add(new ItemCarrito { Producto = productoSeleccionado, Cantidad = 1 });
-                }
+                    if(cat == "Todas")
+                        ListaProductos.ItemsSource = _catalogoCompleto;
+                    else
+                        ListaProductos.ItemsSource = _catalogoCompleto.Where(p => p.Categoria == cat).ToList();
+                };
 
-                ActualizarResumenCarrito();
+                slCategorias.Children.Add(btn);
             }
         }
 
-        private void ActualizarResumenCarrito()
+        private async void OnProductoSeleccionado(object sender, SelectionChangedEventArgs e)
         {
-            // LINQ para calcular dinámicamente el estado
-            int totalArticulos = _carrito.Sum(i => i.Cantidad);
-            _totalCarrito = _carrito.Sum(i => i.Subtotal);
-
-            lblArticulos.Text = $"{totalArticulos} artículos";
-            lblTotal.Text = $"Total: {_totalCarrito:C}";
-
-            // Bloqueamos el botón si la lista de la compra está vacía
-            btnOrdenar.IsEnabled = totalArticulos > 0;
+            if (e.CurrentSelection.FirstOrDefault() is Producto productoSeleccionado)
+            {
+                await Navigation.PushAsync(new MenuDetails(productoSeleccionado, _carrito));
+            }
         }
 
-        private async void OnConfirmarOrdenClicked(object sender, EventArgs e)
+        private async void OnVerCarritoClicked(object sender, EventArgs e)
         {
-            btnOrdenar.IsEnabled = false;
-            btnOrdenar.Text = "Enviando a cocina...";
-
-            // Disparamos la arquitectura de red hacia Supabase
-            bool exito = await _dbService.CrearPedidoCompletoAsync(_clienteActual.Id, _carrito.ToList(), _totalCarrito);
-
-            if (exito)
+            if (_carrito.Count == 0)
             {
-                await DisplayAlert("¡Éxito!", "Tu pedido ha sido procesado correctamente.", "Aceptar");
-
-                // Vaciamos el carrito para dejar la pantalla lista para otra compra
-                _carrito.Clear();
-                ActualizarResumenCarrito();
+                await DisplayAlert("Carrito", "Agrega al menos un producto para proceder al pago.", "OK");
+                return;
             }
-            else
-            {
-                await DisplayAlert("Error", "No pudimos procesar tu pedido. Intenta de nuevo.", "Ok");
-            }
+            await Navigation.PushAsync(new Orders(_carrito, _clienteActual));
+        }
 
-            btnOrdenar.Text = "Confirmar Orden";
+        private async void OnIrPerfilClicked(object sender, EventArgs e)
+        {
+            await Navigation.PushAsync(new PerfilCliente(_clienteActual));
+        }
+
+        private async void OnIrHistorialClicked(object sender, EventArgs e)
+        {
+            await Navigation.PushAsync(new HistorialCliente(_clienteActual.Id));
         }
     }
 }

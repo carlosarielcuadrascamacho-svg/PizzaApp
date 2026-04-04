@@ -24,15 +24,19 @@ namespace PizzeriaApp.Views
         private void ConfigurarMenu(UsuarioPerfil usuario)
         {
             lblNombreUsuario.Text = $"Hola, {usuario.Nombre ?? "Usuario"}";
+            lblRol.Text = usuario.EsAdmin ? "Administrador" : "Cliente Frecuente";
             MenuContainer.Children.Clear();
 
             if (usuario.EsAdmin)
             {
-                AgregarBotonMenu("Ver Pedidos", new MenuAdmin());
+                AgregarBotonMenu("🧑‍🍳 Cola de Cocina", new ColaCocina());
+                AgregarBotonMenu("🍕 Crear Producto", new AltaProducto());
+                AgregarBotonMenu("🛠️ Gestionar Catálogo", new GestionCatalogo());
+                AgregarBotonMenu("📊 Panel Financiero", new ReportesAdmin());
             }
             else
             {
-                AgregarBotonMenu("Realizar Pedido", new MenuClient(usuario));
+                AgregarBotonMenu("🧾 Realizar Pedido", new MenuClient(usuario));
             }
 
             AgregarBotonCerrarSesion();
@@ -44,9 +48,10 @@ namespace PizzeriaApp.Views
             {
                 Text = texto,
                 BackgroundColor = Colors.Transparent,
-                TextColor = Colors.White,
+                TextColor = Color.FromArgb("#424242"),  // Gris obscuro muy elegante
                 HorizontalOptions = LayoutOptions.Start,
                 FontSize = 16,
+                FontAttributes = FontAttributes.Bold,
                 Margin = new Thickness(0, 5)
             };
 
@@ -59,9 +64,11 @@ namespace PizzeriaApp.Views
         {
             var btnCerrar = new Button
             {
-                Text = "Cerrar Sesión",
-                BackgroundColor = Colors.DarkRed,
-                TextColor = Colors.White,
+                Text = "🚪 Cerrar Sesión",
+                BackgroundColor = Color.FromArgb("#FFEBEE"), // Fondo rojizo suave
+                TextColor = Color.FromArgb("#D32F2F"), // Texto rojo alerta
+                FontAttributes = FontAttributes.Bold,
+                CornerRadius = 8,
                 Margin = new Thickness(0, 30, 0, 0)
             };
 

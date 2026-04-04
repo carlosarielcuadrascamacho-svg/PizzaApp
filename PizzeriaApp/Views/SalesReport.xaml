@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:chart="clr-namespace:Syncfusion.Maui.Charts;assembly=Syncfusion.Maui.Charts"
+             x:Class="PizzeriaApp.Views.SalesReport"
+             Title="Reporte de Ventas"
+             BackgroundColor="#FCFCFC">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20">
+            <!-- Header Inteligente -->
+            <Label Text="Métricas del Negocio" FontSize="26" FontAttributes="Bold" TextColor="#B71C1C" Margin="0,0,0,5" />
+            <Label Text="Rendimiento del mes en curso" FontSize="14" TextColor="Gray" Margin="0,0,0,20"/>
+
+            <!-- Tarjetas de Resumen Rápido -->
+            <Grid ColumnDefinitions="*, *" RowDefinitions="Auto" ColumnSpacing="15" Margin="0,0,0,20">
+                <Frame Grid.Column="0" BackgroundColor="#E3F2FD" Padding="15" CornerRadius="12" HasShadow="False" BorderColor="Transparent">
+                    <VerticalStackLayout>
+                        <Label Text="Pedidos Completados" TextColor="#1565C0" FontSize="12" FontAttributes="Bold" />
+                        <Label x:Name="lblTotalPedidos" Text="0" TextColor="#0D47A1" FontSize="24" FontAttributes="Bold" Margin="0,5,0,0"/>
+                    </VerticalStackLayout>
+                </Frame>
+                
+                <Frame Grid.Column="1" BackgroundColor="#E8F5E9" Padding="15" CornerRadius="12" HasShadow="False" BorderColor="Transparent">
+                    <VerticalStackLayout>
+                        <Label Text="Ingresos Brutos" TextColor="#2E7D32" FontSize="12" FontAttributes="Bold" />
+                        <Label x:Name="lblIngresos" Text="$0.00" TextColor="#1B5E20" FontSize="24" FontAttributes="Bold" Margin="0,5,0,0"/>
+                    </VerticalStackLayout>
+                </Frame>
+            </Grid>
+
+            <!-- Gráfico de Dona: Ventas por Producto -->
+            <Frame BackgroundColor="White" Padding="15" CornerRadius="20" HasShadow="True" BorderColor="Transparent">
+                <VerticalStackLayout>
+                    <Label Text="Top Productos Más Vendidos" FontSize="16" FontAttributes="Bold" TextColor="#333" Margin="0,0,0,10"/>
+                    
+                    <chart:SfCircularChart HeightRequest="300">
+                        <chart:SfCircularChart.Legend>
+                            <chart:ChartLegend Placement="Bottom" />
+                        </chart:SfCircularChart.Legend>
+
+                        <chart:DoughnutSeries x:Name="PieVentas" 
+                                              XBindingPath="NombreProducto" 
+                                              YBindingPath="CantidadVendida" 
+                                              ShowDataLabels="True"
+                                              InnerRadius="0.6">
+                            <chart:DoughnutSeries.DataLabelSettings>
+                                <chart:CircularDataLabelSettings LabelPlacement="Outer" />
+                            </chart:DoughnutSeries.DataLabelSettings>
+                        </chart:DoughnutSeries>
+                    </chart:SfCircularChart>
+                </VerticalStackLayout>
+            </Frame>
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

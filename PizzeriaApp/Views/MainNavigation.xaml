@@ -6,19 +6,42 @@
             Title="Pizzería TECNM">
 
     <FlyoutPage.Flyout>
-        <ContentPage Title="Menú" BackgroundColor="{StaticResource Primary}">
-            <ScrollView>
-                <VerticalStackLayout x:Name="MenuContainer" Padding="20" Spacing="15">
-                    <Image Source="pizzasteve.png" HeightRequest="100" HorizontalOptions="Center" Margin="0,0,0,20" />
+        <ContentPage Title="Menú" BackgroundColor="White">
+            <Grid RowDefinitions="200, *, Auto">
+                <!-- Header con Gradiente y Perfil -->
+                <Grid Grid.Row="0">
+                    <Grid.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#E53935" Offset="0.0" />
+                            <GradientStop Color="#B71C1C" Offset="1.0" />
+                        </LinearGradientBrush>
+                    </Grid.Background>
+                    <VerticalStackLayout VerticalOptions="End" Padding="20,0,20,20" Spacing="5">
+                        <Border WidthRequest="70" HeightRequest="70" Stroke="White" StrokeThickness="2" StrokeShape="RoundRectangle 35" HorizontalOptions="Start" BackgroundColor="White">
+                            <Image Source="pizzasteve.png" Aspect="AspectFill" />
+                        </Border>
+                        <Label x:Name="lblNombreUsuario" 
+                               Text="Bienvenido" 
+                               TextColor="White" 
+                               FontSize="20"
+                               FontAttributes="Bold" />
+                        <Label x:Name="lblRol" 
+                               Text="Miembro Activo" 
+                               TextColor="#FFCDD2" 
+                               FontSize="13" />
+                    </VerticalStackLayout>
+                </Grid>
 
-                    <Label x:Name="lblNombreUsuario" 
-                           Text="Bienvenido" 
-                           TextColor="{StaticResource White}" 
-                           FontAttributes="Bold" 
-                           HorizontalOptions="Center" />
+                <!-- Menú Opciones Dinámicas -->
+                <ScrollView Grid.Row="1">
+                    <VerticalStackLayout x:Name="MenuContainer" Padding="15,20,15,20" Spacing="5" />
+                </ScrollView>
 
-                </VerticalStackLayout>
-            </ScrollView>
+                <!-- Pie del Menú (Footer) -->
+                <StackLayout Grid.Row="2" Padding="20">
+                    <Label Text="Pizzería App Premium" TextColor="Gray" FontSize="12" HorizontalOptions="Center" />
+                </StackLayout>
+            </Grid>
         </ContentPage>
     </FlyoutPage.Flyout>
 

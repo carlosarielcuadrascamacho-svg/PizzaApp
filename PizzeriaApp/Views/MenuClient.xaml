@@ -1,60 +1,66 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:PizzeriaApp.Converters"
              x:Class="PizzeriaApp.Views.MenuClient"
              Title="Nuestro Menú"
-             BackgroundColor="#F5F5F5">
+             BackgroundColor="#FCFCFC">
 
-    <Grid RowDefinitions="*, Auto">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:Base64ToImageConverter x:Key="Base64Converter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
-        <CollectionView Grid.Row="0" x:Name="ListaProductos" Margin="10">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem x:Name="tbCart" Text="🛒 Carrito (0)" Clicked="OnVerCarritoClicked" Priority="0" Order="Primary"/>
+        <ToolbarItem Text="👤 Mi Perfil" Clicked="OnIrPerfilClicked" Order="Secondary"/>
+        <ToolbarItem Text="📜 Mis Pedidos" Clicked="OnIrHistorialClicked" Order="Secondary"/>
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="Auto, Auto, *">
+        <!-- Header -->
+        <Border Grid.Row="0" Margin="15" Padding="15" StrokeThickness="0" BackgroundColor="#E53935" StrokeShape="RoundRectangle 15">
+            <HorizontalStackLayout Spacing="15" VerticalOptions="Center">
+                <Label Text="🍕" FontSize="32" VerticalOptions="Center"/>
+                <VerticalStackLayout VerticalOptions="Center">
+                    <Label Text="¿Qué se te antoja hoy?" FontSize="18" FontAttributes="Bold" TextColor="White"/>
+                    <Label Text="Encuentra tu platillo favorito" FontSize="14" TextColor="#FFCDD2" />
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
+        </Border>
+
+        <!-- Category Filters -->
+        <ScrollView Grid.Row="1" Orientation="Horizontal" HorizontalScrollBarVisibility="Never" Margin="15,0,15,10">
+            <HorizontalStackLayout Spacing="10" x:Name="slCategorias">
+                <!-- Dynamically populated in CodeBehind -->
+            </HorizontalStackLayout>
+        </ScrollView>
+
+        <!-- Pizzas List -->
+        <CollectionView Grid.Row="2" x:Name="ListaProductos" SelectionMode="Single" SelectionChanged="OnProductoSeleccionado" Margin="10,0,10,10">
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Orientation="Vertical" Span="1" VerticalItemSpacing="15" />
+            </CollectionView.ItemsLayout>
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Frame Margin="5,5,5,10" Padding="15" CornerRadius="12" HasShadow="True" BorderColor="Transparent">
-                        <Grid ColumnDefinitions="*, Auto">
-
-                            <VerticalStackLayout Grid.Column="0" Spacing="4" VerticalOptions="Center">
-                                <Label Text="{Binding Nombre}" FontSize="18" FontAttributes="Bold" TextColor="#333333" />
-                                <Label Text="{Binding Descripcion}" FontSize="13" TextColor="Gray" />
-                                <Label Text="{Binding Precio, StringFormat='{0:C}'}" FontSize="16" TextColor="#2E7D32" FontAttributes="Bold" Margin="0,5,0,0"/>
-                            </VerticalStackLayout>
-
-                            <Button Grid.Column="1" 
-                                    Text="+ Agregar" 
-                                    BackgroundColor="#E53935" 
-                                    TextColor="White"
-                                    FontAttributes="Bold"
-                                    CornerRadius="8"
-                                    HeightRequest="40"
-                                    VerticalOptions="Center"
-                                    CommandParameter="{Binding .}"
-                                    Clicked="OnAgregarAlCarritoClicked" />
+                    <Frame Margin="0" Padding="0" CornerRadius="15" HasShadow="True" BorderColor="Transparent" BackgroundColor="White" IsClippedToBounds="True">
+                        <Grid RowDefinitions="180, Auto">
+                            <Image Grid.Row="0" 
+                                   Source="{Binding ImagenBase64, Converter={StaticResource Base64Converter}}" 
+                                   Aspect="AspectFill" 
+                                   HeightRequest="180" />
+                                   
+                            <Grid Grid.Row="1" Padding="15" RowDefinitions="Auto, Auto, Auto" ColumnDefinitions="*, Auto">
+                                <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding Nombre}" FontSize="20" FontAttributes="Bold" TextColor="#222" />
+                                <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding Descripcion}" FontSize="14" TextColor="#666" Margin="0,5,0,10" LineBreakMode="TailTruncation" MaxLines="2" />
+                                
+                                <Label Grid.Row="2" Grid.Column="0" Text="{Binding Precio, StringFormat='{0:C}'}" FontSize="18" TextColor="#D32F2F" FontAttributes="Bold" VerticalOptions="Center"/>
+                            </Grid>
                         </Grid>
                     </Frame>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
-
-        <Frame Grid.Row="1" BackgroundColor="White" Padding="20" HasShadow="True" CornerRadius="0" BorderColor="LightGray">
-            <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, Auto">
-
-                <Label Grid.Row="0" Grid.Column="0" x:Name="lblArticulos" Text="0 artículos" FontSize="16" TextColor="Gray" VerticalOptions="Center"/>
-                <Label Grid.Row="0" Grid.Column="1" x:Name="lblTotal" Text="Total: $0.00" FontSize="22" FontAttributes="Bold" TextColor="Black" VerticalOptions="Center"/>
-
-                <Button Grid.Row="1" Grid.ColumnSpan="2" 
-                        x:Name="btnOrdenar"
-                        Text="Confirmar Orden" 
-                        BackgroundColor="#E53935" 
-                        TextColor="White" 
-                        FontSize="18" 
-                        FontAttributes="Bold"
-                        CornerRadius="25" 
-                        Margin="0,15,0,0"
-                        HeightRequest="55"
-                        Clicked="OnConfirmarOrdenClicked" 
-                        IsEnabled="False"/>
-            </Grid>
-        </Frame>
-
     </Grid>
 </ContentPage>
