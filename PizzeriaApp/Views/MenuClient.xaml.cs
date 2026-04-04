@@ -8,7 +8,6 @@ namespace PizzeriaApp.Views
         private readonly UsuarioPerfil _clienteActual;
         private readonly DataBaseServices _dbService;
 
-        // Modificamos el constructor para exigir el perfil del cliente
         public MenuClient(UsuarioPerfil cliente)
         {
             InitializeComponent();
@@ -18,11 +17,9 @@ namespace PizzeriaApp.Views
 
         private async void OnOrdenarClicked(object sender, EventArgs e)
         {
-            // Deshabilitamos el botón para evitar dobles envíos
             btnOrdenar.IsEnabled = false;
             btnOrdenar.Text = "Procesando...";
 
-            // Enviamos el ID real del usuario validado en Google y el costo de la pizza
             bool exito = await _dbService.CrearPedidoAsync(_clienteActual.Id, 250.00m);
 
             if (exito)
@@ -34,7 +31,6 @@ namespace PizzeriaApp.Views
                 await DisplayAlert("Error", "No pudimos procesar tu pedido. Intenta de nuevo.", "Ok");
             }
 
-            // Restauramos el botón
             btnOrdenar.IsEnabled = true;
             btnOrdenar.Text = "Confirmar y Ordenar";
         }

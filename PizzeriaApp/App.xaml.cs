@@ -9,7 +9,6 @@ namespace PizzeriaApp
 
         public App(IServiceProvider serviceProvider)
         {
-            // 1. Registramos la clave oficial de Syncfusion antes que todo
             Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1JHaF5cWWdCe0x0WmFZfVhgdl9FaVZQQ2YuP1ZhSXxVdkFjW39cc31XQmFVWUZ9XEE=");
 
             InitializeComponent();

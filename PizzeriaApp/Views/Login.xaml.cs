@@ -25,17 +25,14 @@ public partial class Login : ContentPage
 
             string idUser = await _dataBaseServices.ObtenerIdPorEmailAsync(loggedUser.Email);
 
-            // 1. Lógica de Base de Datos (Solo el correo)
             if (string.IsNullOrEmpty(idUser))
             {
-                // Ya no mandamos el nombre aquí, el método solo pide el correo
                 await _dataBaseServices.InsertarPerfilAsync(loggedUser.Email);
                 idUser = await _dataBaseServices.ObtenerIdPorEmailAsync(loggedUser.Email);
             }
 
             bool esAdmin = await _dataBaseServices.EsUsuarioAdminAsync(idUser);
 
-            // 2. Lógica de Vista (Calculamos el nombre solo para la pantalla)
             string nombreUsuario = !string.IsNullOrWhiteSpace(loggedUser.FullName)
                                     ? loggedUser.FullName
                                     : loggedUser.Email.Split('@')[0];
@@ -46,7 +43,7 @@ public partial class Login : ContentPage
                 Id = idUser,
                 Email = loggedUser.Email,
                 EsAdmin = esAdmin,
-                Nombre = nombreUsuario // Esto vive en RAM, nunca toca PostgreSQL
+                Nombre = nombreUsuario
             };
 
             Application.Current.MainPage = new MainNavigation(perfil);
