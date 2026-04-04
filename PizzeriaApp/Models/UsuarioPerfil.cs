@@ -17,5 +17,7 @@ namespace PizzeriaApp.Models
 
         [Column("es_admin")]
         public bool EsAdmin { get; set; }
+
+        public string Nombre { get; set; }
     }
 }

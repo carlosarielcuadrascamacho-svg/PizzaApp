@@ -1,39 +1,38 @@
 using Microsoft.Maui.Controls;
-using PizzeriaApp.Models; // Asegúrate de que este namespace coincida con tu modelo
+using PizzeriaApp.Models;
+using Microsoft.Extensions.DependencyInjection; // Para App.Services
 
 namespace PizzeriaApp.Views
 {
     public partial class MainNavigation : FlyoutPage
     {
-        // Obligamos a que la página reciba el perfil del usuario validado
+        // 1. OBLIGATORIO: Recibir el usuario validado
         public MainNavigation(UsuarioPerfil usuario)
         {
             InitializeComponent();
             ConfigurarMenu(usuario);
         }
 
-        // Fragmento a modificar en Views/MainNavigation.xaml.cs
         private void ConfigurarMenu(UsuarioPerfil usuario)
         {
-            // Limpiamos el contenedor por seguridad
+            lblNombreUsuario.Text = $"Hola, {usuario.Nombre ?? "Usuario"}";
             MenuContainer.Children.Clear();
 
-            // Ahora evaluamos tu propiedad booleana
+            // 2. Evaluamos el booleano que definimos antes
             if (usuario.EsAdmin)
             {
-                AgregarBotonMenu("Ver Pedidos", new MenuAdmin(usuario.Id));
+                AgregarBotonMenu("Ver Pedidos", new MenuAdmin());
                 // AgregarBotonMenu("Reportes", new ReportesAdmin());
             }
             else
             {
-                AgregarBotonMenu("Realizar Pedido", new MenuClient(usuario.Id));
+                AgregarBotonMenu("Realizar Pedido", new MenuClient());
                 // AgregarBotonMenu("Mi Historial", new HistorialClient());
             }
 
             AgregarBotonCerrarSesion();
         }
 
-        // Método auxiliar para crear botones limpios y asignarles el evento de navegación
         private void AgregarBotonMenu(string texto, Page paginaDestino)
         {
             var btn = new Button
@@ -46,7 +45,7 @@ namespace PizzeriaApp.Views
                 Margin = new Thickness(0, 5)
             };
 
-            // Al hacer clic, ejecuta el método CambiarDetalle
+            // 3. El evento click cambia la vista "Detail"
             btn.Clicked += (s, e) => CambiarDetalle(paginaDestino);
 
             MenuContainer.Children.Add(btn);
@@ -59,30 +58,35 @@ namespace PizzeriaApp.Views
                 Text = "Cerrar Sesión",
                 BackgroundColor = Colors.DarkRed,
                 TextColor = Colors.White,
-                Margin = new Thickness(0, 30, 0, 0) // Separarlo del resto del menú
+                Margin = new Thickness(0, 30, 0, 0)
             };
 
-            // En Views/MainNavigation.xaml.cs, dentro de tu método AgregarBotonCerrarSesion()
             btnCerrar.Clicked += async (s, e) =>
             {
-                // Instanciamos el servicio de auth
-                var authService = new PizzeriaApp.GoogleAuth.GoogleAuthService();
+                // Obtenemos el servicio Singleton
+                var authService = App.Services.GetService<PizzeriaApp.GoogleAuth.IGoogleAuthService>();
 
-                // Le pedimos a Android que olvide la cuenta
-                await authService.LogoutAsync();
+                if (authService != null)
+                {
+                    // Llamamos al método nativo que borra la sesión en Android
+                    await authService.LogoutAsync();
+                }
 
-                // Redirigimos al inicio
-                Application.Current.MainPage = new NavigationPage(new Login(authService));
+                // Destruimos la navegación y volvemos al Login
+                var loginPage = App.Services.GetService<Login>();
+                Application.Current.MainPage = new NavigationPage(loginPage);
             };
 
             MenuContainer.Children.Add(btnCerrar);
         }
 
-        // Método centralizado para cambiar la vista principal
+        // 4. Método vital para intercambiar la pantalla
         private void CambiarDetalle(Page page)
         {
+            // Asigna la nueva página envuelta en navegación a la zona derecha
             Detail = new NavigationPage(page);
-            IsPresented = false; // Esto es crucial: oculta el menú lateral tras hacer clic
+            // Oculta el menú lateral automáticamente
+            IsPresented = false;
         }
     }
 }
