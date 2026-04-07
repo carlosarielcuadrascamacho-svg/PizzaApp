@@ -1,60 +1,64 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:syncfusion="clr-namespace:Syncfusion.Maui.DataGrid;assembly=Syncfusion.Maui.DataGrid"
              x:Class="PizzeriaApp.Views.HistorialCliente"
              Title="Mis Pedidos"
-             BackgroundColor="#F9F9F9">
+             BackgroundColor="#F8F9FA">
 
     <Grid RowDefinitions="Auto, *">
-        <Border Grid.Row="0" Margin="15" Padding="15" StrokeThickness="0" BackgroundColor="#E53935" StrokeShape="RoundRectangle 15">
-            <HorizontalStackLayout Spacing="15" VerticalOptions="Center">
-                <Label Text="📜" FontSize="32" VerticalOptions="Center"/>
-                <VerticalStackLayout VerticalOptions="Center">
-                    <Label Text="Historial Culinario" FontSize="18" FontAttributes="Bold" TextColor="White"/>
-                    <Label Text="Tus compras pasadas en tiempo real" FontSize="14" TextColor="#FFCDD2" />
-                </VerticalStackLayout>
-            </HorizontalStackLayout>
+        <!-- Header -->
+        <Border Grid.Row="0" Margin="20,25,20,10" Padding="20" BackgroundColor="#FFFFFF" StrokeThickness="0" StrokeShape="RoundRectangle 24">
+            <Border.Shadow>
+                <Shadow Brush="Black" Offset="0,2" Radius="4" Opacity="0.1" />
+            </Border.Shadow>
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Tu Historial" FontSize="26" FontAttributes="Bold" TextColor="#1A1A1A" />
+                <Label Text="Revisa tus órdenes pasadas" FontSize="13" TextColor="#757575" />
+            </VerticalStackLayout>
         </Border>
 
-        <CollectionView Grid.Row="1" x:Name="ListaHistorial" Margin="10,0,10,10">
-            <CollectionView.ItemsLayout>
-                <GridItemsLayout Orientation="Vertical" Span="1" VerticalItemSpacing="15" />
-            </CollectionView.ItemsLayout>
-            
-            <CollectionView.EmptyView>
-                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="15" Margin="0,50,0,0">
-                    <Label Text="🍕" FontSize="60" HorizontalOptions="Center"/>
-                    <Label Text="Aún no tienes pedidos." FontSize="18" TextColor="Gray" FontAttributes="Bold"/>
-                    <Label Text="Anímate a explorar nuestro menú." FontSize="14" TextColor="Silver"/>
-                </VerticalStackLayout>
-            </CollectionView.EmptyView>
-
+        <!-- Listado Principal -->
+        <CollectionView Grid.Row="1" x:Name="ListaHistorial" Margin="15,0">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Frame Margin="5" Padding="15" CornerRadius="12" HasShadow="True" BorderColor="Transparent" BackgroundColor="White">
-                        <Grid RowDefinitions="Auto, Auto" ColumnDefinitions="*, Auto" RowSpacing="10">
-                            <!-- Fecha y Estado -->
-                            <Label Grid.Row="0" Grid.Column="0" Text="{Binding Fecha, StringFormat='{0:dd MMMM yyyy HH:mm}'}" FontSize="14" TextColor="Gray" />
-                            
-                            <!-- Indicador Visual Cromático según Estado -->
-                            <Frame Grid.Row="0" Grid.Column="1" Padding="8,4" CornerRadius="8" HasShadow="False" BackgroundColor="#FFF8E1" BorderColor="Transparent">
-                                <Label Text="{Binding Estado}" FontSize="12" FontAttributes="Bold" TextColor="#FF8F00"/>
-                                <Frame.Triggers>
-                                    <DataTrigger TargetType="Frame" Binding="{Binding Estado}" Value="Entregado">
-                                        <Setter Property="BackgroundColor" Value="#E8F5E9" />
-                                    </DataTrigger>
-                                </Frame.Triggers>
-                            </Frame>
+                    <Border Padding="20" Margin="0,0,0,20" BackgroundColor="#FFFFFF" StrokeThickness="0" StrokeShape="RoundRectangle 24">
+                        <Border.Shadow>
+                            <Shadow Brush="Black" Offset="0,2" Radius="4" Opacity="0.1" />
+                        </Border.Shadow>
+                        <VerticalStackLayout Spacing="15">
+                            <Grid ColumnDefinitions="*, Auto">
+                                <VerticalStackLayout Grid.Column="0">
+                                    <Label Text="{Binding IdVisible}" FontSize="18" FontAttributes="Bold" TextColor="#FF4B3A" />
+                                    <Label Text="{Binding Fecha, StringFormat='{0:dd MMM, HH:mm}'}" FontSize="13" TextColor="#757575" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="1" HorizontalOptions="End">
+                                    <Label Text="{Binding Total, StringFormat='{0:C}'}" FontSize="20" FontAttributes="Bold" TextColor="#00C853" HorizontalOptions="End" />
+                                    <Label Text="{Binding Estado}" FontSize="12" FontAttributes="Bold" TextColor="#FF4B3A" HorizontalOptions="End" />
+                                </VerticalStackLayout>
+                            </Grid>
 
-                            <!-- Folio y Total -->
-                            <VerticalStackLayout Grid.Row="1" Grid.Column="0" Spacing="2">
-                                <Label Text="{Binding Id, StringFormat='Orden #{0}'}" FontSize="12" TextColor="Silver" LineBreakMode="TailTruncation" />
-                                <Label Text="Subtotal pagado" FontSize="12" TextColor="#888"/>
-                            </VerticalStackLayout>
+                            <syncfusion:SfDataGrid ItemsSource="{Binding Detalles}"
+                                                   AutoGenerateColumnsMode="None"
+                                                   HeaderRowHeight="0" RowHeight="35"
+                                                   SelectionMode="None" GridLinesVisibility="None"
+                                                   HeaderGridLinesVisibility="None" BackgroundColor="Transparent"
+                                                   HorizontalScrollBarVisibility="Never" VerticalScrollBarVisibility="Never">
+                                <syncfusion:SfDataGrid.Columns>
+                                    <syncfusion:DataGridTextColumn MappingName="Cantidad" Width="45" />
+                                    <syncfusion:DataGridTextColumn MappingName="NombrePlatillo" />
+                                    <syncfusion:DataGridTextColumn MappingName="Comentarios" />
+                                </syncfusion:SfDataGrid.Columns>
+                            </syncfusion:SfDataGrid>
 
-                            <Label Grid.Row="1" Grid.Column="1" Text="{Binding Total, StringFormat='{0:C}'}" FontSize="18" TextColor="#D32F2F" FontAttributes="Bold" VerticalOptions="Center" HorizontalOptions="End"/>
-                        </Grid>
-                    </Frame>
+                            <Button Text="CANCELAR PEDIDO" 
+                                    IsVisible="{Binding IsNotCancelled}"
+                                    Clicked="OnCancelarClicked"
+                                    CommandParameter="{Binding .}"
+                                    BackgroundColor="#FDECEA" TextColor="#FF4B3A" 
+                                    CornerRadius="15" HeightRequest="45" FontAttributes="Bold" Margin="0,5,0,0"/>
+                        </VerticalStackLayout>
+                    </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>

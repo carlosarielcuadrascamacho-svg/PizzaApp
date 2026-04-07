@@ -3,8 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:converters="clr-namespace:PizzeriaApp.Converters"
              x:Class="PizzeriaApp.Views.PerfilCliente"
-             Title="Mi Perfil"
-             BackgroundColor="#FCFCFC">
+             Title="Mi Cuenta"
+             BackgroundColor="#F4F6F8">
 
     <ContentPage.Resources>
         <ResourceDictionary>
@@ -13,57 +13,55 @@
     </ContentPage.Resources>
 
     <ScrollView>
-        <VerticalStackLayout Spacing="25" Padding="25">
-            <!-- Avatar Circular Interactivo -->
-            <VerticalStackLayout HorizontalOptions="Center" Spacing="10">
-                <Frame WidthRequest="150" HeightRequest="150" CornerRadius="75" Padding="0" IsClippedToBounds="True" HasShadow="True" BorderColor="#E53935" BackgroundColor="#FFF3E0">
-                    <Frame.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="OnCambiarFotoTapped"/>
-                    </Frame.GestureRecognizers>
-                    <Grid>
-                        <Image x:Name="imgAvatar" Aspect="AspectFill" Source="{Binding FotoPerfil, Converter={StaticResource Base64Converter}}" />
-                        <Label x:Name="lblPlaceholderFoto" Text="📷" FontSize="50" HorizontalOptions="Center" VerticalOptions="Center" TextColor="#B71C1C"/>
-                    </Grid>
-                </Frame>
-                <Label Text="Tocar para actualizar" FontSize="12" TextColor="Gray" HorizontalOptions="Center"/>
-            </VerticalStackLayout>
-
-            <!-- Formulario de Contacto -->
-            <Border StrokeThickness="0" BackgroundColor="White" Padding="20" StrokeShape="RoundRectangle 15">
-                <VerticalStackLayout Spacing="20">
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Correo Electrónico (No editable)" FontSize="12" TextColor="Gray" FontAttributes="Bold"/>
-                        <Entry x:Name="txtEmail" IsReadOnly="True" TextColor="#999" BackgroundColor="#F5F5F5" />
-                    </VerticalStackLayout>
-
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Nombre Completo" FontSize="12" TextColor="#B71C1C" FontAttributes="Bold"/>
-                        <Entry x:Name="txtNombre" Placeholder="Ej. Juan Pérez" TextColor="#333" />
-                    </VerticalStackLayout>
-
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Dirección de Entrega" FontSize="12" TextColor="#B71C1C" FontAttributes="Bold"/>
-                        <Entry x:Name="txtDireccion" Placeholder="Calle, Número, Colonia..." TextColor="#333" />
-                    </VerticalStackLayout>
-
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Teléfono" FontSize="12" TextColor="#B71C1C" FontAttributes="Bold"/>
-                        <Entry x:Name="txtTelefono" Placeholder="10 Dígitos" Keyboard="Telephone" MaxLength="10" TextColor="#333" />
-                    </VerticalStackLayout>
+        <Grid RowDefinitions="Auto, *">
+            <!-- Header -->
+            <Border Grid.Row="0" Margin="20,25,20,10" Padding="20" BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 24">
+                <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                    <Border HeightRequest="120" WidthRequest="120" StrokeShape="RoundRectangle 60" StrokeThickness="0" BackgroundColor="#F5F5F5" Margin="0,0,0,10">
+                        <Image x:Name="imgPerfil" Source="{Binding FotoPerfil, Converter={StaticResource Base64Converter}}" Aspect="AspectFill" />
+                    </Border>
+                    <Button Text="CAMBIAR FOTO" Clicked="OnPickPhotoClicked" BackgroundColor="Transparent" TextColor="#B71C1C" FontSize="11" FontAttributes="Bold" HorizontalOptions="Center" />
                 </VerticalStackLayout>
             </Border>
 
-            <!-- Boton Guardar -->
-            <Button x:Name="btnGuardar"
-                    Text="Guardar Cambios" 
-                    BackgroundColor="#E53935" 
-                    TextColor="White" 
-                    FontAttributes="Bold"
-                    FontSize="18"
-                    CornerRadius="25"
-                    HeightRequest="55"
-                    Margin="0,15,0,20"
-                    Clicked="OnGuardarClicked" />
-        </VerticalStackLayout>
+            <!-- Profile Info Card -->
+            <Border Grid.Row="1" Margin="20,10,20,30" Padding="25" BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 24">
+                <VerticalStackLayout Spacing="20">
+
+                    <Label Text="INFORMACIÓN PERSONAL" FontSize="11" FontAttributes="Bold" TextColor="#B71C1C" CharacterSpacing="2" Margin="0,0,0,5" />
+
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="NOMBRE COMPLETO" FontSize="10" TextColor="#757575" CharacterSpacing="1" />
+                        <Border StrokeThickness="1" Stroke="#EEEEEE" StrokeShape="RoundRectangle 12" BackgroundColor="#F9F9F9" Padding="15,0" HeightRequest="50">
+                            <Entry x:Name="txtNombre" Placeholder="Tu nombre" BackgroundColor="Transparent" TextColor="#222" PlaceholderColor="#AAA" />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="TELÉFONO" FontSize="10" TextColor="#757575" CharacterSpacing="1" />
+                        <Border StrokeThickness="1" Stroke="#EEEEEE" StrokeShape="RoundRectangle 12" BackgroundColor="#F9F9F9" Padding="15,0" HeightRequest="50">
+                            <Entry x:Name="txtTelefono" Placeholder="Teléfono" Keyboard="Telephone" BackgroundColor="Transparent" TextColor="#222" PlaceholderColor="#AAA" />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="CORREO ELECTRÓNICO (SOLO LECTURA)" FontSize="10" TextColor="#757575" CharacterSpacing="1" />
+                        <Border StrokeThickness="1" Stroke="#EEEEEE" StrokeShape="RoundRectangle 12" BackgroundColor="#F5F5F5" Padding="15,0" HeightRequest="50">
+                            <Entry x:Name="txtEmail" IsReadOnly="True" BackgroundColor="Transparent" TextColor="#757575" />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="DIRECCIÓN DE ENTREGA" FontSize="10" TextColor="#757575" CharacterSpacing="1" />
+                        <Border StrokeThickness="1" Stroke="#EEEEEE" StrokeShape="RoundRectangle 12" BackgroundColor="#F9F9F9" Padding="15,10" HeightRequest="100">
+                            <Editor x:Name="txtDireccion" Placeholder="Calle, número, colonia..." BackgroundColor="Transparent" TextColor="#222" PlaceholderColor="#AAA" AutoSize="TextChanges" />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Save Action -->
+                    <Button Text="ACTUALIZAR PERFIL" Clicked="OnUpdateProfileClicked" BackgroundColor="#B71C1C" TextColor="White" HeightRequest="60" CornerRadius="20" FontAttributes="Bold" FontSize="16" Margin="0,10,0,0" />
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
     </ScrollView>
 </ContentPage>

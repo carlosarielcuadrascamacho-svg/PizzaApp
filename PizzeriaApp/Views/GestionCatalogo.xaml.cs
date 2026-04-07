@@ -25,30 +25,30 @@ namespace PizzeriaApp.Views
 
         private async Task CargarInventarioTotalAsync()
         {
-            _isLoaded = false;
-            // Descargar el catálogo completo ignorando flag activo
-            var catalog = await _dbService.ObtenerCatalogoCompletoAsync();
-            ListaInventario.ItemsSource = catalog;
-            _isLoaded = true;
+            try
+            {
+                var catalog = await _dbService.ObtenerCatalogoCompletoAsync();
+                ListaInventario.ItemsSource = catalog;
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", "No se pudo cargar el catálogo: " + ex.Message, "OK");
+            }
         }
 
-        private async void OnDisponibilidadToggled(object sender, ToggledEventArgs e)
+        private async void OnAgregarProductoClicked(object sender, EventArgs e)
         {
-            if (!_isLoaded) return;
-            
-            var controlSwitch = sender as Switch;
-            var productoModificado = controlSwitch?.BindingContext as Producto;
+            // Navegar a la vista de alta
+            await Navigation.PushAsync(new AltaProducto());
+        }
 
-            if (productoModificado != null)
+        private async void OnEditarProductoTapped(object sender, TappedEventArgs e)
+        {
+            var productoSeleccionado = e.Parameter as Producto;
+            if (productoSeleccionado != null)
             {
-                // Actualiza in-memory boolean property and Supabase
-                productoModificado.Activo = e.Value;
-                bool dbExito = await _dbService.CambiarEstadoProductoAsync(productoModificado.Id, e.Value);
-                if(!dbExito)
-                {
-                    await DisplayAlert("Error", "No se pudo cambiar la disponibilidad en Supabase.", "OK");
-                    controlSwitch.IsToggled = !e.Value; // Revertir visualmente
-                }
+                // Navegar a la vista de edición pasando el producto
+                await Navigation.PushAsync(new EditarProducto(productoSeleccionado));
             }
         }
     }

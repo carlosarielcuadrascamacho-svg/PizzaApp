@@ -1,9 +1,5 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using Microsoft.Maui.Media;
-using PizzeriaApp.Models;
 using PizzeriaApp.Controllers;
+using PizzeriaApp.Models;
 
 namespace PizzeriaApp.Views
 {
@@ -11,93 +7,110 @@ namespace PizzeriaApp.Views
     {
         private UsuarioPerfil _usuario;
         private DataBaseServices _dbService;
-        private string _nuevaFotoBase64;
+        private string _imageBase64 = "";
 
         public PerfilCliente(UsuarioPerfil usuario)
         {
             InitializeComponent();
             _usuario = usuario;
             _dbService = new DataBaseServices();
-            BindingContext = _usuario;
-
-            CargarDatosIniciales();
+            
+            this.BindingContext = _usuario;
         }
 
-        private void CargarDatosIniciales()
+        protected override async void OnAppearing()
         {
-            txtEmail.Text = _usuario.Email;
-            txtNombre.Text = _usuario.Nombre ?? "";
-            txtDireccion.Text = _usuario.Direccion ?? "";
-            txtTelefono.Text = _usuario.Telefono ?? "";
-            _nuevaFotoBase64 = _usuario.FotoPerfil;
-
-            // Ocultamos el placeholder local de la camara si ya hay foto subida con Binding
-            if (!string.IsNullOrEmpty(_usuario.FotoPerfil))
-            {
-                lblPlaceholderFoto.IsVisible = false;
-            }
+            base.OnAppearing();
+            await RefrescarPerfilAsync();
         }
 
-        private async void OnCambiarFotoTapped(object sender, EventArgs e)
+        private async Task RefrescarPerfilAsync()
         {
             try
             {
-                var photo = await MediaPicker.Default.PickPhotoAsync();
-
-                if (photo != null)
+                // Sincronizar con la BD (Regla de Oro del Perfil)
+                var perfilFresco = await _dbService.ObtenerPerfilAsync(_usuario.Id);
+                if (perfilFresco != null)
                 {
-                    using (var stream = await photo.OpenReadAsync())
-                    using (var memoryStream = new MemoryStream())
+                    _usuario = perfilFresco;
+                    this.BindingContext = _usuario;
+
+                    // Hidratar campos
+                    txtNombre.Text = _usuario.Nombre;
+                    txtTelefono.Text = _usuario.Telefono;
+                    txtDireccion.Text = _usuario.Direccion;
+                    txtEmail.Text = _usuario.Email;
+                    
+                    if (!string.IsNullOrEmpty(_usuario.FotoPerfil))
                     {
-                        await stream.CopyToAsync(memoryStream);
-                        byte[] imageBytes = memoryStream.ToArray();
-
-                        // Codificación C# en cliente estricta segun el Request (No usar URLs en la nube de Storage)
-                        _nuevaFotoBase64 = Convert.ToBase64String(imageBytes);
-
-                        MainThread.BeginInvokeOnMainThread(() =>
-                        {
-                            imgAvatar.Source = ImageSource.FromStream(() => new MemoryStream(imageBytes));
-                            lblPlaceholderFoto.IsVisible = false;
-                        });
+                        _imageBase64 = _usuario.FotoPerfil;
                     }
                 }
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Error", $"Problema al elegir foto: {ex.Message}", "OK");
+                Console.WriteLine("Error refreshing profile: " + ex.Message);
             }
         }
 
-        private async void OnGuardarClicked(object sender, EventArgs e)
+        private async void OnPickPhotoClicked(object sender, EventArgs e)
         {
-            btnGuardar.IsEnabled = false;
-            btnGuardar.Text = "Guardando...";
-
-            string nombre = txtNombre.Text?.Trim();
-            string dir = txtDireccion.Text?.Trim();
-            string tel = txtTelefono.Text?.Trim();
-
-            bool exito = await _dbService.ActualizarPerfilAsync(_usuario.Id, nombre, dir, tel, _nuevaFotoBase64);
-
-            if (exito)
+            try
             {
-                // Actualizamos los datos in-memory en la sesion actual del Singleton
-                _usuario.Nombre = nombre;
-                _usuario.Direccion = dir;
-                _usuario.Telefono = tel;
-                _usuario.FotoPerfil = _nuevaFotoBase64;
+                var photo = await MediaPicker.Default.PickPhotoAsync();
+                if (photo == null) return;
 
-                await DisplayAlert("Genial", "Tus datos han sido actualizados en la base de datos.", "OK");
-                await Navigation.PopAsync();
+                // VISUALIZACIÓN INSTANTÁNEA (Feedback inmediato para el usuario)
+                var stream = await photo.OpenReadAsync();
+                imgPerfil.Source = ImageSource.FromStream(() => stream);
+
+                // Conversión asíncrona a Base64 para el Guardado
+                using (var ms = new MemoryStream())
+                {
+                    var fullStream = await photo.OpenReadAsync();
+                    await fullStream.CopyToAsync(ms);
+                    _imageBase64 = Convert.ToBase64String(ms.ToArray());
+                }
             }
-            else
+            catch (Exception ex)
             {
-                await DisplayAlert("Error", "No se pudieron actualizar los datos. Revisa tu conexión.", "OK");
+                await DisplayAlert("Error", "No se pudo cargar la imagen: " + ex.Message, "OK");
             }
+        }
 
-            btnGuardar.IsEnabled = true;
-            btnGuardar.Text = "Guardar Cambios";
+        private async void OnUpdateProfileClicked(object sender, EventArgs e)
+        {
+            var btn = sender as Button;
+            btn.IsEnabled = false;
+            btn.Text = "Guardando...";
+
+            try 
+            {
+                _usuario.Nombre = txtNombre.Text?.Trim();
+                _usuario.Telefono = txtTelefono.Text?.Trim();
+                _usuario.Direccion = txtDireccion.Text?.Trim();
+                _usuario.FotoPerfil = _imageBase64; // Guardar el string nuevo o el anterior
+
+                bool ok = await _dbService.ActualizarPerfilAsync(_usuario.Id, _usuario.Nombre, _usuario.Direccion, _usuario.Telefono, _usuario.FotoPerfil);
+
+                if (ok)
+                {
+                    await DisplayAlert("¡Excelente!", "Perfil actualizado correctamente.", "OK");
+                }
+                else
+                {
+                    await DisplayAlert("Error", "No pudimos sincronizar con el servidor.", "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Ups", ex.Message, "OK");
+            }
+            finally
+            {
+                btn.IsEnabled = true;
+                btn.Text = "ACTUALIZAR PERFIL";
+            }
         }
     }
 }

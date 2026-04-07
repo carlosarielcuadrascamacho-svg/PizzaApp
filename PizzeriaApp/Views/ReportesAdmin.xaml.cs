@@ -45,7 +45,7 @@ namespace PizzeriaApp.Views
             }
 
             lblPlatillos.Text = $"{totalPlatosVendidos} Platillos";
-            PieRanking.ItemsSource = ListaTendencias;
+            dgTendencias.ItemsSource = ListaTendencias;
         }
     }
 }

@@ -13,7 +13,7 @@ namespace PizzeriaApp.Views
 
             if (usuario.EsAdmin)
             {
-                Detail = new NavigationPage(new MenuAdmin());
+                Detail = new NavigationPage(new MenuClient(usuario));
             }
             else
             {
@@ -29,14 +29,16 @@ namespace PizzeriaApp.Views
 
             if (usuario.EsAdmin)
             {
-                AgregarBotonMenu("🧑‍🍳 Cola de Cocina", new ColaCocina());
-                AgregarBotonMenu("🍕 Crear Producto", new AltaProducto());
-                AgregarBotonMenu("🛠️ Gestionar Catálogo", new GestionCatalogo());
-                AgregarBotonMenu("📊 Panel Financiero", new ReportesAdmin());
+                AgregarBotonMenu("🏠 Tomar Orden (Mostrador)", new MenuClient(usuario));
+                AgregarBotonMenu("👨‍🍳 Cola de Cocina", new ColaCocina());
+                AgregarBotonMenu("📦 Gestión de Catálogo", new GestionCatalogo());
+                AgregarBotonMenu("📊 Reportes", new ReportesAdmin());
             }
             else
             {
-                AgregarBotonMenu("🧾 Realizar Pedido", new MenuClient(usuario));
+                AgregarBotonMenu("🏠 Nuestro Menú", new MenuClient(usuario));
+                AgregarBotonMenu("👤 Mi Perfil", new PerfilCliente(usuario));
+                AgregarBotonMenu("📜 Mis Pedidos", new HistorialCliente(usuario.Id));
             }
 
             AgregarBotonCerrarSesion();

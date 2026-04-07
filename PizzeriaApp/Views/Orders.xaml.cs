@@ -47,7 +47,7 @@ namespace PizzeriaApp.Views
             btnConfirmar.IsEnabled = false;
             btnConfirmar.Text = "Procesando...";
 
-            bool exito = await _dbService.CrearPedidoCompletoAsync(_clienteAsociado.Id, _carrito.ToList(), _totalCalculado);
+            bool exito = await _dbService.CrearPedidoCompletoAsync(_clienteAsociado.Id, _carrito.ToList(), _totalCalculado, "En preparación");
 
             if (exito)
             {

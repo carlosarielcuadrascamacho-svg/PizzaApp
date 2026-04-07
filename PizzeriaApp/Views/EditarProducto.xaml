@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="PizzeriaApp.Views.AltaProducto"
-             Title="Nuevo Platillo"
+             xmlns:converters="clr-namespace:PizzeriaApp.Converters"
+             x:Class="PizzeriaApp.Views.EditarProducto"
+             Title="Editar Platillo"
              BackgroundColor="#F8F9FA">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:Base64ToImageConverter x:Key="Base64Converter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
     <ScrollView>
         <Grid RowDefinitions="Auto, *">
@@ -13,8 +20,8 @@
                     <Shadow Brush="Black" Offset="0,2" Radius="4" Opacity="0.1" />
                 </Border.Shadow>
                 <VerticalStackLayout Spacing="5">
-                    <Label Text="Alta de Producto" FontSize="22" FontAttributes="Bold" TextColor="#1A1A1A" />
-                    <Label Text="Añade un nuevo elemento al menú" FontSize="13" TextColor="#757575" />
+                    <Label Text="Editor de Platillo" FontSize="22" FontAttributes="Bold" TextColor="#1A1A1A" />
+                    <Label Text="Actualiza la información del producto" FontSize="13" TextColor="#757575" />
                 </VerticalStackLayout>
             </Border>
 
@@ -30,7 +37,7 @@
                         <Border HeightRequest="160" WidthRequest="160" StrokeShape="RoundRectangle 80" StrokeThickness="0" BackgroundColor="#F8F9FA">
                             <Image x:Name="imgSelected" Source="placeholder_pizza.png" Aspect="AspectFill" />
                         </Border>
-                        <Button Text="SELECCIONAR FOTO" Clicked="OnPickImageClicked" BackgroundColor="#F5F5F5" TextColor="#FF4B3A" FontSize="11" FontAttributes="Bold" CornerRadius="12" HeightRequest="45" BorderWidth="1" BorderColor="#EEEEEE" />
+                        <Button Text="CAMBIAR FOTO" Clicked="OnPickImageClicked" BackgroundColor="#F5F5F5" TextColor="#FF4B3A" FontSize="11" FontAttributes="Bold" CornerRadius="12" HeightRequest="45" BorderWidth="1" BorderColor="#EEEEEE" />
                     </VerticalStackLayout>
 
                     <!-- Fields -->
@@ -38,7 +45,7 @@
                         <VerticalStackLayout Spacing="5">
                             <Label Text="NOMBRE DEL PRODUCTO" FontSize="10" FontAttributes="Bold" TextColor="#FF4B3A" CharacterSpacing="2" />
                             <Border StrokeThickness="1" Stroke="#EEEEEE" StrokeShape="RoundRectangle 12" BackgroundColor="#F8F9FA" Padding="15,0" HeightRequest="50">
-                                <Entry x:Name="txtNombre" Placeholder="Ej. Margherita Special" BackgroundColor="Transparent" TextColor="#1A1A1A" PlaceholderColor="#AAA" />
+                                <Entry x:Name="txtNombre" Placeholder="Nombre" BackgroundColor="Transparent" TextColor="#1A1A1A" PlaceholderColor="#AAA" />
                             </Border>
                         </VerticalStackLayout>
 
@@ -73,10 +80,21 @@
                                 </Border>
                             </VerticalStackLayout>
                         </Grid>
+
+                        <!-- Disponibilidad Switch -->
+                        <Border Padding="15" BackgroundColor="#F8F9FA" StrokeThickness="1" Stroke="#EEEEEE" StrokeShape="RoundRectangle 12">
+                            <Grid ColumnDefinitions="*, Auto">
+                                <VerticalStackLayout Grid.Column="0">
+                                    <Label Text="DISPONIBILIDAD" FontSize="11" FontAttributes="Bold" TextColor="#FF4B3A" />
+                                    <Label Text="¿Aparece en el menú del cliente?" FontSize="11" TextColor="#757575" />
+                                </VerticalStackLayout>
+                                <Switch Grid.Column="1" x:Name="swActivo" OnColor="#FF4B3A" ThumbColor="White" />
+                            </Grid>
+                        </Border>
                     </VerticalStackLayout>
 
                     <!-- Save Action -->
-                    <Button x:Name="btnGuardar" Text="GUARDAR PRODUCTO" Clicked="OnGuardarClicked" BackgroundColor="#FF4B3A" TextColor="White" HeightRequest="60" CornerRadius="25" FontAttributes="Bold" FontSize="16" Margin="0,10,0,0" />
+                    <Button x:Name="btnGuardar" Text="GUARDAR CAMBIOS" Clicked="OnGuardarClicked" BackgroundColor="#FF4B3A" TextColor="White" HeightRequest="60" CornerRadius="25" FontAttributes="Bold" FontSize="16" Margin="0,10,0,0" />
                 </VerticalStackLayout>
             </Border>
         </Grid>

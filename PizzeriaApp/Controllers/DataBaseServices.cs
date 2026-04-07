@@ -60,6 +60,20 @@ namespace PizzeriaApp.Controllers
             }
         }
 
+        public async Task<UsuarioPerfil?> ObtenerPerfilAsync(string idUsuario)
+        {
+            try
+            {
+                var resultado = await Client.From<UsuarioPerfil>().Where(p => p.Id == idUsuario).Get();
+                return resultado.Models.FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error obteniendo perfil completo: {ex.Message}");
+                return null;
+            }
+        }
+
         public async Task<string?> ObtenerIdPorEmailAsync(string correoBusqueda)
         {
             try
@@ -102,7 +116,7 @@ namespace PizzeriaApp.Controllers
             }
         }
 
-        public async Task<bool> CrearPedidoCompletoAsync(string clienteId, List<ItemCarrito> carrito, decimal totalCalculado)
+        public async Task<bool> CrearPedidoCompletoAsync(string clienteId, List<ItemCarrito> carrito, decimal totalCalculado, string estadoInicial)
         {
             try
             {
@@ -110,7 +124,7 @@ namespace PizzeriaApp.Controllers
                 {
                     ClienteId = clienteId,
                     Total = totalCalculado,
-                    Estado = "En preparación",
+                    Estado = estadoInicial,
                     Fecha = DateTime.UtcNow
                 };
 
@@ -141,22 +155,46 @@ namespace PizzeriaApp.Controllers
             }
         }
 
-        // --- LOS 3 MÉTODOS NUEVOS DEL ADMIN ---
-
-        public async Task<string?> SubirImagenProductoAsync(byte[] imageBytes, string fileName)
+        public async Task<bool> CrearPedidoV2Async(string clienteId, List<ItemCarrito> carrito, decimal totalCalculado, string estadoInicial, string mesa)
         {
             try
             {
-                // Subir la imagen al bucket 'productos' en Supabase Storage
-                await Client.Storage.From("productos").Upload(imageBytes, fileName, new Supabase.Storage.FileOptions { Upsert = true });
-                return Client.Storage.From("productos").GetPublicUrl(fileName);
+                var nuevoPedido = new Pedido
+                {
+                    ClienteId = clienteId,
+                    Total = totalCalculado,
+                    Estado = estadoInicial,
+                    Mesa = mesa,
+                    Fecha = DateTime.UtcNow
+                };
+
+                var respuestaPedido = await Client.From<Pedido>().Insert(nuevoPedido);
+                var pedidoInsertado = respuestaPedido.Models.FirstOrDefault();
+
+                if (pedidoInsertado == null) return false;
+
+                var detalles = new List<DetallePedido>();
+                foreach (var item in carrito)
+                {
+                    detalles.Add(new DetallePedido
+                    {
+                        PedidoId = pedidoInsertado.Id,
+                        ProductoId = item.Producto.Id,
+                        Cantidad = item.Cantidad,
+                        PrecioUnitario = item.Producto.Precio
+                    });
+                }
+
+                await Client.From<DetallePedido>().Insert(detalles);
+                return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al subir imagen: {ex.Message}");
-                return null;
+                Console.WriteLine($"Error en transacción v2: {ex.Message}");
+                return false;
             }
         }
+
 
         public async Task<bool> InsertarProductoAsync(Producto nuevoProducto)
         {
@@ -173,17 +211,63 @@ namespace PizzeriaApp.Controllers
             }
         }
 
+        public async Task<bool> ActualizarProductoAsync(Producto p)
+        {
+            try
+            {
+                var actualizacion = await Client.From<Producto>()
+                    .Where(x => x.Id == p.Id)
+                    .Set(x => x.Nombre, p.Nombre)
+                    .Set(x => x.Descripcion, p.Descripcion)
+                    .Set(x => x.Precio, p.Precio)
+                    .Set(x => x.Categoria, p.Categoria)
+                    .Set(x => x.ImagenBase64, p.ImagenBase64)
+                    .Set(x => x.Activo, p.Activo)
+                    .Update();
+
+                return actualizacion.Models.Count > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al actualizar producto: {ex.Message}");
+                return false;
+            }
+        }
+
         public async Task<List<Pedido>> ObtenerPedidosActivosAsync()
         {
             try
             {
-                // Solo traemos los que no han sido entregados
                 var respuesta = await Client.From<Pedido>()
                     .Where(p => p.Estado != "Entregado")
-                    .Order(p => p.Fecha, Supabase.Postgrest.Constants.Ordering.Descending)
+                    .Order(p => p.Fecha, Supabase.Postgrest.Constants.Ordering.Ascending)  // Cocina debe ver el más viejo primero
                     .Get();
 
-                return respuesta.Models;
+                var pedidosActivos = respuesta.Models;
+                var idsPedidos = pedidosActivos.Select(p => p.Id).ToList();
+
+                if (idsPedidos.Any())
+                {
+                    // Filtrar desde la base de datos
+                    var detallesResponse = await Client.From<DetallePedido>()
+                        .Filter("pedido_id", Supabase.Postgrest.Constants.Operator.In, idsPedidos)
+                        .Get();
+                    
+                    var productosResponse = await Client.From<Producto>().Get();
+                    var productosMapa = productosResponse.Models.ToDictionary(p => p.Id, p => p.Nombre);
+
+                    foreach (var pedido in pedidosActivos)
+                    {
+                        var detallesDelPedido = detallesResponse.Models.Where(d => d.PedidoId == pedido.Id).ToList();
+                        foreach (var d in detallesDelPedido)
+                        {
+                            d.NombrePlatillo = productosMapa.ContainsKey(d.ProductoId) ? productosMapa[d.ProductoId] : "Indefinido";
+                        }
+                        pedido.Detalles = new System.Collections.ObjectModel.ObservableCollection<DetallePedido>(detallesDelPedido);
+                    }
+                }
+
+                return pedidosActivos;
             }
             catch (Exception ex)
             {
@@ -275,7 +359,30 @@ namespace PizzeriaApp.Controllers
                     .Order(p => p.Fecha, Supabase.Postgrest.Constants.Ordering.Descending)
                     .Get();
 
-                return respuesta.Models;
+                var historial = respuesta.Models;
+                var idsPedidos = historial.Select(p => p.Id).ToList();
+
+                if (idsPedidos.Any())
+                {
+                    var detallesResponse = await Client.From<DetallePedido>()
+                        .Filter("pedido_id", Supabase.Postgrest.Constants.Operator.In, idsPedidos)
+                        .Get();
+                    
+                    var productosResponse = await Client.From<Producto>().Get();
+                    var productosMapa = productosResponse.Models.ToDictionary(p => p.Id, p => p.Nombre);
+
+                    foreach (var pedido in historial)
+                    {
+                        var detallesDelPedido = detallesResponse.Models.Where(d => d.PedidoId == pedido.Id).ToList();
+                        foreach (var d in detallesDelPedido)
+                        {
+                            d.NombrePlatillo = productosMapa.ContainsKey(d.ProductoId) ? productosMapa[d.ProductoId] : "??";
+                        }
+                        pedido.Detalles = new System.Collections.ObjectModel.ObservableCollection<DetallePedido>(detallesDelPedido);
+                    }
+                }
+
+                return historial;
             }
             catch (Exception ex)
             {
@@ -320,13 +427,12 @@ namespace PizzeriaApp.Controllers
 
                 if (idsPedidos.Any())
                 {
-                    // Descargamos los Detalles cruzados
+                    // Filtrar desde la base de datos (PostgreSQL) usando operador IN (No descargar la tabla entera a RAM)
                     var detallesResponse = await Client.From<DetallePedido>()
+                        .Filter("pedido_id", Supabase.Postgrest.Constants.Operator.In, idsPedidos)
                         .Get();
                     
-                    var detallesValidos = detallesResponse.Models
-                        .Where(d => idsPedidos.Contains(d.PedidoId))
-                        .ToList();
+                    var detallesValidos = detallesResponse.Models;
 
                     // Descargamos nombre de productos para cruzar (Mock PostgreSQL Join en código porque no hay ORM)
                     var productosResponse = await Client.From<Producto>().Get();

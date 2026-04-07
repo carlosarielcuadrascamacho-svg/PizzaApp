@@ -1,53 +1,73 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:chart="clr-namespace:Syncfusion.Maui.Charts;assembly=Syncfusion.Maui.Charts"
+             xmlns:syncfusion="clr-namespace:Syncfusion.Maui.DataGrid;assembly=Syncfusion.Maui.DataGrid"
              x:Class="PizzeriaApp.Views.ReportesAdmin"
              Title="Panel Directivo"
-             BackgroundColor="#FCFCFC">
+             BackgroundColor="#F4F6F8">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="15">
-            <Label Text="Desempeño del Restaurante" FontSize="26" FontAttributes="Bold" TextColor="#1565C0" />
-            
-            <!-- Cards Resumen Reales -->
-            <Grid ColumnDefinitions="*, *" ColumnSpacing="15">
-                <Frame Grid.Column="0" BackgroundColor="#E3F2FD" Padding="15" CornerRadius="12" HasShadow="False" BorderColor="Transparent">
-                    <VerticalStackLayout>
-                        <Label Text="Ingresos Reales" TextColor="#1565C0" FontSize="12" FontAttributes="Bold" />
-                        <Label x:Name="lblIngresos" Text="$0.00" TextColor="#0D47A1" FontSize="20" FontAttributes="Bold" Margin="0,5,0,0"/>
-                    </VerticalStackLayout>
-                </Frame>
-                
-                <Frame Grid.Column="1" BackgroundColor="#E8F5E9" Padding="15" CornerRadius="12" HasShadow="False" BorderColor="Transparent">
-                    <VerticalStackLayout>
-                        <Label Text="Ventas Directas" TextColor="#2E7D32" FontSize="12" FontAttributes="Bold" />
-                        <Label x:Name="lblPlatillos" Text="0 Platillos" TextColor="#1B5E20" FontSize="20" FontAttributes="Bold" Margin="0,5,0,0"/>
-                    </VerticalStackLayout>
-                </Frame>
-            </Grid>
-
-            <!-- Syncfusion CircularChart Platillos Populares -->
-            <Frame BackgroundColor="White" Padding="15" CornerRadius="20" HasShadow="True" BorderColor="Transparent" Margin="0,15,0,0">
-                <VerticalStackLayout>
-                    <Label Text="Platillos Estrella" FontSize="16" FontAttributes="Bold" TextColor="#333" Margin="0,0,0,10"/>
-                    <chart:SfCircularChart HeightRequest="300">
-                        <chart:SfCircularChart.Legend>
-                            <chart:ChartLegend Placement="Top" />
-                        </chart:SfCircularChart.Legend>
-
-                        <chart:DoughnutSeries x:Name="PieRanking" 
-                                              XBindingPath="Concepto" 
-                                              YBindingPath="Cantidad" 
-                                              ShowDataLabels="True">
-                            <chart:DoughnutSeries.DataLabelSettings>
-                                <chart:CircularDataLabelSettings LabelPlacement="Outer" />
-                            </chart:DoughnutSeries.DataLabelSettings>
-                        </chart:DoughnutSeries>
-                    </chart:SfCircularChart>
+    <Grid RowDefinitions="Auto, Auto, *">
+        <!-- Dashboard Stitch Header -->
+        <Border Grid.Row="0" Margin="15,15,15,5" Padding="20" BackgroundColor="#FFFFFF" StrokeThickness="0" StrokeShape="RoundRectangle 20">
+            <HorizontalStackLayout Spacing="15" VerticalOptions="Center">
+                <Label Text="📈" FontSize="32" VerticalOptions="Center"/>
+                <VerticalStackLayout VerticalOptions="Center">
+                    <Label Text="Desempeño Operativo" FontSize="20" FontAttributes="Bold" TextColor="#222"/>
+                    <Label Text="Métricas calculadas en tiempo real" FontSize="14" TextColor="#757575" />
                 </VerticalStackLayout>
-            </Frame>
+            </HorizontalStackLayout>
+        </Border>
+        
+        <Grid Grid.Row="1" ColumnDefinitions="*, *" ColumnSpacing="15" Margin="15,10,15,5">
+            <Border Grid.Column="0" BackgroundColor="#FFFFFF" Padding="15" StrokeThickness="0" StrokeShape="RoundRectangle 16">
+                <VerticalStackLayout>
+                    <Label Text="Ingresos Brutos" TextColor="#757575" FontSize="12" FontAttributes="Bold" />
+                    <Label x:Name="lblIngresos" Text="$0.00" TextColor="#1565C0" FontSize="20" FontAttributes="Bold" Margin="0,5,0,0"/>
+                </VerticalStackLayout>
+            </Border>
             
-        </VerticalStackLayout>
-    </ScrollView>
+            <Border Grid.Column="1" BackgroundColor="#FFFFFF" Padding="15" StrokeThickness="0" StrokeShape="RoundRectangle 16">
+                <VerticalStackLayout>
+                    <Label Text="Unidades Vendidas" TextColor="#757575" FontSize="12" FontAttributes="Bold" />
+                    <Label x:Name="lblPlatillos" Text="0 Und." TextColor="#2E7D32" FontSize="20" FontAttributes="Bold" Margin="0,5,0,0"/>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+        <!-- SfDataGrid Stitch -->
+        <Border Grid.Row="2" Margin="15,10,15,15" BackgroundColor="#FFFFFF" StrokeThickness="0" StrokeShape="RoundRectangle 16" Padding="0">
+            <Grid RowDefinitions="Auto, *">
+                <Label Grid.Row="0" Text="Top Platillos (Best Sellers)" FontSize="16" FontAttributes="Bold" TextColor="#424242" Margin="15,15,15,5"/>
+                
+                <syncfusion:SfDataGrid Grid.Row="1" x:Name="dgTendencias" 
+                                       AutoGenerateColumnsMode="None" 
+                                       RowHeight="60" 
+                                       HeaderRowHeight="50"
+                                       SelectionMode="None"
+                                       GridLinesVisibility="Horizontal"
+                                       HeaderGridLinesVisibility="None">
+                    
+                    <syncfusion:SfDataGrid.Columns>
+                        
+                        <syncfusion:DataGridTextColumn MappingName="Concepto" HeaderText="Producto Base" ColumnWidthMode="Fill">
+                            <syncfusion:DataGridTextColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Label Text="{Binding Concepto}" FontSize="14" TextColor="#222" FontAttributes="Bold" VerticalOptions="Center" Margin="10,0"/>
+                                </DataTemplate>
+                            </syncfusion:DataGridTextColumn.CellTemplate>
+                        </syncfusion:DataGridTextColumn>
+                        
+                        <syncfusion:DataGridTextColumn MappingName="Cantidad" HeaderText="Cantidad Sold" ColumnWidthMode="Auto">
+                            <syncfusion:DataGridTextColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Label Text="{Binding Cantidad, StringFormat='{0} vendidos'}" FontSize="14" TextColor="#E53935" FontAttributes="Bold" VerticalOptions="Center" Margin="10,0"/>
+                                </DataTemplate>
+                            </syncfusion:DataGridTextColumn.CellTemplate>
+                        </syncfusion:DataGridTextColumn>
+                        
+                    </syncfusion:SfDataGrid.Columns>
+                </syncfusion:SfDataGrid>
+            </Grid>
+        </Border>
+    </Grid>
 </ContentPage>

@@ -4,7 +4,7 @@
              xmlns:converters="clr-namespace:PizzeriaApp.Converters"
              x:Class="PizzeriaApp.Views.MenuClient"
              Title="Nuestro Menú"
-             BackgroundColor="#FCFCFC">
+             BackgroundColor="#F8F9FA">
 
     <ContentPage.Resources>
         <ResourceDictionary>
@@ -12,20 +12,17 @@
         </ResourceDictionary>
     </ContentPage.Resources>
 
-    <ContentPage.ToolbarItems>
-        <ToolbarItem x:Name="tbCart" Text="🛒 Carrito (0)" Clicked="OnVerCarritoClicked" Priority="0" Order="Primary"/>
-        <ToolbarItem Text="👤 Mi Perfil" Clicked="OnIrPerfilClicked" Order="Secondary"/>
-        <ToolbarItem Text="📜 Mis Pedidos" Clicked="OnIrHistorialClicked" Order="Secondary"/>
-    </ContentPage.ToolbarItems>
-
-    <Grid RowDefinitions="Auto, Auto, *">
+    <Grid RowDefinitions="Auto, Auto, *, Auto">
         <!-- Header -->
-        <Border Grid.Row="0" Margin="15" Padding="15" StrokeThickness="0" BackgroundColor="#E53935" StrokeShape="RoundRectangle 15">
+        <Border Grid.Row="0" Margin="15" Padding="15" StrokeThickness="0" BackgroundColor="#FF4B3A" StrokeShape="RoundRectangle 15">
+            <Border.Shadow>
+                <Shadow Brush="Black" Offset="0,2" Radius="4" Opacity="0.1" />
+            </Border.Shadow>
             <HorizontalStackLayout Spacing="15" VerticalOptions="Center">
                 <Label Text="🍕" FontSize="32" VerticalOptions="Center"/>
                 <VerticalStackLayout VerticalOptions="Center">
                     <Label Text="¿Qué se te antoja hoy?" FontSize="18" FontAttributes="Bold" TextColor="White"/>
-                    <Label Text="Encuentra tu platillo favorito" FontSize="14" TextColor="#FFCDD2" />
+                    <Label Text="Encuentra tu platillo favorito" FontSize="14" TextColor="#FFEBEE" />
                 </VerticalStackLayout>
             </HorizontalStackLayout>
         </Border>
@@ -44,23 +41,40 @@
             </CollectionView.ItemsLayout>
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Frame Margin="0" Padding="0" CornerRadius="15" HasShadow="True" BorderColor="Transparent" BackgroundColor="White" IsClippedToBounds="True">
-                        <Grid RowDefinitions="180, Auto">
-                            <Image Grid.Row="0" 
-                                   Source="{Binding ImagenBase64, Converter={StaticResource Base64Converter}}" 
-                                   Aspect="AspectFill" 
-                                   HeightRequest="180" />
+                    <Border Margin="5" Padding="0" BackgroundColor="#FFFFFF" StrokeThickness="0" StrokeShape="RoundRectangle 20" HeightRequest="250">
+                        <Border.Shadow>
+                            <Shadow Brush="Black" Offset="0,2" Radius="4" Opacity="0.1" />
+                        </Border.Shadow>
+                        <Grid RowDefinitions="120, Auto, Auto, *">
+                            <Border Grid.Row="0" StrokeShape="RoundRectangle 20,20,0,0" StrokeThickness="0" HeightRequest="120">
+                                <Image Source="{Binding ImagenBase64, Converter={StaticResource Base64Converter}}" Aspect="AspectFill" BackgroundColor="#F8F9FA" />
+                            </Border>
                                    
-                            <Grid Grid.Row="1" Padding="15" RowDefinitions="Auto, Auto, Auto" ColumnDefinitions="*, Auto">
-                                <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding Nombre}" FontSize="20" FontAttributes="Bold" TextColor="#222" />
-                                <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding Descripcion}" FontSize="14" TextColor="#666" Margin="0,5,0,10" LineBreakMode="TailTruncation" MaxLines="2" />
-                                
-                                <Label Grid.Row="2" Grid.Column="0" Text="{Binding Precio, StringFormat='{0:C}'}" FontSize="18" TextColor="#D32F2F" FontAttributes="Bold" VerticalOptions="Center"/>
+                            <Label Grid.Row="1" Padding="15,10,15,0" Text="{Binding Nombre}" FontSize="18" FontAttributes="Bold" TextColor="#1A1A1A" />
+                            <Label Grid.Row="2" Padding="15,2,15,0" Text="{Binding Descripcion}" FontSize="12" TextColor="#757575" LineBreakMode="TailTruncation" MaxLines="2" />
+                            
+                            <Grid Grid.Row="3" Padding="15,0,15,15" VerticalOptions="End" ColumnDefinitions="*, Auto">
+                                <Label Grid.Column="0" Text="{Binding Precio, StringFormat='{0:C}'}" FontSize="16" TextColor="#00C853" FontAttributes="Bold" VerticalOptions="Center"/>
+                                <Button Grid.Column="1" Text="+" FontSize="20" FontAttributes="Bold" BackgroundColor="#FF4B3A" TextColor="White" CornerRadius="20" WidthRequest="40" HeightRequest="40" Padding="0" Margin="0" Clicked="OnAgregarCarritoClicked" BindingContext="{Binding .}" />
                             </Grid>
                         </Grid>
-                    </Frame>
+                    </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
+
+        <!-- Bottom Cart Bar -->
+        <Border Grid.Row="3" Margin="15,5,15,15" Padding="15" BackgroundColor="#FFFFFF" StrokeThickness="0" StrokeShape="RoundRectangle 20" IsVisible="True" x:Name="ContenedorCarrito">
+            <Border.Shadow>
+                <Shadow Brush="Black" Offset="0,2" Radius="4" Opacity="0.1" />
+            </Border.Shadow>
+            <Grid ColumnDefinitions="*, Auto">
+                <VerticalStackLayout VerticalOptions="Center">
+                    <Label x:Name="lblCartTotal" Text="$0.00" FontSize="18" FontAttributes="Bold" TextColor="#00C853" />
+                    <Label x:Name="lblCartItems" Text="0 artículos" FontSize="12" TextColor="#757575" />
+                </VerticalStackLayout>
+                <Button Grid.Column="1" Text="Confirmar Orden" FontAttributes="Bold" BackgroundColor="#FF4B3A" TextColor="White" CornerRadius="12" HeightRequest="45" Clicked="OnConfirmarOrdenClicked" />
+            </Grid>
+        </Border>
     </Grid>
 </ContentPage>

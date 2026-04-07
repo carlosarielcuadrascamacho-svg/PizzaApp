@@ -1,13 +1,12 @@
-using PizzeriaApp.Models;
 using PizzeriaApp.Controllers;
+using PizzeriaApp.Models;
 
 namespace PizzeriaApp.Views
 {
     public partial class AltaProducto : ContentPage
     {
-        private byte[] _imageBytes;
-        private string _imageExt;
-        private readonly DataBaseServices _dbService;
+        private string _imageBase64 = "";
+        private DataBaseServices _dbService;
 
         public AltaProducto()
         {
@@ -15,101 +14,86 @@ namespace PizzeriaApp.Views
             _dbService = new DataBaseServices();
         }
 
-        private async void OnAñadirFotoClicked(object sender, EventArgs e)
+        private async void OnPickImageClicked(object sender, EventArgs e)
         {
-            var accion = await DisplayActionSheet("Añadir Imagen", "Cancelar", null, "Tomar Foto", "Elegir de Galería");
-
             try
             {
-                FileResult photo = null;
+                var photo = await MediaPicker.Default.PickPhotoAsync();
+                if (photo == null) return;
 
-                if (accion == "Tomar Foto")
+                // Visualización Instantánea (Regla de Oro)
+                var stream = await photo.OpenReadAsync();
+                imgSelected.Source = ImageSource.FromStream(() => stream);
+
+                // Convertir a Base64 para Supabase (Fase de Memoria)
+                byte[] bytes;
+                using (var ms = new MemoryStream())
                 {
-                    if (MediaPicker.Default.IsCaptureSupported)
-                    {
-                        photo = await MediaPicker.Default.CapturePhotoAsync();
-                    }
+                    var streamFull = await photo.OpenReadAsync();
+                    await streamFull.CopyToAsync(ms);
+                    bytes = ms.ToArray();
                 }
-                else if (accion == "Elegir de Galería")
-                {
-                    photo = await MediaPicker.Default.PickPhotoAsync();
-                }
-
-                if (photo != null)
-                {
-                    using (var stream = await photo.OpenReadAsync())
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        await stream.CopyToAsync(memoryStream);
-                        _imageBytes = memoryStream.ToArray();
-                    }
-
-                    _imageExt = Path.GetExtension(photo.FileName);
-
-                    // Forzar dibujado en el UI Thread
-                    MainThread.BeginInvokeOnMainThread(() =>
-                    {
-                        imgPreview.Source = ImageSource.FromStream(() => new MemoryStream(_imageBytes));
-                        imgPreview.IsVisible = true;
-                    });
-                }
+                
+                // Comprimimos y guardamos string para el Insert
+                _imageBase64 = Convert.ToBase64String(bytes);
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Error", $"Problema con la cámara/galería: {ex.Message}", "Ok");
+                await DisplayAlert("Error", "Fallo al seleccionar imagen: " + ex.Message, "OK");
             }
         }
 
         private async void OnGuardarClicked(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtNombre.Text) || string.IsNullOrWhiteSpace(txtPrecio.Text))
+            // Validaciones básicas de formulario POS
+            if (string.IsNullOrEmpty(txtNombre.Text) || string.IsNullOrEmpty(txtPrecio.Text))
             {
-                await DisplayAlert("Error", "Faltan datos obligatorios.", "OK");
+                await DisplayAlert("Atención", "Nombre y Precio son requeridos.", "OK");
                 return;
             }
 
             if (!decimal.TryParse(txtPrecio.Text, out decimal precio))
             {
-                await DisplayAlert("Error", "El precio no es válido.", "OK");
+                await DisplayAlert("Error", "Precio inválido.", "OK");
                 return;
             }
 
-            btnGuardar.IsEnabled = false;
-            btnGuardar.Text = "Guardando...";
+            var btn = sender as Button;
+            btn.IsEnabled = false;
+            btn.Text = "Guardando...";
 
-            string publicUrl = "https://via.placeholder.com/400x180.png?text=Sin+Imagen";
-
-            if (_imageBytes != null)
+            try 
             {
-                // Codificar la imagen directamente a Base64 por requerimiento
-                publicUrl = Convert.ToBase64String(_imageBytes);
+                var nuevoProducto = new Producto
+                {
+                    Nombre = txtNombre.Text.Trim(),
+                    Descripcion = txtDescripcion.Text?.Trim() ?? "",
+                    Precio = precio,
+                    Categoria = pickCategoria.SelectedItem?.ToString() ?? "General",
+                    ImagenBase64 = _imageBase64, // El string que capturamos en el evento PickImage
+                    Activo = true
+                };
+
+                bool ok = await _dbService.InsertarProductoAsync(nuevoProducto);
+
+                if (ok)
+                {
+                    await DisplayAlert("¡Éxito!", "Producto añadido al catálogo.", "OK");
+                    await Navigation.PopAsync();
+                }
+                else
+                {
+                    await DisplayAlert("Error", "No se pudo guardar en Supabase.", "OK");
+                    btn.IsEnabled = true;
+                    btn.Text = "GUARDAR PRODUCTO";
+                }
             }
-
-            var nuevoProducto = new Producto
+            catch (Exception ex)
             {
-                Nombre = txtNombre.Text.Trim(),
-                Descripcion = txtDescripcion.Text?.Trim() ?? "",
-                Precio = precio,
-                ImagenBase64 = publicUrl,
-                Categoria = "Pizzas", // Default
-                Activo = true
-            };
-
-            bool exito = await _dbService.InsertarProductoAsync(nuevoProducto);
-
-            if (exito)
-            {
-                await DisplayAlert("Éxito", "El producto se ha guardado correctamente.", "OK");
-                // Regresamos a la pantalla anterior
-                await Navigation.PopAsync();
+                await DisplayAlert("Error Crítico", ex.Message, "OK");
+                btn.IsEnabled = true;
+                btn.Text = "GUARDAR PRODUCTO";
             }
-            else
-            {
-                await DisplayAlert("Error", "No se pudo guardar el producto.", "OK");
-            }
-
-            btnGuardar.Text = "Guardar Producto";
-            btnGuardar.IsEnabled = true;
         }
     }
 }

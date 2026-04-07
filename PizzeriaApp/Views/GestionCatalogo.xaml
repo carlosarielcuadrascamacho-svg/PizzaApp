@@ -3,8 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:converters="clr-namespace:PizzeriaApp.Converters"
              x:Class="PizzeriaApp.Views.GestionCatalogo"
-             Title="Gestión de Catálogo"
-             BackgroundColor="#FCFCFC">
+             BackgroundColor="#F8F9FA">
 
     <ContentPage.Resources>
         <ResourceDictionary>
@@ -13,42 +12,73 @@
     </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto, *">
-        <!-- Header -->
-        <Border Grid.Row="0" Margin="15" Padding="15" StrokeThickness="0" BackgroundColor="#FFF8E1" StrokeShape="RoundRectangle 15">
-            <HorizontalStackLayout Spacing="15" VerticalOptions="Center">
-                <Label Text="🛠️" FontSize="32" VerticalOptions="Center"/>
-                <VerticalStackLayout VerticalOptions="Center">
-                    <Label Text="Inventario Activo" FontSize="18" FontAttributes="Bold" TextColor="#B71C1C"/>
-                    <Label Text="Alterna la disponibilidad real en la BD." FontSize="14" TextColor="Gray" />
+        <!-- Header con Acción de Alta -->
+        <Border Grid.Row="0" Margin="20,25,20,10" Padding="20" BackgroundColor="#FFFFFF" StrokeThickness="0" StrokeShape="RoundRectangle 24">
+            <Border.Shadow>
+                <Shadow Brush="Black" Offset="0,2" Radius="4" Opacity="0.1" />
+            </Border.Shadow>
+            <Grid ColumnDefinitions="*, Auto">
+                <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                    <Label Text="Gestión de Catálogo" FontSize="22" FontAttributes="Bold" TextColor="#1A1A1A" />
+                    <Label Text="Modifica platillos y disponibilidad" FontSize="13" TextColor="#757575" />
                 </VerticalStackLayout>
-            </HorizontalStackLayout>
+                
+                <Button Grid.Column="1" Text="+ NUEVO" Clicked="OnAgregarProductoClicked" BackgroundColor="#FF4B3A" TextColor="White" FontAttributes="Bold" CornerRadius="15" HeightRequest="45" Padding="15,0" />
+            </Grid>
         </Border>
 
-        <!-- Lista de Productos para Activar/Desactivar -->
-        <CollectionView Grid.Row="1" x:Name="ListaInventario" Margin="10,0,10,10">
+        <!-- Listado SCRUD -->
+        <CollectionView Grid.Row="1" x:Name="ListaInventario" Margin="15,0">
             <CollectionView.ItemsLayout>
-                <GridItemsLayout Orientation="Vertical" Span="1" VerticalItemSpacing="10" />
+                <GridItemsLayout Orientation="Vertical" Span="1" VerticalItemSpacing="15" />
             </CollectionView.ItemsLayout>
+            
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Frame Margin="5" Padding="15" CornerRadius="12" HasShadow="True" BorderColor="Transparent" BackgroundColor="White">
-                        <Grid ColumnDefinitions="Auto, *, Auto, Auto" ColumnSpacing="15">
-                            <Frame Grid.Column="0" WidthRequest="60" HeightRequest="60" CornerRadius="8" IsClippedToBounds="True" HasShadow="False" BorderColor="Transparent" Padding="0" VerticalOptions="Center">
+                    <Border Padding="15" BackgroundColor="#FFFFFF" StrokeThickness="0" StrokeShape="RoundRectangle 20">
+                        <Border.Shadow>
+                            <Shadow Brush="Black" Offset="0,2" Radius="4" Opacity="0.1" />
+                        </Border.Shadow>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnEditarProductoTapped" CommandParameter="{Binding .}" />
+                        </Border.GestureRecognizers>
+                        
+                        <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="15">
+                            <!-- Miniatura -->
+                            <Border Grid.Column="0" WidthRequest="65" HeightRequest="65" StrokeShape="RoundRectangle 12" StrokeThickness="0">
                                 <Image Source="{Binding ImagenBase64, Converter={StaticResource Base64Converter}}" Aspect="AspectFill" />
-                            </Frame>
+                            </Border>
                             
+                            <!-- Info -->
                             <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
-                                <Label Text="{Binding Nombre}" FontSize="16" FontAttributes="Bold" TextColor="#222"/>
-                                <Label Text="{Binding Precio, StringFormat='{0:C}'}" FontSize="14" TextColor="#B71C1C" FontAttributes="Bold"/>
+                                <Label Text="{Binding Nombre}" FontSize="16" FontAttributes="Bold" TextColor="#1A1A1A"/>
+                                <Label Text="{Binding Precio, StringFormat='{0:C}'}" FontSize="14" TextColor="#00C853" FontAttributes="Bold"/>
+                                <Label Text="{Binding Categoria}" FontSize="11" TextColor="#757575" />
                             </VerticalStackLayout>
 
-                            <!-- Switch de Disponibilidad DB Real -->
-                            <VerticalStackLayout Grid.Column="2" VerticalOptions="Center" HorizontalOptions="Center">
-                                <Label Text="Público" FontSize="10" TextColor="Gray" HorizontalOptions="Center" />
-                                <Switch IsToggled="{Binding Activo}" Toggled="OnDisponibilidadToggled" BindingContext="{Binding .}" />
-                            </VerticalStackLayout>
+                            <!-- Status Badge -->
+                            <Border Grid.Column="2" VerticalOptions="Center" Padding="12,6" StrokeThickness="0" StrokeShape="RoundRectangle 12">
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding Activo}" Value="True">
+                                        <Setter Property="BackgroundColor" Value="#00C853" />
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Border" Binding="{Binding Activo}" Value="False">
+                                        <Setter Property="BackgroundColor" Value="#FF4B3A" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Label FontSize="10" FontAttributes="Bold" TextColor="White">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding Activo}" Value="True">
+                                            <Setter Property="Text" Value="ACTIVO" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label" Binding="{Binding Activo}" Value="False">
+                                            <Setter Property="Text" Value="INACTIVO" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </Border>
                         </Grid>
-                    </Frame>
+                    </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>

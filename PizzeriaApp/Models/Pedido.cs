@@ -1,5 +1,8 @@
-﻿using Supabase.Postgrest.Attributes;
+using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
+using System;
+using System.Collections.ObjectModel;
+using Newtonsoft.Json;
 
 namespace PizzeriaApp.Models
 {
@@ -20,5 +23,21 @@ namespace PizzeriaApp.Models
 
         [Column("total")]
         public decimal Total { get; set; }
+
+        [Column("mesa")]
+        public string Mesa { get; set; }
+
+        // Propiedades de UI (No persistidas en DB directamente)
+        [JsonIgnore]
+        public string DetalleResumen { get; set; }
+
+        [JsonIgnore]
+        public ObservableCollection<DetallePedido> Detalles { get; set; } = new ObservableCollection<DetallePedido>();
+
+        [JsonIgnore]
+        public bool IsNotCancelled => Estado != "Cancelado" && Estado != "Entregado";
+
+        [JsonIgnore]
+        public string IdVisible => !string.IsNullOrEmpty(Id) && Id.Length >= 6 ? $"#{Id.Substring(0, 6).ToUpper()}" : "#N/A";
     }
 }

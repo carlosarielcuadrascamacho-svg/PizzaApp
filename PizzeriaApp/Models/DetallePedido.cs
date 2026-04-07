@@ -1,4 +1,4 @@
-﻿using Supabase.Postgrest.Attributes;
+using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
 using Newtonsoft.Json;
 
@@ -24,5 +24,11 @@ namespace PizzeriaApp.Models
 
         [JsonIgnore]
         public decimal Subtotal => Cantidad * PrecioUnitario;
+
+        [Column("comentarios")]
+        public string Comentarios { get; set; }
+
+        [JsonIgnore]
+        public string NombrePlatillo { get; set; }
     }
 }

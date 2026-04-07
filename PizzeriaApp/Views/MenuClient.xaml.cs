@@ -28,11 +28,20 @@ namespace PizzeriaApp.Views
             CargarFiltrosCategorias();
             
             await CargarCatalogoAsync();
-
-            int totalArticulos = _carrito.Sum(i => i.Cantidad);
-            tbCart.Text = $"🛒 Carrito ({totalArticulos})";
+            ActualizarCarritoUI();
             
             ListaProductos.SelectedItem = null;
+        }
+
+        private void ActualizarCarritoUI()
+        {
+            int totalArticulos = _carrito.Sum(i => i.Cantidad);
+            decimal totalCosto = _carrito.Sum(i => i.Subtotal);
+
+            lblCartItems.Text = $"{totalArticulos} artículos";
+            lblCartTotal.Text = totalCosto.ToString("C");
+            
+            ContenedorCarrito.IsVisible = totalArticulos > 0;
         }
 
         private async Task CargarCatalogoAsync()
@@ -81,24 +90,30 @@ namespace PizzeriaApp.Views
             }
         }
 
-        private async void OnVerCarritoClicked(object sender, EventArgs e)
+        private void OnAgregarCarritoClicked(object sender, EventArgs e)
         {
-            if (_carrito.Count == 0)
+            var boton = sender as Button;
+            var producto = boton?.BindingContext as Producto;
+
+            if (producto != null)
             {
-                await DisplayAlert("Carrito", "Agrega al menos un producto para proceder al pago.", "OK");
-                return;
+                var itemExistente = _carrito.FirstOrDefault(i => i.Producto.Id == producto.Id);
+                if (itemExistente != null)
+                {
+                    itemExistente.Cantidad += 1;
+                }
+                else
+                {
+                    _carrito.Add(new ItemCarrito { Producto = producto, Cantidad = 1 });
+                }
+                ActualizarCarritoUI();
             }
-            await Navigation.PushAsync(new Orders(_carrito, _clienteActual));
         }
 
-        private async void OnIrPerfilClicked(object sender, EventArgs e)
+        private async void OnConfirmarOrdenClicked(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new PerfilCliente(_clienteActual));
-        }
-
-        private async void OnIrHistorialClicked(object sender, EventArgs e)
-        {
-            await Navigation.PushAsync(new HistorialCliente(_clienteActual.Id));
+            if (_carrito.Count == 0) return;
+            await Navigation.PushAsync(new MiCarrito(_carrito, _clienteActual));
         }
     }
 }

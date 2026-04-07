@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:PizzeriaApp.Converters"
+             x:Class="PizzeriaApp.Views.MiCarrito"
+             Title="Confirmar Orden"
+             BackgroundColor="#F8F9FA">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:Base64ToImageConverter x:Key="Base64Converter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto, *, Auto">
+        <!-- Header -->
+        <Border Grid.Row="0" Margin="20,25,20,10" Padding="20" BackgroundColor="#FFFFFF" StrokeThickness="0" StrokeShape="RoundRectangle 24">
+            <Border.Shadow>
+                <Shadow Brush="Black" Offset="0,2" Radius="4" Opacity="0.1" />
+            </Border.Shadow>
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Tu Carrito" FontSize="24" FontAttributes="Bold" TextColor="#1A1A1A" />
+                <Label Text="Revisa tu pedido y confirma la mesa" FontSize="13" TextColor="#757575" />
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- Lista de Productos en el Carrito -->
+        <CollectionView Grid.Row="1" x:Name="ListaCarrito" Margin="15,5">
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Orientation="Vertical" Span="1" VerticalItemSpacing="15" />
+            </CollectionView.ItemsLayout>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border Padding="15" BackgroundColor="#FFFFFF" StrokeThickness="0" StrokeShape="RoundRectangle 24">
+                        <Border.Shadow>
+                            <Shadow Brush="Black" Offset="0,2" Radius="4" Opacity="0.1" />
+                        </Border.Shadow>
+                        <Grid ColumnDefinitions="Auto, *, Auto" RowDefinitions="Auto, Auto" ColumnSpacing="15" RowSpacing="10">
+                            <!-- Foto del Producto -->
+                            <Border Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" HeightRequest="80" WidthRequest="80" StrokeShape="RoundRectangle 16" StrokeThickness="0">
+                                <Image Source="{Binding Producto.ImagenBase64, Converter={StaticResource Base64Converter}}" Aspect="AspectFill" />
+                            </Border>
+
+                            <!-- Información Principal -->
+                            <VerticalStackLayout Grid.Row="0" Grid.Column="1" VerticalOptions="Center">
+                                <Label Text="{Binding Producto.Nombre}" FontSize="16" FontAttributes="Bold" TextColor="#1A1A1A" />
+                                <Label Text="{Binding Subtotal, StringFormat='{0:C}'}" FontSize="14" TextColor="#00C853" FontAttributes="Bold" />
+                            </VerticalStackLayout>
+
+                            <!-- Botón Eliminar -->
+                            <Button Grid.Row="0" Grid.Column="2" 
+                                    Text="✕" Clicked="OnEliminarItemClicked" CommandParameter="{Binding .}"
+                                    BackgroundColor="#FDECEA" TextColor="#FF4B3A" 
+                                    CornerRadius="12" WidthRequest="40" HeightRequest="40" VerticalOptions="Start" />
+
+                            <!-- Input de Comentarios -->
+                            <Border Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Padding="12,2" BackgroundColor="#F8F9FA" StrokeThickness="1" Stroke="#EEEEEE" StrokeShape="RoundRectangle 12">
+                                <Entry Text="{Binding Comentarios}" Placeholder="Instrucciones especiales..." FontSize="12" TextColor="#1A1A1A" PlaceholderColor="#AAA" HeightRequest="35" BackgroundColor="Transparent" />
+                            </Border>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- Checkout Section -->
+        <Border Grid.Row="2" Margin="15,10,15,25" Padding="25" BackgroundColor="#FFFFFF" StrokeThickness="0" StrokeShape="RoundRectangle 32">
+            <Border.Shadow>
+                <Shadow Brush="Black" Offset="0,2" Radius="4" Opacity="0.1" />
+            </Border.Shadow>
+            <VerticalStackLayout Spacing="20">
+
+                <!-- Área POS -->
+                <VerticalStackLayout x:Name="PanelAdminMesa" Spacing="8">
+                    <Label Text="UBICACIÓN / MESA" FontSize="11" FontAttributes="Bold" TextColor="#FF4B3A" CharacterSpacing="2" />
+                    <Border StrokeThickness="1" Stroke="#EEEEEE" StrokeShape="RoundRectangle 12" BackgroundColor="#F8F9FA" Padding="15,0" HeightRequest="45">
+                        <Entry x:Name="txtMesaCliente" Placeholder="Ej. Mesa 4 o Pedido Mostrador" BackgroundColor="Transparent" TextColor="#1A1A1A" PlaceholderColor="#AAA" />
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Total y Confirmación -->
+                <Grid ColumnDefinitions="*, Auto">
+                    <Label Text="TOTAL A PAGAR" VerticalOptions="Center" FontSize="12" FontAttributes="Bold" TextColor="#757575" CharacterSpacing="1" />
+                    <Label Grid.Column="1" x:Name="lblTotalCosto" Text="$0.00" FontSize="26" FontAttributes="Bold" TextColor="#00C853" />
+                </Grid>
+
+                <Button Text="CONFIRMAR ORDEN" Clicked="OnConfirmarOrdenClicked" BackgroundColor="#FF4B3A" TextColor="White" HeightRequest="60" CornerRadius="25" FontAttributes="Bold" FontSize="16" />
+            </VerticalStackLayout>
+        </Border>
+    </Grid>
+</ContentPage>
