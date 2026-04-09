@@ -12,7 +12,6 @@
     </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto, *">
-        <!-- Header con Acción de Alta -->
         <Border Grid.Row="0" Margin="20,25,20,10" Padding="20" BackgroundColor="#FFFFFF" StrokeThickness="0" StrokeShape="RoundRectangle 24">
             <Border.Shadow>
                 <Shadow Brush="Black" Offset="0,2" Radius="4" Opacity="0.1" />
@@ -44,19 +43,17 @@
                         </Border.GestureRecognizers>
                         
                         <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="15">
-                            <!-- Miniatura -->
+                            
                             <Border Grid.Column="0" WidthRequest="65" HeightRequest="65" StrokeShape="RoundRectangle 12" StrokeThickness="0">
                                 <Image Source="{Binding ImagenBase64, Converter={StaticResource Base64Converter}}" Aspect="AspectFill" />
                             </Border>
                             
-                            <!-- Info -->
                             <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
                                 <Label Text="{Binding Nombre}" FontSize="16" FontAttributes="Bold" TextColor="#1A1A1A"/>
                                 <Label Text="{Binding Precio, StringFormat='{0:C}'}" FontSize="14" TextColor="#00C853" FontAttributes="Bold"/>
                                 <Label Text="{Binding Categoria}" FontSize="11" TextColor="#757575" />
                             </VerticalStackLayout>
 
-                            <!-- Status Badge -->
                             <Border Grid.Column="2" VerticalOptions="Center" Padding="12,6" StrokeThickness="0" StrokeShape="RoundRectangle 12">
                                 <Border.Triggers>
                                     <DataTrigger TargetType="Border" Binding="{Binding Activo}" Value="True">

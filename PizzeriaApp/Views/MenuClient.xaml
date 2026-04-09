@@ -27,14 +27,12 @@
             </HorizontalStackLayout>
         </Border>
 
-        <!-- Category Filters -->
         <ScrollView Grid.Row="1" Orientation="Horizontal" HorizontalScrollBarVisibility="Never" Margin="15,0,15,10">
             <HorizontalStackLayout Spacing="10" x:Name="slCategorias">
-                <!-- Dynamically populated in CodeBehind -->
+                
             </HorizontalStackLayout>
         </ScrollView>
 
-        <!-- Pizzas List -->
         <CollectionView Grid.Row="2" x:Name="ListaProductos" SelectionMode="Single" SelectionChanged="OnProductoSeleccionado" Margin="10,0,10,10">
             <CollectionView.ItemsLayout>
                 <GridItemsLayout Orientation="Vertical" Span="1" VerticalItemSpacing="15" />
@@ -63,7 +61,6 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <!-- Bottom Cart Bar -->
         <Border Grid.Row="3" Margin="15,5,15,15" Padding="15" BackgroundColor="#FFFFFF" StrokeThickness="0" StrokeShape="RoundRectangle 20" IsVisible="True" x:Name="ContenedorCarrito">
             <Border.Shadow>
                 <Shadow Brush="Black" Offset="0,2" Radius="4" Opacity="0.1" />

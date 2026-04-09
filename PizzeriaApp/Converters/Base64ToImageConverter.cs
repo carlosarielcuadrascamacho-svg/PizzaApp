@@ -26,6 +26,7 @@ namespace PizzeriaApp.Converters
                     Console.WriteLine($"Error convirtiendo Base64: {ex.Message}");
                     return null;
                 }
+
             }
 
             return null;

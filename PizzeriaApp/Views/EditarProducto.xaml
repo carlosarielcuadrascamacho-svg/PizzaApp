@@ -72,8 +72,6 @@
                                             <x:Array Type="{x:Type x:String}">
                                                 <x:String>Pizzas</x:String>
                                                 <x:String>Bebidas</x:String>
-                                                <x:String>Postres</x:String>
-                                                <x:String>Entradas</x:String>
                                             </x:Array>
                                         </Picker.ItemsSource>
                                     </Picker>

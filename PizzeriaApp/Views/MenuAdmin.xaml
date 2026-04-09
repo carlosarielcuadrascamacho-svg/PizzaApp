@@ -17,7 +17,7 @@
                     </EventTrigger>
                 </Label.Triggers>
             </Label>
-            <Label Text="Cola de Cocina (En Vivo)" 
+            <Label Text="Cola de Cocina" 
                    FontSize="22" 
                    FontAttributes="Bold"
                    TextColor="#333333" />

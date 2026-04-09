@@ -21,11 +21,9 @@ namespace PizzeriaApp.Views
                 var photo = await MediaPicker.Default.PickPhotoAsync();
                 if (photo == null) return;
 
-                // Visualización Instantánea (Regla de Oro)
                 var stream = await photo.OpenReadAsync();
                 imgSelected.Source = ImageSource.FromStream(() => stream);
 
-                // Convertir a Base64 para Supabase (Fase de Memoria)
                 byte[] bytes;
                 using (var ms = new MemoryStream())
                 {
@@ -34,7 +32,6 @@ namespace PizzeriaApp.Views
                     bytes = ms.ToArray();
                 }
                 
-                // Comprimimos y guardamos string para el Insert
                 _imageBase64 = Convert.ToBase64String(bytes);
             }
             catch (Exception ex)
