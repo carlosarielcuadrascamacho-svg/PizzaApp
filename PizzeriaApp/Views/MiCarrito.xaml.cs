@@ -71,8 +71,9 @@ namespace PizzeriaApp.Views
                 decimal totalCosto = _carrito.Sum(i => i.Subtotal);
                 
                 string mesa = isMostrador ? (txtMesaCliente.Text?.Trim() ?? "Piso") : "Delivery";
+                string comentario = txtComentario.Text?.Trim() ?? "";
                 
-                bool exito = await _dbService.CrearPedidoV2Async(_clienteActual.Id, _carrito.ToList(), totalCosto, estadoInicial, mesa);
+                bool exito = await _dbService.CrearPedidoV2Async(_clienteActual.Id, _carrito.ToList(), totalCosto, estadoInicial, mesa, comentario);
 
                 if (exito)
                 {

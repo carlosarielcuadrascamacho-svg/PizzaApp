@@ -27,6 +27,9 @@ namespace PizzeriaApp.Models
         [Column("mesa")]
         public string Mesa { get; set; }
 
+        [Column("comentario")]
+        public string Comentario { get; set; }
+
         // Propiedades de UI (No persistidas en DB directamente)
         [JsonIgnore]
         public string DetalleResumen { get; set; }
@@ -36,6 +39,9 @@ namespace PizzeriaApp.Models
 
         [JsonIgnore]
         public bool IsNotCancelled => Estado != "Cancelado" && Estado != "Entregado";
+
+        [JsonIgnore]
+        public bool TieneComentario => !string.IsNullOrWhiteSpace(Comentario);
 
         [JsonIgnore]
         public string IdVisible => !string.IsNullOrEmpty(Id) && Id.Length >= 6 ? $"#{Id.Substring(0, 6).ToUpper()}" : "#N/A";

@@ -75,6 +75,14 @@
                     </Border>
                 </VerticalStackLayout>
 
+                <!-- Comentario del Cliente -->
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="💬 COMENTARIO / INSTRUCCIONES" FontSize="11" FontAttributes="Bold" TextColor="#FF4B3A" CharacterSpacing="2" />
+                    <Border StrokeThickness="1" Stroke="#EEEEEE" StrokeShape="RoundRectangle 12" BackgroundColor="#F8F9FA" Padding="15,10" HeightRequest="90">
+                        <Editor x:Name="txtComentario" Placeholder="Ej. Sin cebolla, extra queso, tocar el timbre..." BackgroundColor="Transparent" TextColor="#1A1A1A" PlaceholderColor="#AAA" AutoSize="TextChanges" />
+                    </Border>
+                </VerticalStackLayout>
+
                 <!-- Total y Confirmación -->
                 <Grid ColumnDefinitions="*, Auto">
                     <Label Text="TOTAL A PAGAR" VerticalOptions="Center" FontSize="12" FontAttributes="Bold" TextColor="#757575" CharacterSpacing="1" />

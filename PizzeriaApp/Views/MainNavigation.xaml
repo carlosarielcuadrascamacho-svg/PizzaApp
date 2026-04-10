@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <FlyoutPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+            xmlns:converters="clr-namespace:PizzeriaApp.Converters"
             x:Class="PizzeriaApp.Views.MainNavigation"
             FlyoutLayoutBehavior="Popover"
             Title="Pizzería TECNM">
+
+    <FlyoutPage.Resources>
+        <ResourceDictionary>
+            <converters:Base64ToImageConverter x:Key="Base64Converter" />
+        </ResourceDictionary>
+    </FlyoutPage.Resources>
 
     <FlyoutPage.Flyout>
         <ContentPage Title="Menú" BackgroundColor="White">
@@ -18,7 +25,7 @@
                     </Grid.Background>
                     <VerticalStackLayout VerticalOptions="End" Padding="20,0,20,20" Spacing="5">
                         <Border WidthRequest="70" HeightRequest="70" Stroke="White" StrokeThickness="2" StrokeShape="RoundRectangle 35" HorizontalOptions="Start" BackgroundColor="White">
-                            <Image Source="pizzasteve.png" Aspect="AspectFill" />
+                            <Image x:Name="imgFlyoutPerfil" Source="pizzasteve.png" Aspect="AspectFill" />
                         </Border>
                         <Label x:Name="lblNombreUsuario" 
                                Text="Bienvenido" 

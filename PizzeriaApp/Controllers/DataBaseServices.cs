@@ -155,7 +155,7 @@ namespace PizzeriaApp.Controllers
             }
         }
 
-        public async Task<bool> CrearPedidoV2Async(string clienteId, List<ItemCarrito> carrito, decimal totalCalculado, string estadoInicial, string mesa)
+        public async Task<bool> CrearPedidoV2Async(string clienteId, List<ItemCarrito> carrito, decimal totalCalculado, string estadoInicial, string mesa, string comentario = "")
         {
             try
             {
@@ -165,6 +165,7 @@ namespace PizzeriaApp.Controllers
                     Total = totalCalculado,
                     Estado = estadoInicial,
                     Mesa = mesa,
+                    Comentario = comentario,
                     Fecha = DateTime.UtcNow
                 };
 

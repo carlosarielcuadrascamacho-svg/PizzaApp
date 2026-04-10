@@ -1,18 +1,26 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:PizzeriaApp.Converters"
              x:Class="PizzeriaApp.Views.MenuDetails"
              Title="Detalles del Producto"
              BackgroundColor="White">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:Base64ToImageConverter x:Key="Base64Converter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
     <Grid RowDefinitions="300, *, Auto">
         
         <!-- Imagen Header -->
         <Image Grid.Row="0" 
-               Source="{Binding ProductoMostrado.ImagenUrl}" 
+               Source="{Binding ProductoMostrado.ImagenBase64, Converter={StaticResource Base64Converter}}" 
                Aspect="AspectFill" 
                VerticalOptions="FillAndExpand" 
-               HorizontalOptions="FillAndExpand" />
+               HorizontalOptions="FillAndExpand"
+               BackgroundColor="#F5F5F5" />
 
         <Frame Grid.Row="0" VerticalOptions="End" Margin="0,-20,0,0" CornerRadius="30" HasShadow="False" BackgroundColor="White" Padding="0" BorderColor="Transparent" HeightRequest="30" />
 

@@ -42,6 +42,9 @@
                         <Border.Shadow>
                             <Shadow Brush="Black" Offset="0,2" Radius="4" Opacity="0.1" />
                         </Border.Shadow>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnPedidoTapped" />
+                        </Border.GestureRecognizers>
                         <VerticalStackLayout Spacing="12">
                             <!-- Header del pedido: ID + Mesa + Estado -->
                             <Grid ColumnDefinitions="*, Auto">
@@ -58,7 +61,7 @@
                             <!-- Separador -->
                             <BoxView HeightRequest="1" BackgroundColor="#F0F0F0" />
 
-                            <!-- Detalles del pedido como lista simple (SIN SfDataGrid) -->
+                            <!-- Detalles del pedido como lista simple -->
                             <VerticalStackLayout BindableLayout.ItemsSource="{Binding Detalles}" Spacing="6">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate>
@@ -70,11 +73,22 @@
                                 </BindableLayout.ItemTemplate>
                             </VerticalStackLayout>
 
+                            <!-- Comentario del cliente -->
+                            <Border x:Name="borderComentario" Padding="12,10" BackgroundColor="#FFF8E1" StrokeShape="RoundRectangle 10" StrokeThickness="0" IsVisible="{Binding TieneComentario}">
+                                <HorizontalStackLayout Spacing="8">
+                                    <Label Text="💬" FontSize="14" VerticalOptions="Start" />
+                                    <Label Text="{Binding Comentario}" FontSize="13" TextColor="#795548" LineBreakMode="WordWrap" HorizontalOptions="FillAndExpand" />
+                                </HorizontalStackLayout>
+                            </Border>
+
                             <!-- Total -->
                             <Grid ColumnDefinitions="*, Auto">
                                 <Label Grid.Column="0" Text="Total:" FontSize="13" TextColor="#757575" VerticalOptions="Center" />
                                 <Label Grid.Column="1" Text="{Binding Total, StringFormat='${0:N2}'}" FontSize="16" FontAttributes="Bold" TextColor="#1A1A1A" VerticalOptions="Center" />
                             </Grid>
+
+                            <!-- Hint para ver detalle -->
+                            <Label Text="Toca para ver detalle completo ›" FontSize="11" TextColor="#BDBDBD" HorizontalOptions="Center" />
 
                             <!-- Botones de acción - solo visibles si el pedido está activo -->
                             <Grid ColumnDefinitions="*, *, Auto" ColumnSpacing="10" IsVisible="{Binding IsNotCancelled}">

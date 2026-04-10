@@ -73,6 +73,17 @@ namespace PizzeriaApp.Views
             await CargarPedidosAsync();
         }
 
+        private async void OnPedidoTapped(object sender, TappedEventArgs e)
+        {
+            var border = sender as Border;
+            var pedido = border?.BindingContext as Pedido;
+
+            if (pedido != null)
+            {
+                await Navigation.PushAsync(new DetalleOrden(pedido, _dbService));
+            }
+        }
+
         private async void OnEstadoClicked(object sender, EventArgs e)
         {
             var btn = sender as Button;
