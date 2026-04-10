@@ -6,10 +6,8 @@
     xmlns:local="clr-namespace:PizzeriaApp"
     xmlns:views="clr-namespace:PizzeriaApp.Views"
     Title="PizzeriaApp">
-
     <ShellContent
         Title="Home"
         ContentTemplate="{DataTemplate views:Login}"
         Route="LoginPage" />
-
 </Shell>

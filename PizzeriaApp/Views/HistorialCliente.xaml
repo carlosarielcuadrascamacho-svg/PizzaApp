@@ -1,60 +1,93 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:syncfusion="clr-namespace:Syncfusion.Maui.DataGrid;assembly=Syncfusion.Maui.DataGrid"
              x:Class="PizzeriaApp.Views.HistorialCliente"
              Title="Mis Pedidos"
-             BackgroundColor="#F8F9FA">
-
+             BackgroundColor="#F5F6F8">
     <Grid RowDefinitions="Auto, *">
-        <Border Grid.Row="0" Margin="20,25,20,10" Padding="20" BackgroundColor="#FFFFFF" StrokeThickness="0" StrokeShape="RoundRectangle 24">
-            <Border.Shadow>
-                <Shadow Brush="Black" Offset="0,2" Radius="4" Opacity="0.1" />
-            </Border.Shadow>
-            <VerticalStackLayout Spacing="5">
-                <Label Text="Tu Historial" FontSize="26" FontAttributes="Bold" TextColor="#1A1A1A" />
-                <Label Text="Revisa tus órdenes pasadas" FontSize="13" TextColor="#757575" />
-            </VerticalStackLayout>
-        </Border>
 
-        <CollectionView Grid.Row="1" x:Name="ListaHistorial" Margin="15,0">
+        <VerticalStackLayout Grid.Row="0" Margin="25,30,25,15" Spacing="4">
+            <Label Text="Mis Pedidos" FontSize="32" FontAttributes="Bold" TextColor="#2D2D2D" />
+            <Label Text="Historial de tus antojos" FontSize="14" TextColor="#9E9E9E" />
+        </VerticalStackLayout>
+
+        <CollectionView Grid.Row="1" 
+                        x:Name="ListaHistorial" 
+                        Margin="20,0"
+                        SelectionMode="None">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Border Padding="20" Margin="0,0,0,20" BackgroundColor="#FFFFFF" StrokeThickness="0" StrokeShape="RoundRectangle 24">
+                    <Border Margin="0,0,0,20" 
+                            Padding="20" 
+                            BackgroundColor="White" 
+                            StrokeShape="RoundRectangle 20"
+                            StrokeThickness="0">
                         <Border.Shadow>
-                            <Shadow Brush="Black" Offset="0,2" Radius="4" Opacity="0.1" />
+                            <Shadow Brush="#000000" Offset="0,8" Radius="15" Opacity="0.05" />
                         </Border.Shadow>
+
                         <VerticalStackLayout Spacing="15">
                             <Grid ColumnDefinitions="*, Auto">
-                                <VerticalStackLayout Grid.Column="0">
-                                    <Label Text="{Binding IdVisible}" FontSize="18" FontAttributes="Bold" TextColor="#FF4B3A" />
-                                    <Label Text="{Binding Fecha, StringFormat='{0:dd MMM, HH:mm}'}" FontSize="13" TextColor="#757575" />
+                                <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                                    <Label Text="{Binding IdVisible, StringFormat='Orden #{0}'}" 
+                                           FontSize="17" FontAttributes="Bold" TextColor="#1A1A1A" />
+                                    <Label Text="{Binding Fecha, StringFormat='{0:dd MMM yyyy • HH:mm}'}" 
+                                           FontSize="12" TextColor="#9E9E9E" />
                                 </VerticalStackLayout>
-                                <VerticalStackLayout Grid.Column="1" HorizontalOptions="End">
-                                    <Label Text="{Binding Total, StringFormat='{0:C}'}" FontSize="20" FontAttributes="Bold" TextColor="#00C853" HorizontalOptions="End" />
-                                    <Label Text="{Binding Estado}" FontSize="12" FontAttributes="Bold" TextColor="#FF4B3A" HorizontalOptions="End" />
-                                </VerticalStackLayout>
+
+                                <Border Grid.Column="1" 
+                                        Padding="10,4" 
+                                        BackgroundColor="#FFF0EE" 
+                                        StrokeShape="RoundRectangle 8"
+                                        HorizontalOptions="End">
+                                    <Label Text="{Binding Estado}" 
+                                           FontSize="11" 
+                                           FontAttributes="Bold" 
+                                           TextColor="#FF4B3A" 
+                                           VerticalOptions="Center"/>
+                                </Border>
                             </Grid>
 
-                            <syncfusion:SfDataGrid ItemsSource="{Binding Detalles}"
-                                                   AutoGenerateColumnsMode="None"
-                                                   HeaderRowHeight="0" RowHeight="35"
-                                                   SelectionMode="None" GridLinesVisibility="None"
-                                                   HeaderGridLinesVisibility="None" BackgroundColor="Transparent"
-                                                   HorizontalScrollBarVisibility="Never" VerticalScrollBarVisibility="Never">
-                                <syncfusion:SfDataGrid.Columns>
-                                    <syncfusion:DataGridTextColumn MappingName="Cantidad" Width="45" />
-                                    <syncfusion:DataGridTextColumn MappingName="NombrePlatillo" />
-                                    <syncfusion:DataGridTextColumn MappingName="Comentarios" />
-                                </syncfusion:SfDataGrid.Columns>
-                            </syncfusion:SfDataGrid>
+                            <BoxView HeightRequest="1" Color="#F0F0F0" HorizontalOptions="Fill" />
 
-                            <Button Text="CANCELAR PEDIDO" 
-                                    IsVisible="{Binding IsNotCancelled}"
-                                    Clicked="OnCancelarClicked"
-                                    CommandParameter="{Binding .}"
-                                    BackgroundColor="#FDECEA" TextColor="#FF4B3A" 
-                                    CornerRadius="15" HeightRequest="45" FontAttributes="Bold" Margin="0,5,0,0"/>
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Detalles}" Spacing="8">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid ColumnDefinitions="30, *, Auto">
+                                            <Label Grid.Column="0" Text="{Binding Cantidad, StringFormat='{0}x'}" 
+                                                   TextColor="#FF4B3A" FontAttributes="Bold" FontSize="14" />
+                                            <VerticalStackLayout Grid.Column="1">
+                                                <Label Text="{Binding NombrePlatillo}" TextColor="#444444" FontSize="14" FontAttributes="Bold"/>
+                                                <Label Text="{Binding Comentarios}" IsVisible="{Binding Comentarios, Converter={StaticResource StringNotNullOrEmptyConverter}}"
+                                                       FontSize="11" TextColor="#9E9E9E" FontAttributes="Italic"/>
+                                            </VerticalStackLayout>
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+
+                            <BoxView HeightRequest="1" Color="#F0F0F0" HorizontalOptions="Fill" />
+
+                            <Grid ColumnDefinitions="*, Auto">
+                                <VerticalStackLayout Grid.Column="0">
+                                    <Label Text="Total pagado" FontSize="11" TextColor="#9E9E9E" />
+                                    <Label Text="{Binding Total, StringFormat='{0:C}'}" 
+                                           FontSize="20" FontAttributes="Bold" TextColor="#2D2D2D" />
+                                </VerticalStackLayout>
+
+                                <Button Grid.Column="1"
+                                        Text="CANCELAR" 
+                                        IsVisible="{Binding IsNotCancelled}"
+                                        Clicked="OnCancelarClicked"
+                                        CommandParameter="{Binding .}"
+                                        BackgroundColor="#FF4B3A" 
+                                        TextColor="White" 
+                                        FontSize="12"
+                                        CornerRadius="12" 
+                                        Padding="20,0"
+                                        HeightRequest="40" 
+                                        FontAttributes="Bold"/>
+                            </Grid>
                         </VerticalStackLayout>
                     </Border>
                 </DataTemplate>
