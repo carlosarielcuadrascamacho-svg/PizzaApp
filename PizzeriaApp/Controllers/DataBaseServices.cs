@@ -535,6 +535,14 @@ namespace PizzeriaApp.Controllers
         }
 
         /// <summary>
+        /// Obtiene el token FCM de un usuario específico por su ID (Alias solicitado).
+        /// </summary>
+        public async Task<string?> ObtenerTokenPorClienteIdAsync(string clienteId)
+        {
+            return await ObtenerFcmTokenAsync(clienteId);
+        }
+
+        /// <summary>
         /// Obtiene los tokens FCM de todos los administradores.
         /// Se usa para notificar a los admins cuando un cliente crea un nuevo pedido.
         /// </summary>
@@ -556,6 +564,14 @@ namespace PizzeriaApp.Controllers
                 Console.WriteLine($"Error obteniendo tokens de admins: {ex.Message}");
                 return new List<string>();
             }
+        }
+
+        /// <summary>
+        /// Obtiene los tokens FCM de todos los administradores (Alias solicitado).
+        /// </summary>
+        public async Task<List<string>> ObtenerTokenAdminAsync()
+        {
+            return await ObtenerAdminsTokensAsync();
         }
     }
 }
