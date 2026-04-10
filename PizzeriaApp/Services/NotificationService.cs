@@ -20,6 +20,8 @@ namespace PizzeriaApp.Services
     {
         private static readonly HttpClient _httpClient = new HttpClient();
         
+        private static GoogleCredential? _credential;
+
         /// <summary>
         /// Obtiene un Access Token generándolo a partir del archivo firebase-auth.json
         /// </summary>
@@ -27,11 +29,14 @@ namespace PizzeriaApp.Services
         {
             try
             {
-                using var stream = await FileSystem.OpenAppPackageFileAsync("firebase-auth.json");
-                var credential = GoogleCredential.FromStream(stream)
-                                                 .CreateScoped("https://www.googleapis.com/auth/firebase.messaging");
+                if (_credential == null)
+                {
+                    using var stream = await FileSystem.OpenAppPackageFileAsync("firebase-auth.json");
+                    _credential = GoogleCredential.FromStream(stream)
+                                                     .CreateScoped("https://www.googleapis.com/auth/firebase.messaging");
+                }
                 
-                var token = await credential.UnderlyingCredential.GetAccessTokenForRequestAsync();
+                var token = await _credential.UnderlyingCredential.GetAccessTokenForRequestAsync();
                 return token;
             }
             catch (Exception ex)
@@ -48,9 +53,15 @@ namespace PizzeriaApp.Services
         {
             try
             {
-                if (string.IsNullOrEmpty(token) || Secretos.FirebaseProjectId == "TU-PROJECT-ID")
+                if (string.IsNullOrEmpty(token))
                 {
-                    Console.WriteLine("FCM: Token vacío o Project ID no configurado.");
+                    Console.WriteLine("FCM: Token del dispositivo vacío, no se puede enviar.");
+                    return false;
+                }
+
+                if (string.IsNullOrEmpty(Secretos.FirebaseProjectId))
+                {
+                    Console.WriteLine("FCM: Firebase Project ID no configurado.");
                     return false;
                 }
 

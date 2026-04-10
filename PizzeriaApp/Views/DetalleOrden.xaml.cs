@@ -27,7 +27,8 @@ namespace PizzeriaApp.Views
             lblMesa.Text = _pedido.MesaVisible;
             lblEstado.Text = _pedido.Estado;
             badgeEstado.BackgroundColor = Color.FromArgb(_pedido.ColorEstado);
-            lblFecha.Text = _pedido.Fecha.ToLocalTime().ToString("dd MMM yyyy • HH:mm");
+            var fechaUtc = DateTime.SpecifyKind(_pedido.Fecha, DateTimeKind.Utc);
+            lblFecha.Text = fechaUtc.ToLocalTime().ToString("dd MMM yyyy • HH:mm");
             lblTiempo.Text = _pedido.TiempoRelativo;
 
             // Total

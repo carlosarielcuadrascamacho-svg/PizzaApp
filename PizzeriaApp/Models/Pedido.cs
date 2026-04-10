@@ -54,11 +54,14 @@ namespace PizzeriaApp.Models
         {
             get
             {
-                var diff = DateTime.UtcNow - Fecha;
+                // Asegurar que '.NET' sepa que Fecha viene en formato UTC desde Supabase
+                var fechaUtcReal = DateTime.SpecifyKind(Fecha, DateTimeKind.Utc);
+                var diff = DateTime.UtcNow - fechaUtcReal;
+                
                 if (diff.TotalMinutes < 1) return "Hace un momento";
                 if (diff.TotalMinutes < 60) return $"Hace {(int)diff.TotalMinutes} min";
                 if (diff.TotalHours < 24) return $"Hace {(int)diff.TotalHours}h {(int)(diff.TotalMinutes % 60)}min";
-                return Fecha.ToLocalTime().ToString("dd/MM HH:mm");
+                return fechaUtcReal.ToLocalTime().ToString("dd/MM HH:mm");
             }
         }
 
