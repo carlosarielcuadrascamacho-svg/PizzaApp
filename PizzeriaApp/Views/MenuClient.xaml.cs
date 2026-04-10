@@ -54,7 +54,7 @@ namespace PizzeriaApp.Views
         private void CargarFiltrosCategorias()
         {
             slCategorias.Children.Clear();
-            var categorias = new List<string> { "Todas", "Pizzas", "Bebidas", "Postres", "Complementos" };
+            var categorias = new List<string> { "Todas", "Pizzas", "Bebidas"};
 
             foreach (var cat in categorias)
             {

@@ -195,7 +195,6 @@ namespace PizzeriaApp.Controllers
             }
         }
 
-
         public async Task<bool> InsertarProductoAsync(Producto nuevoProducto)
         {
             try
@@ -238,9 +237,10 @@ namespace PizzeriaApp.Controllers
         {
             try
             {
+                // Excluir pedidos Entregados Y Cancelados
                 var respuesta = await Client.From<Pedido>()
-                    .Where(p => p.Estado != "Entregado")
-                    .Order(p => p.Fecha, Supabase.Postgrest.Constants.Ordering.Ascending)  // Cocina debe ver el más viejo primero
+                    .Where(p => p.Estado != "Entregado" && p.Estado != "Cancelado")
+                    .Order(p => p.Fecha, Supabase.Postgrest.Constants.Ordering.Ascending)
                     .Get();
 
                 var pedidosActivos = respuesta.Models;
@@ -248,13 +248,16 @@ namespace PizzeriaApp.Controllers
 
                 if (idsPedidos.Any())
                 {
-                    // Filtrar desde la base de datos
-                    var detallesResponse = await Client.From<DetallePedido>()
+                    // Traer detalles y productos en paralelo para mayor velocidad
+                    var detallesTask = Client.From<DetallePedido>()
                         .Filter("pedido_id", Supabase.Postgrest.Constants.Operator.In, idsPedidos)
                         .Get();
-                    
-                    var productosResponse = await Client.From<Producto>().Get();
-                    var productosMapa = productosResponse.Models.ToDictionary(p => p.Id, p => p.Nombre);
+                    var productosTask = Client.From<Producto>().Get();
+
+                    await Task.WhenAll(detallesTask, productosTask);
+
+                    var detallesResponse = detallesTask.Result;
+                    var productosMapa = productosTask.Result.Models.ToDictionary(p => p.Id, p => p.Nombre);
 
                     foreach (var pedido in pedidosActivos)
                     {
@@ -467,20 +470,19 @@ namespace PizzeriaApp.Controllers
             }
         }
 
-        public async Task SuscribirseAPedidosEnVivo(Action<Pedido> alRecibirNuevoPedido)
+        public async Task SuscribirseAPedidosEnVivo(Action<Pedido> alRecibirCambio)
         {
             DesuscribirsePedidosEnVivo(); // Prevenimos colisiones de sockets anteriores
 
             // Asegurar que Supabase y su socket Realtime estén inicializados y conectados
             await InitializeAsync();
 
-            _canalPedidos = await Client.From<Pedido>().On(PostgresChangesOptions.ListenType.Inserts, (sender, args) =>
+            // Escuchar TODOS los cambios (inserts, updates, deletes)
+            // para que cancelaciones y cambios de estado se reflejen en cocina
+            _canalPedidos = await Client.From<Pedido>().On(PostgresChangesOptions.ListenType.All, (sender, args) =>
             {
-                var nuevoPedido = args.Model<Pedido>();
-                if (nuevoPedido != null)
-                {
-                    alRecibirNuevoPedido?.Invoke(nuevoPedido);
-                }
+                var pedidoCambiado = args.Model<Pedido>();
+                alRecibirCambio?.Invoke(pedidoCambiado);
             });
         }
     }

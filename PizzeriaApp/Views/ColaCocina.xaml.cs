@@ -6,6 +6,7 @@ namespace PizzeriaApp.Views
     public partial class ColaCocina : ContentPage
     {
         private DataBaseServices _dbService;
+        private bool _isLoading = false;
 
         public ColaCocina()
         {
@@ -17,9 +18,10 @@ namespace PizzeriaApp.Views
         {
             base.OnAppearing();
             await CargarPedidosAsync();
-            
-            // WebSockets de Supabase para actualizaciones en vivo
-            _dbService.SuscribirseAPedidosEnVivo(async payload => {
+
+            // Escuchar cambios en tiempo real (INSERTs y UPDATEs)
+            await _dbService.SuscribirseAPedidosEnVivo(payload =>
+            {
                 MainThread.BeginInvokeOnMainThread(async () => await CargarPedidosAsync());
             });
         }
@@ -32,27 +34,60 @@ namespace PizzeriaApp.Views
 
         private async Task CargarPedidosAsync()
         {
+            if (_isLoading) return; // Evitar llamadas concurrentes
+            _isLoading = true;
+
             try
             {
+                loadingIndicator.IsRunning = true;
+                loadingIndicator.IsVisible = true;
+
                 var pedidos = await _dbService.ObtenerPedidosActivosAsync();
+
                 ListaPedidos.ItemsSource = pedidos;
+
+                // Mostrar estado vacío o la lista
+                bool sinPedidos = pedidos == null || pedidos.Count == 0;
+                emptyState.IsVisible = sinPedidos;
+                ListaPedidos.IsVisible = !sinPedidos;
+
+                // Actualizar contador
+                lblContador.Text = sinPedidos
+                    ? "Cola de Cocina en Tiempo Real"
+                    : $"{pedidos.Count} pedido{(pedidos.Count != 1 ? "s" : "")} en cola";
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error: " + ex.Message);
+                Console.WriteLine("Error cargando pedidos: " + ex.Message);
             }
+            finally
+            {
+                loadingIndicator.IsRunning = false;
+                loadingIndicator.IsVisible = false;
+                _isLoading = false;
+            }
+        }
+
+        private async void OnRefreshClicked(object sender, EventArgs e)
+        {
+            await CargarPedidosAsync();
         }
 
         private async void OnEstadoClicked(object sender, EventArgs e)
         {
             var btn = sender as Button;
             var nuevoEstado = btn?.CommandParameter as string;
-            var pedido = btn?.BindingContext as Pedido; // BindingContext identifica la tarjeta actual
+            var pedido = btn?.BindingContext as Pedido;
 
             if (pedido == null || string.IsNullOrEmpty(nuevoEstado)) return;
 
+            // Bloquear el botón para evitar doble clic
+            btn.IsEnabled = false;
+
             bool ok = await _dbService.ActualizarEstadoPedidoAsync(pedido.Id, nuevoEstado);
             if (ok) await CargarPedidosAsync();
+
+            btn.IsEnabled = true;
         }
 
         private async void OnCancelarClicked(object sender, EventArgs e)
@@ -62,9 +97,12 @@ namespace PizzeriaApp.Views
 
             if (pedido == null) return;
 
-            bool confirm = await DisplayAlert("Cuidado", "¿Cancelar orden?", "Sí", "No");
+            bool confirm = await DisplayAlert("Cancelar Pedido",
+                $"¿Cancelar la orden {pedido.IdVisible}?", "Sí, cancelar", "No");
+
             if (confirm)
             {
+                btn.IsEnabled = false;
                 await _dbService.ActualizarEstadoPedidoAsync(pedido.Id, "Cancelado");
                 await CargarPedidosAsync();
             }

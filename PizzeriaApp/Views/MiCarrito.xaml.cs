@@ -70,17 +70,15 @@ namespace PizzeriaApp.Views
                 string estadoInicial = isMostrador ? "Consumo Local" : "En preparación";
                 decimal totalCosto = _carrito.Sum(i => i.Subtotal);
                 
-                // Ubicación (Mesa o Delivery)
                 string mesa = isMostrador ? (txtMesaCliente.Text?.Trim() ?? "Piso") : "Delivery";
-
-                // Se utiliza el método V2 del controlador que ya configuramos con soporte para Mesa y Comentarios
+                
                 bool exito = await _dbService.CrearPedidoV2Async(_clienteActual.Id, _carrito.ToList(), totalCosto, estadoInicial, mesa);
 
                 if (exito)
                 {
                     await DisplayAlert("¡Excelente!", "Tu orden ha sido recibida y está en cola de cocina.", "OK");
                     _carrito.Clear();
-                    await Navigation.PopToRootAsync(); // Regresa al menú principal
+                    await Navigation.PopToRootAsync();
                 }
                 else
                 {

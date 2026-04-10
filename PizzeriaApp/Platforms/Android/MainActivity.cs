@@ -1,4 +1,4 @@
-﻿using Android.App;
+using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Android.Gms.Auth.Api.SignIn;
@@ -12,20 +12,20 @@ namespace PizzeriaApp
 
         protected override async void OnActivityResult(int requestCode, Result resultCode, Intent data)
         {
+            base.OnActivityResult(requestCode, resultCode, data);
+
             if (requestCode == 9001)
             {
                 try
                 {
                     var currentAccount = await GoogleSignIn.GetSignedInAccountFromIntentAsync(data);
 
-                    ResultGoogleAuth.Invoke(this, (currentAccount.Email != null, currentAccount));
+                    ResultGoogleAuth?.Invoke(this, (currentAccount.Email != null, currentAccount));
                 }
                 catch (Exception ex)
                 {
-                    ResultGoogleAuth.Invoke(this, (false, null));
+                    ResultGoogleAuth?.Invoke(this, (false, null));
                 }
-
-
             }
         }
     }

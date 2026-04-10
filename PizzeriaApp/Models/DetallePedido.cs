@@ -25,7 +25,7 @@ namespace PizzeriaApp.Models
         [JsonIgnore]
         public decimal Subtotal => Cantidad * PrecioUnitario;
 
-        [Column("comentarios")]
+        [JsonIgnore]
         public string Comentarios { get; set; }
 
         [JsonIgnore]

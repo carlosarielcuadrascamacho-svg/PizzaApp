@@ -6,4 +6,6 @@
 	<uses-permission android:name="android.permission.CAMERA" />
 	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	<!-- Android 13+ (API 33) requiere permisos granulares para media -->
+	<uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 </manifest>

@@ -60,17 +60,20 @@ namespace PizzeriaApp.Views
                 var photo = await MediaPicker.Default.PickPhotoAsync();
                 if (photo == null) return;
 
-                // VISUALIZACIÓN INSTANTÁNEA (Feedback inmediato para el usuario)
-                var stream = await photo.OpenReadAsync();
-                imgPerfil.Source = ImageSource.FromStream(() => stream);
-
-                // Conversión asíncrona a Base64 para el Guardado
+                // Leer todos los bytes UNA sola vez
+                byte[] bytes;
+                using (var stream = await photo.OpenReadAsync())
                 using (var ms = new MemoryStream())
                 {
-                    var fullStream = await photo.OpenReadAsync();
-                    await fullStream.CopyToAsync(ms);
-                    _imageBase64 = Convert.ToBase64String(ms.ToArray());
+                    await stream.CopyToAsync(ms);
+                    bytes = ms.ToArray();
                 }
+
+                // Conversión a Base64 para el Guardado
+                _imageBase64 = Convert.ToBase64String(bytes);
+
+                // VISUALIZACIÓN INSTANTÁNEA con MemoryStream fresco
+                imgPerfil.Source = ImageSource.FromStream(() => new MemoryStream(bytes));
             }
             catch (Exception ex)
             {

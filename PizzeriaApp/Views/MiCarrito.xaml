@@ -54,10 +54,6 @@
                                     BackgroundColor="#FDECEA" TextColor="#FF4B3A" 
                                     CornerRadius="12" WidthRequest="40" HeightRequest="40" VerticalOptions="Start" />
 
-                            <!-- Input de Comentarios -->
-                            <Border Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Padding="12,2" BackgroundColor="#F8F9FA" StrokeThickness="1" Stroke="#EEEEEE" StrokeShape="RoundRectangle 12">
-                                <Entry Text="{Binding Comentarios}" Placeholder="Instrucciones especiales..." FontSize="12" TextColor="#1A1A1A" PlaceholderColor="#AAA" HeightRequest="35" BackgroundColor="Transparent" />
-                            </Border>
                         </Grid>
                     </Border>
                 </DataTemplate>

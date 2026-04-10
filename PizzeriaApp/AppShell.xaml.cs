@@ -9,7 +9,6 @@ namespace PizzeriaApp
             InitializeComponent();
 
             Routing.RegisterRoute(nameof(MenuClient), typeof(MenuClient));
-            Routing.RegisterRoute(nameof(MenuAdmin), typeof(MenuAdmin));
         }
     }
 }

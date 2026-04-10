@@ -39,5 +39,37 @@ namespace PizzeriaApp.Models
 
         [JsonIgnore]
         public string IdVisible => !string.IsNullOrEmpty(Id) && Id.Length >= 6 ? $"#{Id.Substring(0, 6).ToUpper()}" : "#N/A";
+
+        [JsonIgnore]
+        public string MesaVisible => !string.IsNullOrEmpty(Mesa) ? $"Mesa: {Mesa}" : "Delivery / Sin mesa";
+
+        [JsonIgnore]
+        public string TiempoRelativo
+        {
+            get
+            {
+                var diff = DateTime.UtcNow - Fecha;
+                if (diff.TotalMinutes < 1) return "Hace un momento";
+                if (diff.TotalMinutes < 60) return $"Hace {(int)diff.TotalMinutes} min";
+                if (diff.TotalHours < 24) return $"Hace {(int)diff.TotalHours}h {(int)(diff.TotalMinutes % 60)}min";
+                return Fecha.ToLocalTime().ToString("dd/MM HH:mm");
+            }
+        }
+
+        [JsonIgnore]
+        public string ColorEstado
+        {
+            get
+            {
+                return Estado switch
+                {
+                    "En preparación" => "#FF9800",
+                    "Listo" => "#00C853",
+                    "Entregado" => "#4CAF50",
+                    "Cancelado" => "#F44336",
+                    _ => "#FF4B3A"
+                };
+            }
+        }
     }
 }
