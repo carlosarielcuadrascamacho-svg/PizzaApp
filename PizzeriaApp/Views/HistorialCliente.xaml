@@ -31,7 +31,7 @@
                                 <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
                                     <Label Text="{Binding IdVisible, StringFormat='Orden #{0}'}" 
                                            FontSize="17" FontAttributes="Bold" TextColor="#1A1A1A" />
-                                    <Label Text="{Binding Fecha, StringFormat='{0:dd MMM yyyy • HH:mm}'}" 
+                                    <Label Text="{Binding FechaLocal, StringFormat='{0:dd MMM yyyy • HH:mm}'}" 
                                            FontSize="12" TextColor="#9E9E9E" />
                                 </VerticalStackLayout>
 

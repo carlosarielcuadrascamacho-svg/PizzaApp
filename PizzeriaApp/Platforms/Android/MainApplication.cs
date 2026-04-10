@@ -18,13 +18,6 @@ namespace PizzeriaApp
         public override void OnCreate()
         {
             base.OnCreate();
-
-            // Firebase se inicializa automáticamente a través de google-services.json
-            // y el servicio PizzeriaFirebaseMessagingService registrado en el manifiesto.
-            // No se necesita inicialización manual adicional.
-            //
-            // El token FCM será capturado por PizzeriaFirebaseMessagingService.OnNewToken()
-            // y guardado en Supabase desde Login.xaml.cs después del login exitoso.
         }
     }
 }

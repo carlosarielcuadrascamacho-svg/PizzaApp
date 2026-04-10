@@ -5,6 +5,7 @@ using PizzeriaApp.Views;
 
 namespace PizzeriaApp.Views;
 
+// Esta es la puerta de entrada a la app; aquí manejamos el login con Google y la vinculación con Firebase
 public partial class Login : ContentPage
 {
     private IGoogleAuthService _googleAuthService;
@@ -16,29 +17,38 @@ public partial class Login : ContentPage
         _googleAuthService = googleAuthService;
         _dataBaseServices = new Controllers.DataBaseServices();
     }
+
+    // El evento principal: cuando el usuario le pica al botón colorido de Google
     private async void OnGoogleLoginClicked(object sender, EventArgs e)
     {
         try
         {
+            // Primero intentamos recuperar una sesión activa o disparamos el modal de login de Google
             var loggedUser = await _googleAuthService.GetCurrentUserAsync() ?? await _googleAuthService.AuthenticateAsync();
 
+            // Si se arrepintió y cerró el modal, no hacemos nada
             if (loggedUser == null) return;
 
+            // Buscamos si este correo ya existe en nuestra base de datos de perfiles
             string idUser = await _dataBaseServices.ObtenerIdPorEmailAsync(loggedUser.Email);
 
+            // Si es la primera vez que entra a la app, le creamos su perfil automáticamente
             if (string.IsNullOrEmpty(idUser))
             {
                 await _dataBaseServices.InsertarPerfilAsync(loggedUser.Email);
+                // Volvemos a consultar para obtener el UUID generado por Supabase
                 idUser = await _dataBaseServices.ObtenerIdPorEmailAsync(loggedUser.Email);
             }
 
+            // Revisamos en una tabla de seguridad si este usuario tiene permisos de Administrador (para la cocina/catálogo)
             bool esAdmin = await _dataBaseServices.EsUsuarioAdminAsync(idUser);
 
+            // Si Google no nos dio nombre, usamos lo que esté antes del '@' del correo como apodo
             string nombreUsuario = !string.IsNullOrWhiteSpace(loggedUser.FullName)
                                     ? loggedUser.FullName
                                     : loggedUser.Email.Split('@')[0];
 
-            // 3. Armamos el perfil en memoria
+            // Armamos el objeto de perfil que va a viajar por toda la app durante esta sesión
             var perfil = new UsuarioPerfil
             {
                 Id = idUser,
@@ -47,35 +57,32 @@ public partial class Login : ContentPage
                 Nombre = nombreUsuario
             };
 
-            // 4. Capturar y guardar el token FCM para Push Notifications
+            // Paso vital: Capturamos el token del dispositivo para poder mandarle Pushes después
             await GuardarTokenFcmAsync(idUser);
 
-            // 5. Notificación de bienvenida (fire-and-forget)
+            // Mandamos una notificación de bienvenida (proceso en segundo plano para no retrasar la entrada)
             _ = NotificationService.NotificarBienvenidaAsync(_dataBaseServices, idUser, nombreUsuario, esAdmin);
 
+            // Cambiamos la página principal de la app a la navegación con el perfil ya cargado
             Application.Current.MainPage = new MainNavigation(perfil);
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error de Sesión", $"Ocurrió un problema: {ex.Message}", "Ok");
+            // Si algo truena en el handshake con Google o la BD, avisamos al usuario
+            await DisplayAlert("Error de Sesión", $"Ocurrió un problema al intentar entrar: {ex.Message}", "Ok");
         }
     }
 
-    /// <summary>
-    /// Captura el token FCM del dispositivo y lo persiste en Supabase.
-    /// Usa la API nativa de Firebase.Messaging directamente (sin plugin de terceros).
-    /// También registra un listener para refrescar el token si Firebase lo renueva.
-    /// </summary>
+    // Método para capturar el token FCM y guardarlo en Supabase; esto nos permite enviar notificaciones personalizadas
     private async Task GuardarTokenFcmAsync(string userId)
     {
         try
         {
 #if ANDROID
-            // Intentar obtener el token FCM.
-            // Primero verificamos si nuestro servicio ya tiene un token cacheado.
+            // Checamos si ya capturamos un token anteriormente en esta ejecución
             string? fcmToken = PizzeriaApp.Platforms.Android.PizzeriaFirebaseMessagingService.LastKnownToken;
 
-            // Si no hay token cacheado, solicitarlo a Firebase
+            // Si no hay token en caché, se lo pedimos formalmente a Google Play Services
             if (string.IsNullOrEmpty(fcmToken))
             {
                 try
@@ -83,11 +90,12 @@ public partial class Login : ContentPage
                     var firebaseInstance = Firebase.Messaging.FirebaseMessaging.Instance;
                     var tokenTaskSource = new TaskCompletionSource<string?>();
 
+                    // Usamos listeners para convertir las callbacks de Java en una Task de .NET
                     firebaseInstance.GetToken()
                         .AddOnSuccessListener(new PizzeriaApp.Platforms.Android.TokenSuccessListener(tokenTaskSource))
                         .AddOnFailureListener(new PizzeriaApp.Platforms.Android.TokenFailureListener(tokenTaskSource));
 
-                    // Esperar máximo 10 segundos para no bloquear el login
+                    // Ponemos un timeout de 10 segundos para que el usuario no se quede trabado en el login si Firebase tarda
                     var completedTask = await Task.WhenAny(tokenTaskSource.Task, Task.Delay(10000));
                     if (completedTask == tokenTaskSource.Task)
                     {
@@ -100,6 +108,7 @@ public partial class Login : ContentPage
                 }
             }
 
+            // Si logramos obtener el token, lo persistimos vinculado al ID del usuario
             if (!string.IsNullOrEmpty(fcmToken))
             {
                 await _dataBaseServices.GuardarFcmTokenAsync(userId, fcmToken);
@@ -107,10 +116,10 @@ public partial class Login : ContentPage
             }
             else
             {
-                Console.WriteLine("FCM: Token aún no disponible, se guardará cuando Firebase lo genere.");
+                Console.WriteLine("FCM: Token aún no disponible; se guardará cuando Firebase lo genere.");
             }
 
-            // Listener: si Firebase renueva el token, guardarlo automáticamente
+            // Dejamos un evento escuchando por si el token cambia mientras la app está abierta (refresco de token)
             PizzeriaApp.Platforms.Android.PizzeriaFirebaseMessagingService.TokenRefreshed += async (nuevoToken) =>
             {
                 if (!string.IsNullOrEmpty(nuevoToken))
@@ -123,7 +132,7 @@ public partial class Login : ContentPage
         }
         catch (Exception ex)
         {
-            // No bloquear el login si falla la captura del token FCM
+            // Error silencioso: si las notificaciones fallan, no queremos que el usuario no pueda usar la app
             Console.WriteLine($"FCM: Error capturando token: {ex.Message}");
         }
     }
