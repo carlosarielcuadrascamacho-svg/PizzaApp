@@ -1,6 +1,7 @@
 using System;
 using PizzeriaApp.Controllers;
 using PizzeriaApp.Models;
+using PizzeriaApp.Services;
 
 namespace PizzeriaApp.Views
 {
@@ -133,6 +134,10 @@ namespace PizzeriaApp.Views
 
             if (ok)
             {
+                // Notificar al cliente del cambio de estado
+                _ = NotificationService.NotificarCambioEstadoAClienteAsync(
+                    _dbService, _pedido.ClienteId, nuevoEstado, _pedido.IdVisible);
+
                 await DisplayAlert("Actualizado", $"La orden ahora está: {nuevoEstado}", "OK");
                 await Navigation.PopAsync();
             }
@@ -155,6 +160,10 @@ namespace PizzeriaApp.Views
 
                 if (ok)
                 {
+                    // Notificar al cliente de la cancelación
+                    _ = NotificationService.NotificarCambioEstadoAClienteAsync(
+                        _dbService, _pedido.ClienteId, "Cancelado", _pedido.IdVisible);
+
                     await DisplayAlert("Cancelado", "La orden ha sido cancelada.", "OK");
                     await Navigation.PopAsync();
                 }

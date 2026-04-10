@@ -27,5 +27,8 @@ namespace PizzeriaApp.Models
 
         [Column("foto_perfil")]
         public string FotoPerfil { get; set; }
+
+        [Column("fcm_token")]
+        public string FcmToken { get; set; }
     }
 }

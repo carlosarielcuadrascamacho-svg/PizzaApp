@@ -1,5 +1,6 @@
 using PizzeriaApp.Controllers;
 using PizzeriaApp.Models;
+using PizzeriaApp.Services;
 
 namespace PizzeriaApp.Views
 {
@@ -96,7 +97,14 @@ namespace PizzeriaApp.Views
             btn.IsEnabled = false;
 
             bool ok = await _dbService.ActualizarEstadoPedidoAsync(pedido.Id, nuevoEstado);
-            if (ok) await CargarPedidosAsync();
+            if (ok)
+            {
+                // Notificar al cliente del cambio de estado (fire-and-forget)
+                _ = NotificationService.NotificarCambioEstadoAClienteAsync(
+                    _dbService, pedido.ClienteId, nuevoEstado, pedido.IdVisible);
+
+                await CargarPedidosAsync();
+            }
 
             btn.IsEnabled = true;
         }
@@ -114,7 +122,13 @@ namespace PizzeriaApp.Views
             if (confirm)
             {
                 btn.IsEnabled = false;
-                await _dbService.ActualizarEstadoPedidoAsync(pedido.Id, "Cancelado");
+                bool ok = await _dbService.ActualizarEstadoPedidoAsync(pedido.Id, "Cancelado");
+                if (ok)
+                {
+                    // Notificar al cliente de la cancelación
+                    _ = NotificationService.NotificarCambioEstadoAClienteAsync(
+                        _dbService, pedido.ClienteId, "Cancelado", pedido.IdVisible);
+                }
                 await CargarPedidosAsync();
             }
         }

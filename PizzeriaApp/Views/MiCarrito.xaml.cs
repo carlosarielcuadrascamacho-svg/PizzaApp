@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using PizzeriaApp.Models;
 using PizzeriaApp.Controllers;
+using PizzeriaApp.Services;
 
 namespace PizzeriaApp.Views
 {
@@ -77,6 +78,12 @@ namespace PizzeriaApp.Views
 
                 if (exito)
                 {
+                    // Notificar a los admins del nuevo pedido (fire-and-forget, no bloquea UX)
+                    _ = NotificationService.NotificarNuevoPedidoAAdminsAsync(_dbService);
+
+                    // Confirmar al cliente que su pedido llegó a la sucursal
+                    _ = NotificationService.NotificarPedidoRecibidoAClienteAsync(_dbService, _clienteActual.Id);
+
                     await DisplayAlert("¡Excelente!", "Tu orden ha sido recibida y está en cola de cocina.", "OK");
                     _carrito.Clear();
                     await Navigation.PopToRootAsync();

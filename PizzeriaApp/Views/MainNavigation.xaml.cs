@@ -80,7 +80,7 @@ namespace PizzeriaApp.Views
             else
             {
                 AgregarBotonMenu("🏠 Nuestro Menú", new MenuClient(usuario));
-                AgregarBotonMenu("📜 Mis Pedidos", new HistorialCliente(usuario.Id));
+                AgregarBotonMenu("📜 Mis Pedidos", new HistorialCliente(usuario.Id, usuario.Nombre ?? "Cliente"));
                 AgregarBotonMenu("👤 Mi Perfil", new PerfilCliente(usuario));
             }
 

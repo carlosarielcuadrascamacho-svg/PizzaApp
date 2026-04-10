@@ -1,5 +1,6 @@
 using PizzeriaApp.Controllers;
 using PizzeriaApp.Models;
+using PizzeriaApp.Services;
 using System.Collections.ObjectModel;
 
 namespace PizzeriaApp.Views
@@ -7,12 +8,14 @@ namespace PizzeriaApp.Views
     public partial class HistorialCliente : ContentPage
     {
         private string _clienteId;
+        private string _nombreCliente;
         private DataBaseServices _dbService;
 
-        public HistorialCliente(string clienteId)
+        public HistorialCliente(string clienteId, string nombreCliente = "Cliente")
         {
             InitializeComponent();
             _clienteId = clienteId;
+            _nombreCliente = nombreCliente;
             _dbService = new DataBaseServices();
         }
 
@@ -49,6 +52,10 @@ namespace PizzeriaApp.Views
                 bool ok = await _dbService.ActualizarEstadoPedidoAsync(pedidoSeleccionado.Id, "Cancelado");
                 if (ok)
                 {
+                    // Notificar a los admins que el cliente canceló su pedido
+                    _ = NotificationService.NotificarCancelacionClienteAAdminsAsync(
+                        _dbService, pedidoSeleccionado.IdVisible, _nombreCliente);
+
                     await DisplayAlert("Éxito", "Pedido cancelado.", "OK");
                     await CargarHistorialAsync();
                 }

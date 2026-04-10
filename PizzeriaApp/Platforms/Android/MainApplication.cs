@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Android.App;
 using Android.Runtime;
 using Microsoft.Maui;
@@ -19,13 +19,12 @@ namespace PizzeriaApp
         {
             base.OnCreate();
 
-            // Evitar usar Activity u obtener el looper desde una Activity aquí.
-            // Si se necesita el looper principal, usar Android.OS.Looper.MainLooper.
-            // Inicializaciones que solo requieren el contexto de la aplicación deben ir aquí.
-            // Inicializaciones que requieren una Activity válida deben diferirse a MainActivity.OnCreate.
-
-            // Ejemplo seguro de obtener el looper principal:
-            // var mainLooper = Android.OS.Looper.MainLooper;
+            // Firebase se inicializa automáticamente a través de google-services.json
+            // y el servicio PizzeriaFirebaseMessagingService registrado en el manifiesto.
+            // No se necesita inicialización manual adicional.
+            //
+            // El token FCM será capturado por PizzeriaFirebaseMessagingService.OnNewToken()
+            // y guardado en Supabase desde Login.xaml.cs después del login exitoso.
         }
     }
 }

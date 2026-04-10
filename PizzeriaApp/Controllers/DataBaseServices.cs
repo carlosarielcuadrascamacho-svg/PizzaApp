@@ -486,5 +486,76 @@ namespace PizzeriaApp.Controllers
                 alRecibirCambio?.Invoke(pedidoCambiado);
             });
         }
+
+        // =============================================
+        // ===  FCM Token Management (Push Notifications)
+        // =============================================
+
+        /// <summary>
+        /// Guarda o actualiza el token FCM del usuario en la tabla de perfiles.
+        /// Se llama después de cada login exitoso.
+        /// </summary>
+        public async Task<bool> GuardarFcmTokenAsync(string userId, string fcmToken)
+        {
+            try
+            {
+                var actualizacion = await Client.From<UsuarioPerfil>()
+                    .Where(p => p.Id == userId)
+                    .Set(p => p.FcmToken, fcmToken)
+                    .Update();
+
+                return actualizacion.Models.Count > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error guardando FCM token: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Obtiene el token FCM de un usuario específico por su ID.
+        /// Útil para notificar al cliente dueño de un pedido.
+        /// </summary>
+        public async Task<string?> ObtenerFcmTokenAsync(string userId)
+        {
+            try
+            {
+                var resultado = await Client.From<UsuarioPerfil>()
+                    .Where(p => p.Id == userId)
+                    .Get();
+
+                return resultado.Models.FirstOrDefault()?.FcmToken;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error obteniendo FCM token: {ex.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Obtiene los tokens FCM de todos los administradores.
+        /// Se usa para notificar a los admins cuando un cliente crea un nuevo pedido.
+        /// </summary>
+        public async Task<List<string>> ObtenerAdminsTokensAsync()
+        {
+            try
+            {
+                var resultado = await Client.From<UsuarioPerfil>()
+                    .Where(p => p.EsAdmin == true)
+                    .Get();
+
+                return resultado.Models
+                    .Where(p => !string.IsNullOrEmpty(p.FcmToken))
+                    .Select(p => p.FcmToken)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error obteniendo tokens de admins: {ex.Message}");
+                return new List<string>();
+            }
+        }
     }
 }
