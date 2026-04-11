@@ -3,70 +3,60 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using PizzeriaApp.Models;
 using PizzeriaApp.Controllers;
+using PizzeriaApp.Services;
 using Syncfusion.Maui.DataGrid;
 
 namespace PizzeriaApp.Views
 {
-    // Esta es la vista directiva de la pizzería; aquí se visualiza el progreso y los pedidos del día
+    // Esta es la Vista de reportes; delega la carga de datos al AdminController
     public partial class ReportesAdmin : ContentPage
     {
-        private DataBaseServices _dbService;
-        // Colección observable para que el DataGrid refleje inmediatamente los pedidos del día
+        private AdminController _controller;
         public ObservableCollection<Pedido> HistorialDia { get; set; }
 
         public ReportesAdmin()
         {
             InitializeComponent();
-            _dbService = new DataBaseServices();
+            // Inicialización del controlador
+            _controller = new AdminController(new DataBaseServices());
             HistorialDia = new ObservableCollection<Pedido>();
         }
 
-        // Cada vez que entran a ver las gráficas, recalculamos todo con la data más fresca del día
         protected override async void OnAppearing()
         {
             base.OnAppearing();
             await LlenarReportesAsync();
         }
 
-        // Método que solicita las métricas diarias y el historial de pedidos
         private async Task LlenarReportesAsync()
         {
-            // Consultamos las métricas restringidas al día de hoy
-            var metricasDelDia = await _dbService.ObtenerMetricasDelDiaAsync();
+            // El controlador nos da las métricas ya calculadas
+            var result = await _controller.ObtenerReportesDiaAsync();
             
-            // Pintamos el dinero total de hoy con formato de moneda local
-            lblIngresos.Text = metricasDelDia.IngresosTotales.ToString("C");
-            
-            // Mostramos el conteo total de unidades vendidas hoy
-            lblPlatillos.Text = $"{metricasDelDia.UnidadesVendidas} Und.";
+            lblIngresos.Text = result.Ingresos.ToString("C");
+            lblPlatillos.Text = $"{result.Unidades} Und.";
 
-            // Limpiamos la lista y agregamos el nuevo historial de hoy
             HistorialDia.Clear();
-
-            foreach(var pedido in metricasDelDia.HistorialHoy)
+            foreach(var pedido in result.Historial)
             {
                 HistorialDia.Add(pedido);
             }
 
-            // Enlazamos la fuente de datos al control Grid de la pantalla para mostrar el historial
             dgTendencias.ItemsSource = HistorialDia;
         }
 
-        // Abrimos el detalle del ticket cuando el admin toca una fila
         private async void dgTendencias_SelectionChanged(object sender, DataGridSelectionChangedEventArgs e)
         {
             if (e.AddedRows != null && e.AddedRows.Count > 0)
             {
-                // Obtenemos el objeto Pedido de la fila seleccionada
                 var pedidoSeleccionado = e.AddedRows[0] as Pedido;
 
                 if (pedidoSeleccionado != null)
                 {
-                    // Navegamos a la pantalla de detalle pasándole el pedido y el servicio de DB
-                    await Navigation.PushAsync(new DetalleOrden(pedidoSeleccionado, _dbService));
+                    // Navegamos pasando el servicio (requerido por el constructor de DetalleOrden)
+                    await Navigation.PushAsync(new DetalleOrden(pedidoSeleccionado, new DataBaseServices()));
                 }
 
-                // Deseleccionamos para que la fila no se quede marcada y permita volver a entrar si hace falta
                 dgTendencias.SelectedIndex = -1;
             }
         }

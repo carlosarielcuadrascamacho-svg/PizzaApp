@@ -9,7 +9,7 @@ using Supabase.Realtime;
 using Supabase.Realtime.PostgresChanges;
 using PizzeriaApp.Services;
 
-namespace PizzeriaApp.Controllers
+namespace PizzeriaApp.Services
 {
     // Esta clase es el corazón de los datos. Centralizamos todo lo que sea pegarle a Supabase aquí.
     public class DataBaseServices

@@ -40,19 +40,17 @@ namespace PizzeriaApp.Views
 
                 try
                 {
-                    // Consultamos Supabase para ver si tiene una foto de perfil personalizada
-                    var dbService = new PizzeriaApp.Controllers.DataBaseServices();
-                    var perfilFresco = await dbService.ObtenerPerfilAsync(usuario.Id);
+                    // Delegamos la obtención del perfil al AuthController para cumplir con MVC
+                    var authController = new Controllers.AuthController(null, new Services.DataBaseServices());
+                    var perfilFresco = await authController.ObtenerPerfilAsync(usuario.Id);
 
                     if (perfilFresco != null)
                     {
                         lblNombreUsuario.Text = $"Hola, {perfilFresco.Nombre ?? "Usuario"}";
 
-                        // Si tiene foto en base64, la convertimos para mostrarla en el menú
                         if (!string.IsNullOrEmpty(perfilFresco.FotoPerfil))
                         {
                             var fotoBase64 = perfilFresco.FotoPerfil;
-                            // Limpiamos el prefijo si es que viene con el formato de data:image/png;base64,...
                             if (fotoBase64.Contains(","))
                                 fotoBase64 = fotoBase64.Substring(fotoBase64.IndexOf(",") + 1);
 
