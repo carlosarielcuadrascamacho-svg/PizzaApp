@@ -53,12 +53,12 @@ namespace PizzeriaApp.Views
                 var pedidos = await _dbService.ObtenerPedidosActivosAsync();
 
                 // Pintamos los pedidos en nuestra vista
-                ListaPedidos.ItemsSource = pedidos;
+                ListaPedidosGrid.ItemsSource = pedidos;
 
                 // Si no hay nada, mostramos un mensaje amigable de "No hay trabajo por ahora"
                 bool sinPedidos = pedidos == null || pedidos.Count == 0;
                 emptyState.IsVisible = sinPedidos;
-                ListaPedidos.IsVisible = !sinPedidos;
+                ListaPedidosGrid.IsVisible = !sinPedidos;
 
                 // Actualizamos el contador dinámico del título
                 lblContador.Text = sinPedidos

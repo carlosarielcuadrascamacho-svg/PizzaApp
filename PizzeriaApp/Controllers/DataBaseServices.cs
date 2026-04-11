@@ -298,7 +298,7 @@ namespace PizzeriaApp.Controllers
                         foreach (var d in detallesDelPedido)
                         {
                             // Le pegamos el nombre del platillo para que en la lista se vea \"Pizza Peperoni\" y no solo un ID feo
-                            d.NombrePlatillo = productosMapa.ContainsKey(d.ProductoId) ? productosMapa[d.ProductoId] : \"Indefinido\";
+                            d.NombrePlatillo = productosMapa.ContainsKey(d.ProductoId) ? productosMapa[d.ProductoId] : "Indefinido";
                         }
                         // Usamos ObservableCollection para que el UI se refresque solito si añadimos algo (aunque aquí es carga inicial)
                         pedido.Detalles = new System.Collections.ObjectModel.ObservableCollection<DetallePedido>(detallesDelPedido);
@@ -320,7 +320,7 @@ namespace PizzeriaApp.Controllers
             try
             {
                 var respuesta = await Client.From<Pedido>()
-                    .Where(p => p.Estado == \"Entregado\")
+                    .Where(p => p.Estado == "Entregado")
                     .Order(p => p.Fecha, Supabase.Postgrest.Constants.Ordering.Descending) // Los más recientes arriba
                     .Get();
 
@@ -408,7 +408,7 @@ namespace PizzeriaApp.Controllers
                 {
                     // Igual que en cocina, armamos los detalles para que el cliente vea qué pidió exactamente cada vez
                     var detallesResponse = await Client.From<DetallePedido>()
-                        .Filter(\"pedido_id\", Supabase.Postgrest.Constants.Operator.In, idsPedidos)
+                        .Filter("pedido_id", Supabase.Postgrest.Constants.Operator.In, idsPedidos)
                         .Get();
                     
                     var productosResponse = await Client.From<Producto>().Get();
@@ -419,7 +419,7 @@ namespace PizzeriaApp.Controllers
                         var detallesDelPedido = detallesResponse.Models.Where(d => d.PedidoId == pedido.Id).ToList();
                         foreach (var d in detallesDelPedido)
                         {
-                            d.NombrePlatillo = productosMapa.ContainsKey(d.ProductoId) ? productosMapa[d.ProductoId] : \"??\";
+                            d.NombrePlatillo = productosMapa.ContainsKey(d.ProductoId) ? productosMapa[d.ProductoId] : "??";
                         }
                         pedido.Detalles = new System.Collections.ObjectModel.ObservableCollection<DetallePedido>(detallesDelPedido);
                     }
@@ -449,54 +449,63 @@ namespace PizzeriaApp.Controllers
             }
         }
 
-        // Calculamos cuánto dinero ha entrado y qué es lo que más se vende
-        public async Task<(decimal IngresosTotales, Dictionary<string, int> PlatillosPopulares)> ObtenerMetricasRealesAsync()
+        // Calculamos cuánto dinero ha entrado, unidades vendidas hoy, y obtenemos el historial de órdenes del día
+        public async Task<(decimal IngresosTotales, int UnidadesVendidas, List<Pedido> HistorialHoy)> ObtenerMetricasDelDiaAsync()
         {
             decimal totalCaja = 0;
-            var platillosRanking = new Dictionary<string, int>();
+            int totalUnidades = 0;
+            var historialHoy = new List<Pedido>();
 
             try
             {
-                // Solo nos importan los pedidos que ya se pagaron y se entregaron
-                var todosLosPedidos = await Client.From<Pedido>()
-                    .Where(p => p.Estado == \"Entregado\")
+                // Obtenemos todos los pedidos recientes (bajamos un poco más de info para asegurar que traemos los de hoy considerando UTC/Local)
+                var respuesta = await Client.From<Pedido>()
+                    .Order(p => p.Fecha, Supabase.Postgrest.Constants.Ordering.Descending)
+                    .Limit(100) // Un chunk razonable para negocios pequeños/medianos en un día
                     .Get();
 
-                var pedidos = todosLosPedidos.Models;
-                totalCaja = pedidos.Sum(p => p.Total);
+                // Filtramos que correspondan al día de hoy en la zona horaria del dispositivo
+                historialHoy = respuesta.Models
+                    .Where(p => p.FechaLocal.Date == DateTime.Today)
+                    .ToList();
 
-                var idsPedidos = pedidos.Select(p => p.Id).ToList();
+                // Para estadísticas monetarias y de unidades, excluimos los pedidos cancelados
+                var pedidosValidos = historialHoy.Where(p => p.Estado != "Cancelado").ToList();
+                totalCaja = pedidosValidos.Sum(p => p.Total);
+
+                var idsPedidos = historialHoy.Select(p => p.Id).ToList();
 
                 if (idsPedidos.Any())
                 {
-                    // Filtramos detalles por esos pedidos. PostgreSQL se encarga de procesar el \"IN\"
+                    // Traemos los detalles para que la vista de "Detalle de Orden" funcione desde reportes
                     var detallesResponse = await Client.From<DetallePedido>()
-                        .Filter(\"pedido_id\", Supabase.Postgrest.Constants.Operator.In, idsPedidos)
+                        .Filter("pedido_id", Supabase.Postgrest.Constants.Operator.In, idsPedidos)
                         .Get();
                     
-                    var detallesValidos = detallesResponse.Models;
-
-                    // Mapeamos a nombres reales de pizza para que la gráfica de admin sea legible
                     var productosResponse = await Client.From<Producto>().Get();
                     var productosMapa = productosResponse.Models.ToDictionary(p => p.Id, p => p.Nombre);
 
-                    foreach (var det in detallesValidos)
+                    var todosLosDetalles = detallesResponse.Models;
+
+                    foreach (var pedido in historialHoy)
                     {
-                        var nombreReal = productosMapa.ContainsKey(det.ProductoId) ? productosMapa[det.ProductoId] : \"Indefinido\";
-                        if (!platillosRanking.ContainsKey(nombreReal))
-                            platillosRanking[nombreReal] = 0;
-                        
-                        // Vamos sumando las unidades vendidas por producto
-                        platillosRanking[nombreReal] += det.Cantidad;
+                        var susDetalles = todosLosDetalles.Where(d => d.PedidoId == pedido.Id).ToList();
+                        foreach (var det in susDetalles)
+                        {
+                            det.NombrePlatillo = productosMapa.ContainsKey(det.ProductoId) ? productosMapa[det.ProductoId] : "??";
+                        }
+                        pedido.Detalles = new System.Collections.ObjectModel.ObservableCollection<DetallePedido>(susDetalles);
                     }
+
+                    totalUnidades = todosLosDetalles.Where(d => idsPedidos.Contains(d.PedidoId) && historialHoy.First(p => p.Id == d.PedidoId).Estado != "Cancelado").Sum(d => d.Cantidad);
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error en métricas reales: {ex.Message}");
+                Console.WriteLine($"Error en métricas diarias detalladas: {ex.Message}");
             }
 
-            return (totalCaja, platillosRanking);
+            return (totalCaja, totalUnidades, historialHoy);
         }
 
         private RealtimeChannel? _canalPedidos;

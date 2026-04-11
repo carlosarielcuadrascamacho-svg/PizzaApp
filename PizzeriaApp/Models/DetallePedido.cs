@@ -30,5 +30,8 @@ namespace PizzeriaApp.Models
 
         [JsonIgnore]
         public string NombrePlatillo { get; set; }
+
+        [JsonIgnore]
+        public bool TieneComentarios => !string.IsNullOrWhiteSpace(Comentarios);
     }
 }

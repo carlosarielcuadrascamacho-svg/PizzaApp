@@ -272,8 +272,3 @@ namespace PizzeriaApp.Services
         }
     }
 }
-ine($"FCM Error: {ex.Message}");
-            }
-        }
-    }
-}

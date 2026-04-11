@@ -15,8 +15,13 @@ namespace PizzeriaApp.Models
         [Column("cliente_id")]
         public string ClienteId { get; set; }
 
+        private DateTime _fecha;
         [Column("fecha")]
-        public DateTime Fecha { get; set; }
+        public DateTime Fecha 
+        { 
+            get => _fecha; 
+            set => _fecha = value.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(value, DateTimeKind.Local) : value; 
+        }
 
         [JsonIgnore]
         public DateTime FechaLocal => Fecha.ToLocalTime();

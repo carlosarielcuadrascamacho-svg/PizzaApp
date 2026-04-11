@@ -35,7 +35,7 @@ namespace PizzeriaApp.Views
                 // Vamos a la base de datos por todos los pedidos vinculados a este cliente
                 var pedidos = await _dbService.ObtenerHistorialClienteAsync(_clienteId);
                 // Pintamos la lista en la UI
-                ListaHistorial.ItemsSource = pedidos;
+                ListaHistorialGrid.ItemsSource = pedidos;
             }
             catch (Exception ex)
             {

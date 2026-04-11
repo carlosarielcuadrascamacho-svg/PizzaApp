@@ -1,63 +1,74 @@
 using System;
 using System.Collections.ObjectModel;
-using System.Linq;
+using System.Threading.Tasks;
 using PizzeriaApp.Models;
 using PizzeriaApp.Controllers;
+using Syncfusion.Maui.DataGrid;
 
 namespace PizzeriaApp.Views
 {
-    // Clase auxiliar para mapear los datos que vamos a pintar en la tablita de tendencias
-    public class MetricaConcepto
-    {
-        public string Concepto { get; set; }
-        public int Cantidad { get; set; }
-    }
-
-    // Esta es la vista de "Business Intelligence" de la pizzería; aquí el dueño ve cuánto dinero ha entrado
+    // Esta es la vista directiva de la pizzería; aquí se visualiza el progreso y los pedidos del día
     public partial class ReportesAdmin : ContentPage
     {
         private DataBaseServices _dbService;
-        // Colección observable para que el DataGrid se actualice solito al llenar los datos
-        public ObservableCollection<MetricaConcepto> ListaTendencias { get; set; }
+        // Colección observable para que el DataGrid refleje inmediatamente los pedidos del día
+        public ObservableCollection<Pedido> HistorialDia { get; set; }
 
         public ReportesAdmin()
         {
             InitializeComponent();
             _dbService = new DataBaseServices();
-            ListaTendencias = new ObservableCollection<MetricaConcepto>();
+            HistorialDia = new ObservableCollection<Pedido>();
         }
 
-        // Cada vez que entran a ver las gráficas, recalculamos todo con la data más fresca
+        // Cada vez que entran a ver las gráficas, recalculamos todo con la data más fresca del día
         protected override async void OnAppearing()
         {
             base.OnAppearing();
             await LlenarReportesAsync();
         }
 
-        // Método que hace el trabajo pesado de conteo y sumas
+        // Método que solicita las métricas diarias y el historial de pedidos
         private async Task LlenarReportesAsync()
         {
-            // Consultamos las métricas reales directo de las vistas/funciones de Supabase
-            var metricasReales = await _dbService.ObtenerMetricasRealesAsync();
+            // Consultamos las métricas restringidas al día de hoy
+            var metricasDelDia = await _dbService.ObtenerMetricasDelDiaAsync();
             
-            // Pintamos el dinero total con formato de moneda local
-            lblIngresos.Text = metricasReales.IngresosTotales.ToString("C");
+            // Pintamos el dinero total de hoy con formato de moneda local
+            lblIngresos.Text = metricasDelDia.IngresosTotales.ToString("C");
             
-            // Limpiamos la lista de tendencias antes de volver a llenar
-            ListaTendencias.Clear();
-            int totalPlatosVendidos = 0;
+            // Mostramos el conteo total de unidades vendidas hoy
+            lblPlatillos.Text = $"{metricasDelDia.UnidadesVendidas} Und.";
 
-            // Agarramos los 5 platos más vendidos para la tablita de popularidad
-            foreach(var kvp in metricasReales.PlatillosPopulares.OrderByDescending(x => x.Value).Take(5))
+            // Limpiamos la lista y agregamos el nuevo historial de hoy
+            HistorialDia.Clear();
+
+            foreach(var pedido in metricasDelDia.HistorialHoy)
             {
-                ListaTendencias.Add(new MetricaConcepto { Concepto = kvp.Key, Cantidad = kvp.Value });
-                totalPlatosVendidos += kvp.Value;
+                HistorialDia.Add(pedido);
             }
 
-            // Mostramos el conteo total de ítems despachados
-            lblPlatillos.Text = $"{totalPlatosVendidos} Platillos";
-            // Enlazamos la fuente de datos al control Grid de la pantalla
-            dgTendencias.ItemsSource = ListaTendencias;
+            // Enlazamos la fuente de datos al control Grid de la pantalla para mostrar el historial
+            dgTendencias.ItemsSource = HistorialDia;
+        }
+
+        // Abrimos el detalle del ticket cuando el admin toca una fila
+        private async void dgTendencias_SelectionChanged(object sender, DataGridSelectionChangedEventArgs e)
+        {
+            if (e.AddedRows != null && e.AddedRows.Count > 0)
+            {
+                // Obtenemos el objeto Pedido de la fila seleccionada
+                var pedidoSeleccionado = e.AddedRows[0] as Pedido;
+
+                if (pedidoSeleccionado != null)
+                {
+                    // Navegamos a la pantalla de detalle pasándole el pedido y el servicio de DB
+                    await Navigation.PushAsync(new DetalleOrden(pedidoSeleccionado, _dbService));
+                }
+
+                // Deseleccionamos para que la fila no se quede marcada y permita volver a entrar si hace falta
+                dgTendencias.SelectedIndex = -1;
+            }
         }
     }
 }

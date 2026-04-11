@@ -89,7 +89,6 @@ namespace PizzeriaApp.Views
 
                 if (exito)
                 {
-                    // ¡Notificaciones Push! 
                     // 1. Avisamos a los administradores que tienen chamba nueva
                     _ = NotificationService.NotificarNuevoPedidoAAdminsAsync(_dbService);
 
