@@ -5,62 +5,68 @@
              Title="Nuevo Platillo"
              BackgroundColor="#F8F9FA">
 
-    <ScrollView>
-        <Grid RowDefinitions="Auto, *">
-            <!-- Header Stitch -->
-            <Border Grid.Row="0" Margin="20,25,20,10" Padding="20" BackgroundColor="#FFFFFF" StrokeThickness="0" StrokeShape="RoundRectangle 24">
-                <Border.Shadow>
-                    <Shadow Brush="Black" Offset="0,2" Radius="4" Opacity="0.1" />
-                </Border.Shadow>
-                <VerticalStackLayout Spacing="5">
-                    <Label Text="Alta de Producto" FontSize="22" FontAttributes="Bold" TextColor="#1A1A1A" />
-                    <Label Text="Añade un nuevo elemento al menú" FontSize="13" TextColor="#757575" />
+    <ScrollView BackgroundColor="#F8F9FA">
+        <Grid RowDefinitions="Auto, *" Padding="0,0,0,30">
+            <!-- Header Stitch Premium -->
+            <Border Grid.Row="0" Margin="25,30,25,10" Padding="0" BackgroundColor="Transparent" StrokeThickness="0">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="PRODUCT CREATION" FontSize="10" FontAttributes="Bold" TextColor="#FF4B3A" CharacterSpacing="2" />
+                    <Label Text="Nuevo Platillo" FontSize="32" FontAttributes="Bold" TextColor="#1A1A1A" />
+                    <Label Text="Define los detalles básicos para el menú" FontSize="14" TextColor="#757575" />
                 </VerticalStackLayout>
             </Border>
 
-            <!-- Form Card Stitch -->
-            <Border Grid.Row="1" Margin="20,10,20,30" Padding="25" BackgroundColor="#FFFFFF" StrokeThickness="0" StrokeShape="RoundRectangle 24">
+            <!-- Form Card Premium -->
+            <Border Grid.Row="1" Margin="20,10,20,0" Padding="25" BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 30">
                 <Border.Shadow>
-                    <Shadow Brush="Black" Offset="0,2" Radius="4" Opacity="0.1" />
+                    <Shadow Brush="Black" Offset="0,10" Radius="20" Opacity="0.05" />
                 </Border.Shadow>
+                
                 <VerticalStackLayout Spacing="25">
-
-                    <!-- Imagen Upload Area -->
-                    <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
-                        <Border HeightRequest="160" WidthRequest="160" StrokeShape="RoundRectangle 80" StrokeThickness="0" BackgroundColor="#F8F9FA">
-                            <Image x:Name="imgSelected" Source="placeholder_pizza.png" Aspect="AspectFill" />
+                    <!-- Imagen Upload Area Minimalista -->
+                    <VerticalStackLayout Spacing="15" HorizontalOptions="Center">
+                        <Border HeightRequest="150" WidthRequest="150" StrokeShape="RoundRectangle 75" StrokeThickness="0" BackgroundColor="#F5F5F7">
+                            <Grid>
+                                <Image x:Name="imgSelected" Source="placeholder_pizza.png" Aspect="AspectFill" />
+                                <Border BackgroundColor="#CCFFFFFF" HeightRequest="40" WidthRequest="40" VerticalOptions="End" HorizontalOptions="End" Margin="0,0,5,5" StrokeShape="RoundRectangle 20" StrokeThickness="0">
+                                    <Label Text="📷" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnPickImageClicked" />
+                                    </Border.GestureRecognizers>
+                                </Border>
+                            </Grid>
                         </Border>
-                        <Button Text="SELECCIONAR FOTO" Clicked="OnPickImageClicked" BackgroundColor="#F5F5F5" TextColor="#FF4B3A" FontSize="11" FontAttributes="Bold" CornerRadius="12" HeightRequest="45" BorderWidth="1" BorderColor="#EEEEEE" />
+                        <Label Text="TAP PARA CAMBIAR IMAGEN" FontSize="9" HorizontalOptions="Center" TextColor="#757575" FontAttributes="Bold" CharacterSpacing="1" />
                     </VerticalStackLayout>
 
-                    <!-- Fields -->
-                    <VerticalStackLayout Spacing="15">
-                        <VerticalStackLayout Spacing="5">
-                            <Label Text="NOMBRE DEL PRODUCTO" FontSize="10" FontAttributes="Bold" TextColor="#FF4B3A" CharacterSpacing="2" />
-                            <Border StrokeThickness="1" Stroke="#EEEEEE" StrokeShape="RoundRectangle 12" BackgroundColor="#F8F9FA" Padding="15,0" HeightRequest="50">
-                                <Entry x:Name="txtNombre" Placeholder="Ej. Margherita Special" BackgroundColor="Transparent" TextColor="#1A1A1A" PlaceholderColor="#AAA" />
+                    <!-- Fields Section -->
+                    <VerticalStackLayout Spacing="18">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="NOMBRE DEL PRODUCTO" FontSize="10" FontAttributes="Bold" TextColor="#FF4B3A" CharacterSpacing="1.5" Margin="5,0"/>
+                            <Border StrokeThickness="1" Stroke="#F0F0F0" StrokeShape="RoundRectangle 16" BackgroundColor="#FAFAFA" Padding="15,0" HeightRequest="54">
+                                <Entry x:Name="txtNombre" Placeholder="Nombre de la pizza..." BackgroundColor="Transparent" TextColor="#1A1A1A" PlaceholderColor="#BDBDBD" VerticalOptions="Center" />
                             </Border>
                         </VerticalStackLayout>
 
-                        <VerticalStackLayout Spacing="5">
-                            <Label Text="DESCRIPCIÓN" FontSize="10" FontAttributes="Bold" TextColor="#FF4B3A" CharacterSpacing="2" />
-                            <Border StrokeThickness="1" Stroke="#EEEEEE" StrokeShape="RoundRectangle 12" BackgroundColor="#F8F9FA" Padding="15,10" HeightRequest="100">
-                                <Editor x:Name="txtDescripcion" Placeholder="Ingredientes..." BackgroundColor="Transparent" TextColor="#1A1A1A" PlaceholderColor="#AAA" AutoSize="TextChanges" />
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="DESCRIPCIÓN DETALLADA" FontSize="10" FontAttributes="Bold" TextColor="#FF4B3A" CharacterSpacing="1.5" Margin="5,0"/>
+                            <Border StrokeThickness="1" Stroke="#F0F0F0" StrokeShape="RoundRectangle 16" BackgroundColor="#FAFAFA" Padding="15,10" HeightRequest="110">
+                                <Editor x:Name="txtDescripcion" Placeholder="Ingredientes, tamaño..." BackgroundColor="Transparent" TextColor="#1A1A1A" PlaceholderColor="#BDBDBD" AutoSize="TextChanges" />
                             </Border>
                         </VerticalStackLayout>
 
                         <Grid ColumnDefinitions="*, *" ColumnSpacing="15">
-                            <VerticalStackLayout Grid.Column="0" Spacing="5">
-                                <Label Text="PRECIO" FontSize="10" FontAttributes="Bold" TextColor="#FF4B3A" CharacterSpacing="2" />
-                                <Border StrokeThickness="1" Stroke="#EEEEEE" StrokeShape="RoundRectangle 12" BackgroundColor="#F8F9FA" Padding="15,0" HeightRequest="50">
-                                    <Entry x:Name="txtPrecio" Placeholder="0.00" Keyboard="Numeric" BackgroundColor="Transparent" TextColor="#1A1A1A" PlaceholderColor="#AAA" />
+                            <VerticalStackLayout Grid.Column="0" Spacing="6">
+                                <Label Text="PRECIO ($)" FontSize="10" FontAttributes="Bold" TextColor="#FF4B3A" CharacterSpacing="1.5" Margin="5,0"/>
+                                <Border StrokeThickness="1" Stroke="#F0F0F0" StrokeShape="RoundRectangle 16" BackgroundColor="#FAFAFA" Padding="15,0" HeightRequest="54">
+                                    <Entry x:Name="txtPrecio" Placeholder="0.00" Keyboard="Numeric" BackgroundColor="Transparent" TextColor="#1A1A1A" PlaceholderColor="#BDBDBD" VerticalOptions="Center" />
                                 </Border>
                             </VerticalStackLayout>
 
-                            <VerticalStackLayout Grid.Column="1" Spacing="5">
-                                <Label Text="CATEGORÍA" FontSize="10" FontAttributes="Bold" TextColor="#FF4B3A" CharacterSpacing="2" />
-                                <Border StrokeThickness="1" Stroke="#EEEEEE" StrokeShape="RoundRectangle 12" BackgroundColor="#F8F9FA" HeightRequest="50">
-                                    <Picker x:Name="pickCategoria" Title="Seleccionar" BackgroundColor="Transparent" TextColor="#1A1A1A" TitleColor="#AAA">
+                            <VerticalStackLayout Grid.Column="1" Spacing="6">
+                                <Label Text="CATEGORÍA" FontSize="10" FontAttributes="Bold" TextColor="#FF4B3A" CharacterSpacing="1.5" Margin="5,0"/>
+                                <Border StrokeThickness="1" Stroke="#F0F0F0" StrokeShape="RoundRectangle 16" BackgroundColor="#FAFAFA" HeightRequest="54">
+                                    <Picker x:Name="pickCategoria" Title="Elegir..." BackgroundColor="Transparent" TextColor="#1A1A1A" TitleColor="#BDBDBD" Margin="10,0">
                                         <Picker.ItemsSource>
                                             <x:Array Type="{x:Type x:String}">
                                                 <x:String>Pizzas</x:String>
@@ -75,8 +81,21 @@
                         </Grid>
                     </VerticalStackLayout>
 
-                    <!-- Save Action -->
-                    <Button x:Name="btnGuardar" Text="GUARDAR PRODUCTO" Clicked="OnGuardarClicked" BackgroundColor="#FF4B3A" TextColor="White" HeightRequest="60" CornerRadius="25" FontAttributes="Bold" FontSize="16" Margin="0,10,0,0" />
+                    <!-- Acciones -->
+                    <Button x:Name="btnGuardar" 
+                            Text="AÑADIR AL CATÁLOGO" 
+                            Clicked="OnGuardarClicked" 
+                            BackgroundColor="#FF4B3A" 
+                            TextColor="White" 
+                            HeightRequest="64" 
+                            CornerRadius="32" 
+                            FontAttributes="Bold" 
+                            FontSize="16" 
+                            Margin="0,15,0,0">
+                        <Button.Shadow>
+                            <Shadow Brush="#FF4B3A" Offset="0,8" Radius="15" Opacity="0.3" />
+                        </Button.Shadow>
+                    </Button>
                 </VerticalStackLayout>
             </Border>
         </Grid>
