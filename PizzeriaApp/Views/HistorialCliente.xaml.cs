@@ -27,6 +27,15 @@ namespace PizzeriaApp.Views
             await CargarHistorialAsync();
         }
 
+        private void ListaHistorialGrid_QueryRowHeight(object sender, Syncfusion.Maui.DataGrid.DataGridQueryRowHeightEventArgs e)
+        {
+            if (e.RowIndex > 0)
+            {
+                e.Height = e.GetIntrinsicRowHeight(e.RowIndex);
+                e.Handled = true;
+            }
+        }
+
         private async Task CargarHistorialAsync()
         {
             try

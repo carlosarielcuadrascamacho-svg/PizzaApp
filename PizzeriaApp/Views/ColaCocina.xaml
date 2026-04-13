@@ -7,21 +7,36 @@
              BackgroundColor="#F8F9FA">
 
     <Grid RowDefinitions="Auto, *">
-        <!-- Header -->
-        <Border Grid.Row="0" Margin="20,25,20,10" Padding="20" BackgroundColor="#FFFFFF" StrokeThickness="0" StrokeShape="RoundRectangle 24">
-            <Border.Shadow>
-                <Shadow Brush="Black" Offset="0,2" Radius="4" Opacity="0.1" />
-            </Border.Shadow>
+        <!-- Header con Filtros -->
+        <VerticalStackLayout Grid.Row="0" Margin="20,15,20,5" Spacing="15">
             <Grid ColumnDefinitions="*, Auto">
-                <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
-                    <Label Text="Pedidos Activos" FontSize="22" FontAttributes="Bold" TextColor="#1A1A1A" />
-                    <Label x:Name="lblContador" Text="Cola de Cocina en Tiempo Real" FontSize="13" TextColor="#FF4B3A" />
+                <VerticalStackLayout Grid.Column="0">
+                    <Label Text="Panel de Cocina" FontSize="26" FontAttributes="Bold" TextColor="#1A1A1A" />
+                    <Label x:Name="lblContador" Text="Cola de Cocina en Tiempo Real" FontSize="14" TextColor="#FF4B3A" />
                 </VerticalStackLayout>
-                <Button Grid.Column="1" Text="⟳" FontSize="20" Clicked="OnRefreshClicked"
-                        BackgroundColor="#F5F5F5" TextColor="#FF4B3A" WidthRequest="45" HeightRequest="45"
-                        CornerRadius="22" BorderWidth="1" BorderColor="#EEEEEE" />
+                <Button Grid.Column="1" Text="⟳" FontSize="22" Clicked="OnRefreshClicked"
+                        BackgroundColor="Transparent" TextColor="#FF4B3A" WidthRequest="50" HeightRequest="50" />
             </Grid>
-        </Border>
+
+            <!-- Filtros de Estado (Pill style) -->
+            <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                <Button Text="Todos" Clicked="OnFilterClicked" CommandParameter="Todos"
+                        BackgroundColor="#FFEBE8" TextColor="#FF4B3A" CornerRadius="20" HeightRequest="36" Padding="15,0" FontSize="12" />
+                <Button Text="En cola" Clicked="OnFilterClicked" CommandParameter="Ordenado"
+                        BackgroundColor="#F0F0F0" TextColor="#607D8B" CornerRadius="20" HeightRequest="36" Padding="15,0" FontSize="12" />
+                <Button Text="En fuego" Clicked="OnFilterClicked" CommandParameter="En preparación"
+                        BackgroundColor="#FFF3E0" TextColor="#E65100" CornerRadius="20" HeightRequest="36" Padding="15,0" FontSize="12" />
+                <Button Text="Listos" Clicked="OnFilterClicked" CommandParameter="Listo"
+                        BackgroundColor="#E8F5E9" TextColor="#2E7D32" CornerRadius="20" HeightRequest="36" Padding="15,0" FontSize="12" />
+            </HorizontalStackLayout>
+            
+            <!-- Panel de Resumen Consolidado (NUEVO) -->
+            <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never" Margin="0,5">
+                <HorizontalStackLayout x:Name="LayoutResumen" Spacing="10" Padding="0,5">
+                    <!-- Se llena dinámicamente desde el code-behind -->
+                </HorizontalStackLayout>
+            </ScrollView>
+        </VerticalStackLayout>
 
         <!-- Loading indicator -->
         <ActivityIndicator x:Name="loadingIndicator" Grid.Row="1" IsRunning="False" IsVisible="False"
@@ -29,86 +44,115 @@
 
         <!-- Empty state -->
         <VerticalStackLayout x:Name="emptyState" Grid.Row="1" IsVisible="False"
-                             VerticalOptions="Center" HorizontalOptions="Center" Spacing="10">
-            <Label Text="🍕" FontSize="60" HorizontalOptions="Center" />
-            <Label Text="No hay pedidos pendientes" FontSize="18" FontAttributes="Bold" TextColor="#757575" HorizontalOptions="Center" />
-            <Label Text="Los nuevos pedidos aparecerán aquí" FontSize="13" TextColor="#AAA" HorizontalOptions="Center" />
+                             VerticalOptions="Center" HorizontalOptions="Center" Spacing="15">
+            <Label Text="👨‍🍳" FontSize="70" HorizontalOptions="Center" />
+            <Label Text="¡Todo bajo control!" FontSize="20" FontAttributes="Bold" TextColor="#1A1A1A" HorizontalOptions="Center" />
+            <Label Text="No hay pedidos pendientes por ahora." FontSize="14" TextColor="#757575" HorizontalOptions="Center" />
         </VerticalStackLayout>
 
         <!-- Lista de Pedidos (Syncfusion DataGrid) -->
-        <syncfusion:SfDataGrid Grid.Row="1" x:Name="ListaPedidosGrid" Margin="15,0"
+        <syncfusion:SfDataGrid Grid.Row="1" x:Name="ListaPedidosGrid" Margin="15,5"
                                AutoGenerateColumnsMode="None"
-                               ColumnWidthMode="Fill" RowHeight="380" HeaderRowHeight="0"
+                               ColumnWidthMode="Fill" RowHeight="340" HeaderRowHeight="0"
                                SelectionMode="None" GridLinesVisibility="None" BackgroundColor="Transparent">
             <syncfusion:SfDataGrid.Columns>
                 <syncfusion:DataGridTemplateColumn MappingName="Id">
                     <syncfusion:DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Border Padding="20" Margin="5,0,5,15" BackgroundColor="#FFFFFF" StrokeThickness="0" StrokeShape="RoundRectangle 24">
+                            <!-- Diseño tipo Ticket de Cocina -->
+                            <Border Padding="0" Margin="5,8" BackgroundColor="#FFFFFF" StrokeThickness="0" StrokeShape="RoundRectangle 20">
                                 <Border.Shadow>
-                                    <Shadow Brush="Black" Offset="0,2" Radius="4" Opacity="0.1" />
+                                    <Shadow Brush="Black" Offset="0,4" Radius="8" Opacity="0.1" />
                                 </Border.Shadow>
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Tapped="OnPedidoTapped" />
-                                </Border.GestureRecognizers>
-                                <VerticalStackLayout Spacing="12">
-                                    <!-- Header del pedido: ID + Mesa + Estado -->
-                                    <Grid ColumnDefinitions="*, Auto">
-                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                            <Label Text="{Binding IdVisible}" FontSize="18" FontAttributes="Bold" TextColor="#FF4B3A" />
-                                            <Label Text="{Binding MesaVisible}" FontSize="13" TextColor="#757575" />
-                                            <Label Text="{Binding TiempoRelativo}" FontSize="11" TextColor="#AAA" />
-                                        </VerticalStackLayout>
-                                        <Border Grid.Column="1" Padding="12,6" BackgroundColor="{Binding ColorEstado}" StrokeShape="RoundRectangle 12" StrokeThickness="0" VerticalOptions="Start">
-                                            <Label Text="{Binding Estado}" FontSize="10" FontAttributes="Bold" TextColor="White" />
+                                
+                                <Grid ColumnDefinitions="8, *">
+                                    <!-- Barra lateral de estado -->
+                                    <BoxView Grid.Column="0" BackgroundColor="{Binding ColorEstado}" WidthRequest="8" />
+                                    
+                                    <VerticalStackLayout Grid.Column="1" Padding="15" Spacing="10">
+                                        <!-- Header del ticket -->
+                                        <Grid ColumnDefinitions="*, Auto">
+                                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                                <VerticalStackLayout.GestureRecognizers>
+                                                    <TapGestureRecognizer Tapped="OnTicketTapped" />
+                                                </VerticalStackLayout.GestureRecognizers>
+                                                <Label Text="{Binding IdVisible}" FontSize="20" FontAttributes="Bold" TextColor="#1A1A1A" />
+                                                <Label Text="{Binding MesaVisible}" FontSize="15" TextColor="#757575" FontAttributes="Bold" />
+                                            </VerticalStackLayout>
+                                            
+                                            <VerticalStackLayout Grid.Column="1" HorizontalOptions="End" VerticalOptions="Start" Spacing="5">
+                                                <Border Padding="10,4" BackgroundColor="{Binding ColorEstado}" StrokeShape="RoundRectangle 8" StrokeThickness="0">
+                                                    <Label Text="{Binding Estado}" FontSize="10" FontAttributes="Bold" TextColor="White" />
+                                                </Border>
+                                                
+                                                <!-- Alerta de Tiempo (NUEVO) -->
+                                                <Border IsVisible="{Binding EsUrgente}" Padding="8,2" BackgroundColor="#FFEBE8" Stroke="#FF4B3A" StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                                                    <HorizontalStackLayout Spacing="5">
+                                                        <Label Text="⚠️" FontSize="10" VerticalOptions="Center" />
+                                                        <Label Text="RETRASADO" FontSize="9" FontAttributes="Bold" TextColor="#FF4B3A" VerticalOptions="Center" />
+                                                    </HorizontalStackLayout>
+                                                </Border>
+
+                                                <Label Text="{Binding TiempoRelativo}" FontSize="11" TextColor="#AAA" HorizontalOptions="End" Margin="0,5,0,0" />
+                                            </VerticalStackLayout>
+                                        </Grid>
+
+                                        <!-- Sección Expandible: Info del Cliente -->
+                                        <Border IsVisible="{Binding IsExpanded}" Padding="15" BackgroundColor="#F8F9FA" StrokeShape="RoundRectangle 12" StrokeThickness="0">
+                                            <VerticalStackLayout Spacing="5">
+                                                <Label Text="DATOS DEL CLIENTE" FontSize="10" FontAttributes="Bold" TextColor="#FF4B3A" CharacterSpacing="1" />
+                                                <Label Text="{Binding Cliente.Nombre}" FontSize="15" FontAttributes="Bold" TextColor="#1A1A1A" />
+                                                <Label Text="{Binding Cliente.Telefono, StringFormat='📞 {0}'}" FontSize="14" TextColor="#1A1A1A" />
+                                                <Label Text="{Binding Cliente.Direccion, StringFormat='🏠 {0}'}" FontSize="13" TextColor="#757575" MaxLines="2" />
+                                            </VerticalStackLayout>
                                         </Border>
-                                    </Grid>
 
-                                    <!-- Separador -->
-                                    <BoxView HeightRequest="1" BackgroundColor="#F0F0F0" />
+                                        <BoxView HeightRequest="1" BackgroundColor="#F0F0F0" Margin="0,2" />
 
-                                    <!-- Detalles del pedido como lista simple -->
-                                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Detalles}" Spacing="6">
-                                        <BindableLayout.ItemTemplate>
-                                            <DataTemplate>
-                                                <Grid ColumnDefinitions="45, *" Padding="5,2">
-                                                    <Label Grid.Column="0" Text="{Binding Cantidad, StringFormat='x{0}'}" FontSize="14" FontAttributes="Bold" TextColor="#FF4B3A" VerticalOptions="Center" />
-                                                    <Label Grid.Column="1" Text="{Binding NombrePlatillo}" FontSize="14" TextColor="#333" VerticalOptions="Center" />
-                                                </Grid>
-                                            </DataTemplate>
-                                        </BindableLayout.ItemTemplate>
+                                        <!-- Productos (Cuerpo del ticket) -->
+                                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Detalles}" Spacing="5">
+                                            <VerticalStackLayout.GestureRecognizers>
+                                                <TapGestureRecognizer Tapped="OnTicketTapped" />
+                                            </VerticalStackLayout.GestureRecognizers>
+                                            <BindableLayout.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid ColumnDefinitions="Auto, *" ColumnSpacing="15">
+                                                        <Label Grid.Column="0" Text="{Binding Cantidad, StringFormat='{0}x'}" FontSize="16" FontAttributes="Bold" TextColor="#FF4B3A" />
+                                                        <Label Grid.Column="1" Text="{Binding NombrePlatillo}" FontSize="16" TextColor="#333" FontAttributes="Bold" />
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </BindableLayout.ItemTemplate>
+                                        </VerticalStackLayout>
+
+                                        <!-- Comentario crítico -->
+                                        <Border Padding="10" BackgroundColor="#FFFDE7" StrokeShape="RoundRectangle 8" IsVisible="{Binding TieneComentario}">
+                                            <Label Text="{Binding Comentario}" FontSize="13" TextColor="#795548" FontAttributes="Italic" />
+                                        </Border>
+
+                                        <!-- Footer y Acciones -->
+                                        <Grid ColumnDefinitions="*, Auto" Margin="0,10,0,0">
+                                            <Button Grid.Column="0" 
+                                                    Text="{Binding TextoBotonSiguiente}" 
+                                                    CommandParameter="{Binding SiguienteEstado}"
+                                                    Clicked="OnEstadoClicked"
+                                                    BackgroundColor="{Binding ColorEstado}" 
+                                                    TextColor="White" 
+                                                    CornerRadius="12" 
+                                                    FontAttributes="Bold" 
+                                                    HeightRequest="48"
+                                                    Margin="0,0,10,0" />
+                                            
+                                            <Button Grid.Column="1" 
+                                                    Text="✕" 
+                                                    Clicked="OnCancelarClicked"
+                                                    BackgroundColor="#F5F5F5" 
+                                                    TextColor="#757575" 
+                                                    CornerRadius="12" 
+                                                    WidthRequest="48" 
+                                                    HeightRequest="48" />
+                                        </Grid>
                                     </VerticalStackLayout>
-
-                                    <!-- Comentario del cliente -->
-                                    <Border x:Name="borderComentario" Padding="12,10" BackgroundColor="#FFF8E1" StrokeShape="RoundRectangle 10" StrokeThickness="0" IsVisible="{Binding TieneComentario}">
-                                        <HorizontalStackLayout Spacing="8">
-                                            <Label Text="💬" FontSize="14" VerticalOptions="Start" />
-                                            <Label Text="{Binding Comentario}" FontSize="13" TextColor="#795548" LineBreakMode="WordWrap" HorizontalOptions="FillAndExpand" />
-                                        </HorizontalStackLayout>
-                                    </Border>
-
-                                    <!-- Total -->
-                                    <Grid ColumnDefinitions="*, Auto">
-                                        <Label Grid.Column="0" Text="Total:" FontSize="13" TextColor="#757575" VerticalOptions="Center" />
-                                        <Label Grid.Column="1" Text="{Binding Total, StringFormat='${0:N2}'}" FontSize="16" FontAttributes="Bold" TextColor="#1A1A1A" VerticalOptions="Center" />
-                                    </Grid>
-
-                                    <!-- Hint para ver detalle -->
-                                    <Label Text="Toca para ver detalle completo ›" FontSize="11" TextColor="#BDBDBD" HorizontalOptions="Center" />
-
-                                    <!-- Botones de acción - solo visibles si el pedido está activo -->
-                                    <Grid ColumnDefinitions="*, *, Auto" ColumnSpacing="10" IsVisible="{Binding IsNotCancelled}">
-                                        <Button Grid.Column="0" Text="🔥 PREPARANDO" Clicked="OnEstadoClicked" CommandParameter="En preparación"
-                                                BackgroundColor="#FFF3E0" TextColor="#E65100" CornerRadius="12" FontAttributes="Bold" FontSize="12"
-                                                HeightRequest="44" />
-                                        <Button Grid.Column="1" Text="✓ LISTO" Clicked="OnEstadoClicked" CommandParameter="Entregado"
-                                                BackgroundColor="#00C853" TextColor="White" CornerRadius="12" FontAttributes="Bold" FontSize="12"
-                                                HeightRequest="44" />
-                                        <Button Grid.Column="2" Text="✕" Clicked="OnCancelarClicked"
-                                                BackgroundColor="#FDECEA" TextColor="#FF4B3A" CornerRadius="12"
-                                                WidthRequest="44" HeightRequest="44" FontSize="16" />
-                                    </Grid>
-                                </VerticalStackLayout>
+                                </Grid>
                             </Border>
                         </DataTemplate>
                     </syncfusion:DataGridTemplateColumn.CellTemplate>

@@ -45,7 +45,7 @@ namespace PizzeriaApp.Platforms.Android
             }
         }
 
-        // Método para pintar la notificación manualmente cuando la app está en primer plano
+        // Método para la notificación manualmente cuando la app está en primer plano
         private void MostrarNotificacionLocal(string? titulo, string? cuerpo)
         {
             // ID del canal, obligatorio para Android Oreo en adelante

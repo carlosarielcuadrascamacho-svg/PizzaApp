@@ -19,35 +19,42 @@
                 <Grid Grid.Row="0">
                     <Grid.Background>
                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Color="#E53935" Offset="0.0" />
+                            <GradientStop Color="#FF4B3A" Offset="0.0" />
                             <GradientStop Color="#B71C1C" Offset="1.0" />
                         </LinearGradientBrush>
                     </Grid.Background>
-                    <VerticalStackLayout VerticalOptions="End" Padding="20,0,20,20" Spacing="5">
-                        <Border WidthRequest="70" HeightRequest="70" Stroke="White" StrokeThickness="2" StrokeShape="RoundRectangle 35" HorizontalOptions="Start" BackgroundColor="White">
+                    <VerticalStackLayout VerticalOptions="End" Padding="25,0,25,25" Spacing="8">
+                        <Border WidthRequest="80" HeightRequest="80" Stroke="White" StrokeThickness="3" StrokeShape="RoundRectangle 40" HorizontalOptions="Start" BackgroundColor="White">
+                            <Border.Shadow>
+                                <Shadow Brush="Black" Offset="0,4" Radius="10" Opacity="0.2" />
+                            </Border.Shadow>
                             <Image x:Name="imgFlyoutPerfil" Source="pizzasteve.png" Aspect="AspectFill" />
                         </Border>
                         <Label x:Name="lblNombreUsuario" 
                                Text="Bienvenido" 
                                TextColor="White" 
-                               FontSize="20"
+                               FontSize="22"
                                FontAttributes="Bold" />
                         <Label x:Name="lblRol" 
-                               Text="Miembro Activo" 
+                               Text="PIZZA LOVER PREMIUM" 
                                TextColor="#FFCDD2" 
-                               FontSize="13" />
+                               FontSize="11"
+                               CharacterSpacing="1"
+                               FontAttributes="Bold" />
                     </VerticalStackLayout>
                 </Grid>
 
                 <!-- Menú Opciones Dinámicas -->
-                <ScrollView Grid.Row="1">
-                    <VerticalStackLayout x:Name="MenuContainer" Padding="15,20,15,20" Spacing="5" />
+                <ScrollView Grid.Row="1" BackgroundColor="White">
+                    <VerticalStackLayout x:Name="MenuContainer" Padding="20,10" Spacing="2" />
                 </ScrollView>
 
-                <!-- Pie del Menú (Footer) -->
-                <StackLayout Grid.Row="2" Padding="20">
-                    <Label Text="Pizzería App Premium" TextColor="Gray" FontSize="12" HorizontalOptions="Center" />
-                </StackLayout>
+                <!-- Pie del Menú (Footer) Premium -->
+                <VerticalStackLayout Grid.Row="2" Padding="20,30" BackgroundColor="#FAFAFA">
+                    <BoxView HeightRequest="1" Color="#EEEEEE" Margin="0,0,0,15" />
+                    <Label Text="PIZZERÍA APP PREMIUM" TextColor="#BDBDBD" FontSize="10" FontAttributes="Bold" HorizontalOptions="Center" CharacterSpacing="2" />
+                    <Label Text="Versión 2.0.4 - TECNM" TextColor="#E0E0E0" FontSize="9" HorizontalOptions="Center" Margin="0,5,0,0" />
+                </VerticalStackLayout>
             </Grid>
         </ContentPage>
     </FlyoutPage.Flyout>

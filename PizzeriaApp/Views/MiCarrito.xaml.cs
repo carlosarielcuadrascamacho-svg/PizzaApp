@@ -36,59 +36,121 @@ namespace PizzeriaApp.Views
         {
             decimal total = _carrito.Sum(i => i.Subtotal);
             lblTotalCosto.Text = total.ToString("C");
+
+            bool carritoVacio = _carrito.Count == 0;
+            emptyState.IsVisible = carritoVacio;
+            ListaCarrito.IsVisible = !carritoVacio;
+
+            // SINCRONIZACIÓN: Guardar el estado actual en el almacenamiento local
+            MenuClient.GuardarPersistencia(_clienteActual.Id, _carrito);
         }
 
-        private void OnEliminarItemClicked(object sender, EventArgs e)
+        private async void OnRegresarMenuClicked(object sender, EventArgs e)
+        {
+            await Navigation.PopAsync();
+        }
+
+        private void OnAumentarCantidadClicked(object sender, EventArgs e)
         {
             var btn = sender as Button;
             var item = btn?.CommandParameter as ItemCarrito;
 
             if (item != null)
             {
+                item.Cantidad += 1;
+                ActualizarTotal();
+            }
+        }
+
+        private void OnDisminuirCantidadClicked(object sender, EventArgs e)
+        {
+            var btn = sender as Button;
+            var item = btn?.CommandParameter as ItemCarrito;
+
+            if (item != null)
+            {
+                if (item.Cantidad > 1)
+                {
+                    item.Cantidad -= 1;
+                }
+                else
+                {
+                    // Si llega a 0 (estaba en 1 y bajó), se elimina automáticamente
+                    _carrito.Remove(item);
+                }
+                ActualizarTotal();
+            }
+        }
+
+        private void OnEliminarItemClicked(object sender, EventArgs e)
+        {
+            var btn = sender as Button;
+            var item = (ItemCarrito)btn?.BindingContext; // Cambiamos a BindingContext para mayor seguridad
+
+            if (item != null)
+            {
                 _carrito.Remove(item);
                 ActualizarTotal();
-
-                if (_carrito.Count == 0)
-                {
-                    Navigation.PopAsync();
-                }
             }
         }
 
         private async void OnConfirmarOrdenClicked(object sender, EventArgs e)
         {
-            if (_carrito.Count == 0) return;
+            if (_carrito.Count == 0) 
+            {
+                await DisplayAlert("Carrito vacío", "Agrega al menos una pizza antes de pedir.", "OK");
+                return;
+            }
 
             var btn = sender as Button;
             btn.IsEnabled = false;
+            string originalText = btn.Text;
             btn.Text = "PROCESANDO...";
 
             try 
             {
-                string mesa = _clienteActual.EsAdmin ? (txtMesaCliente.Text?.Trim() ?? "Piso") : "Delivery";
+                // Si no es admin, la mesa es por defecto "Mesa 1-Cliente" o similar, o capturar de txtMesaCliente si está habilitado
+                string mesa = txtMesaCliente.Text?.Trim() ?? "Cliente";
                 string comentario = txtComentario.Text?.Trim() ?? "";
                 
-                // El controlador orquesta la creación del pedido y las notificaciones
                 bool exito = await _controller.ProcesarPedidoAsync(_clienteActual, _carrito, mesa, comentario);
 
                 if (exito)
                 {
-                    await DisplayAlert("¡Excelente!", "Tu orden ha sido recibida y está en cola de cocina.", "OK");
+                    // 1. Limpiamos el carrito en memoria
                     _carrito.Clear();
-                    await Navigation.PopToRootAsync();
+
+                    // 2. NUEVO: Limpiamos la persistencia local de este usuario
+                    MenuClient.LimpiarPersistencia(_clienteActual.Id);
+                    
+                    if (_clienteActual.EsAdmin)
+                    {
+                        // Si es admin, no mostramos pantalla festiva, volvemos al inicio
+                        await DisplayAlert("Orden Exitosa", "La orden se ha enviado a cocina.", "OK");
+                        await Navigation.PopToRootAsync();
+                    }
+                    else
+                    {
+                        // Si es cliente, redirigir a la nueva pantalla de éxito festiva
+                        await Navigation.PushAsync(new SuccessOrder(_clienteActual));
+                        
+                        // Remover esta página del stack para evitar volver al carrito vacío
+                        var cartPage = Navigation.NavigationStack.FirstOrDefault(p => p is MiCarrito);
+                        if (cartPage != null) Navigation.RemovePage(cartPage);
+                    }
                 }
                 else
                 {
                     await DisplayAlert("Error", "No pudimos procesar la orden en este momento.", "OK");
                     btn.IsEnabled = true;
-                    btn.Text = "ENVIAR ORDEN";
+                    btn.Text = originalText;
                 }
             }
             catch (Exception ex)
             {
                 await DisplayAlert("Ups", "Error crítico: " + ex.Message, "OK");
                 btn.IsEnabled = true;
-                btn.Text = "ENVIAR ORDEN";
+                btn.Text = originalText;
             }
         }
     }

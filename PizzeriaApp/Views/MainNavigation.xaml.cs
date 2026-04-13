@@ -69,75 +69,108 @@ namespace PizzeriaApp.Views
             // Limpiamos los botones viejos (por si hubo un cambio de sesión sin cerrar la app)
             MenuContainer.Children.Clear();
 
-            // Inyectamos los botones según el rol
+            // Inyectamos los botones según el rol con iconos
             if (usuario.EsAdmin)
             {
-                // El Admin tiene acceso a todo el control operativo
-                AgregarBotonMenu("🏠 Tomar Orden (Mostrador)", new MenuClient(usuario));
-                AgregarBotonMenu("👨‍🍳 Cola de Cocina", new ColaCocina());
-                AgregarBotonMenu("📦 Gestión de Catálogo", new GestionCatalogo());
-                AgregarBotonMenu("📊 Reportes", new ReportesAdmin());
+                AgregarSeccion("OPERACIONES");
+                AgregarItemMenu("🏠", "Tomar Orden", new MenuClient(usuario));
+                AgregarItemMenu("👨‍🍳", "Cola de Cocina", new ColaCocina());
+                
+                AgregarSeccion("ADMINISTRACIÓN");
+                AgregarItemMenu("📦", "Gestión de Catálogo", new GestionCatalogo());
+                AgregarItemMenu("📊", "Reportes Directivos", new ReportesAdmin());
             }
             else
             {
-                // El Cliente solo ve lo que le interesa: comer y sus datos
-                AgregarBotonMenu("🏠 Nuestro Menú", new MenuClient(usuario));
-                AgregarBotonMenu("📜 Mis Pedidos", new HistorialCliente(usuario.Id, usuario.Nombre ?? "Cliente"));
-                AgregarBotonMenu("👤 Mi Perfil", new PerfilCliente(usuario));
+                AgregarSeccion("PRINCIPAL");
+                AgregarItemMenu("🏠", "Nuestro Menú", new MenuClient(usuario));
+                AgregarItemMenu("📜", "Mis Pedidos", new HistorialCliente(usuario.Id, usuario.Nombre ?? "Cliente"));
+                
+                AgregarSeccion("PERSONAL");
+                AgregarItemMenu("👤", "Mi Perfil", new PerfilCliente(usuario));
             }
 
-            // El botón de salida siempre va al final
             AgregarBotonCerrarSesion();
         }
 
-        // Método auxiliar para crear botones de menú con estilo uniforme
-        private void AgregarBotonMenu(string texto, Page paginaDestino)
+        private void AgregarSeccion(string titulo)
         {
-            var btn = new Button
-            {
-                Text = texto,
-                BackgroundColor = Colors.Transparent,
-                TextColor = Color.FromArgb("#424242"), // Un gris oscuro elegante para el texto
-                HorizontalOptions = LayoutOptions.Start,
-                FontSize = 16,
-                FontAttributes = FontAttributes.Bold,
-                Margin = new Thickness(0, 5)
-            };
-
-            // Al picar el botón, cambiamos el "Detail" (la página central) por la nueva
-            btn.Clicked += (s, e) => CambiarDetalle(paginaDestino);
-
-            MenuContainer.Children.Add(btn);
+            MenuContainer.Children.Add(new Label 
+            { 
+                Text = titulo, 
+                FontSize = 10, 
+                FontAttributes = FontAttributes.Bold, 
+                TextColor = Color.FromArgb("#BDBDBD"),
+                Margin = new Thickness(10, 20, 0, 5),
+                CharacterSpacing = 1
+            });
         }
 
-        // Configuración especial para el botón de cerrar sesión
-        private void AgregarBotonCerrarSesion()
+        private void AgregarItemMenu(string icono, string texto, Page paginaDestino)
         {
-            var btnCerrar = new Button
+            var grid = new Grid { ColumnDefinitions = new ColumnDefinitionCollection { new ColumnDefinition { Width = 40 }, new ColumnDefinition { Width = GridLength.Star } }, Padding = new Thickness(15, 12) };
+            
+            var lblIcono = new Label { Text = icono, FontSize = 18, VerticalOptions = LayoutOptions.Center, HorizontalOptions = LayoutOptions.Center };
+            var lblTexto = new Label { Text = texto, FontSize = 15, FontAttributes = FontAttributes.Bold, VerticalOptions = LayoutOptions.Center, TextColor = Color.FromArgb("#424242") };
+
+            grid.Add(lblIcono, 0);
+            grid.Add(lblTexto, 1);
+
+            var border = new Border
             {
-                Text = "🚪 Cerrar Sesión",
-                BackgroundColor = Color.FromArgb("#FFEBEE"), // Fondo rojizo suave tipo alerta light
-                TextColor = Color.FromArgb("#D32F2F"), // Texto rojo fuerte
-                FontAttributes = FontAttributes.Bold,
-                CornerRadius = 8,
-                Margin = new Thickness(0, 30, 0, 0)
+                StrokeThickness = 0,
+                StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 12 },
+                BackgroundColor = Colors.Transparent,
+                Content = grid,
+                Margin = new Thickness(0, 2)
             };
 
-            btnCerrar.Clicked += async (s, e) =>
-            {
-                // Obtenemos el servicio de Google para destruir el token de sesión
-                var authService = App.Services.GetService<PizzeriaApp.GoogleAuth.IGoogleAuthService>();
-
-                if (authService != null)
+            var tapGesture = new TapGestureRecognizer();
+            tapGesture.Tapped += (s, e) => {
+                // Limpiar selecciones previas
+                foreach (var child in MenuContainer.Children)
                 {
-                    await authService.LogoutAsync();
+                    if (child is Border b) b.BackgroundColor = Colors.Transparent;
                 }
+                // Resaltar actual
+                border.BackgroundColor = Color.FromArgb("#F5F5F5");
+                CambiarDetalle(paginaDestino);
+            };
 
-                // Mandamos al usuario de patitas a la calle (la pantalla de Login)
+            border.GestureRecognizers.Add(tapGesture);
+            MenuContainer.Children.Add(border);
+        }
+
+        private void AgregarBotonCerrarSesion()
+        {
+            var btnCerrar = new Border
+            {
+                StrokeThickness = 1,
+                Stroke = Color.FromArgb("#FFCDD2"),
+                StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 12 },
+                BackgroundColor = Color.FromArgb("#FFF5F5"),
+                Margin = new Thickness(0, 40, 0, 0),
+                Padding = new Thickness(15, 12),
+                Content = new Label 
+                { 
+                    Text = "🚪 Cerrar Sesión", 
+                    TextColor = Color.FromArgb("#D32F2F"), 
+                    FontAttributes = FontAttributes.Bold, 
+                    HorizontalOptions = LayoutOptions.Center 
+                }
+            };
+
+            var tap = new TapGestureRecognizer();
+            tap.Tapped += async (s, e) =>
+            {
+                var authService = App.Services.GetService<PizzeriaApp.GoogleAuth.IGoogleAuthService>();
+                if (authService != null) await authService.LogoutAsync();
+
                 var loginPage = App.Services.GetService<Login>();
                 Application.Current.MainPage = new NavigationPage(loginPage);
             };
 
+            btnCerrar.GestureRecognizers.Add(tap);
             MenuContainer.Children.Add(btnCerrar);
         }
 

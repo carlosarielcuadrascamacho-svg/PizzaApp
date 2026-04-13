@@ -30,8 +30,8 @@ namespace PizzeriaApp.Controllers
             if (carrito == null || carrito.Count == 0) return false;
 
             decimal total = carrito.Sum(i => i.Subtotal);
-            string estadoInicial = cliente.EsAdmin ? "Consumo Local" : "En preparación";
-            string mesaFinal = cliente.EsAdmin ? (mesa ?? "Piso") : "Delivery";
+            string estadoInicial = "Ordenado";
+            string mesaFinal = string.IsNullOrEmpty(mesa) ? "Mostrador" : mesa;
 
             bool exito = await _db.CrearPedidoV2Async(cliente.Id, carrito.ToList(), total, estadoInicial, mesaFinal, comentario);
 

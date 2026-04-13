@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:PizzeriaApp.Converters"
              x:Class="PizzeriaApp.Views.HistorialCliente"
              xmlns:syncfusion="clr-namespace:Syncfusion.Maui.DataGrid;assembly=Syncfusion.Maui.DataGrid"
              Title="Mis Pedidos"
              BackgroundColor="#F5F6F8">
+    
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:IndexToColorConverter x:Key="IndexToColorConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
     <Grid RowDefinitions="Auto, *">
 
         <VerticalStackLayout Grid.Row="0" Margin="25,30,25,15" Spacing="4">
@@ -16,8 +24,12 @@
                                x:Name="ListaHistorialGrid" 
                                Margin="20,0"
                                AutoGenerateColumnsMode="None"
-                               ColumnWidthMode="Fill" RowHeight="320" HeaderRowHeight="0"
-                               SelectionMode="None" GridLinesVisibility="None" BackgroundColor="Transparent">
+                               ColumnWidthMode="Fill" 
+                               HeaderRowHeight="0"
+                               QueryRowHeight="ListaHistorialGrid_QueryRowHeight"
+                               SelectionMode="None" 
+                               GridLinesVisibility="None" 
+                               BackgroundColor="Transparent">
             <syncfusion:SfDataGrid.Columns>
                 <syncfusion:DataGridTemplateColumn MappingName="Id">
                     <syncfusion:DataGridTemplateColumn.CellTemplate>
@@ -42,15 +54,59 @@
 
                                         <Border Grid.Column="1" 
                                                 Padding="10,4" 
-                                                BackgroundColor="#FFF0EE" 
+                                                BackgroundColor="{Binding ColorEstado}" 
                                                 StrokeShape="RoundRectangle 8"
                                                 HorizontalOptions="End">
                                             <Label Text="{Binding Estado}" 
                                                    FontSize="11" 
                                                    FontAttributes="Bold" 
-                                                   TextColor="#FF4B3A" 
+                                                   TextColor="White" 
                                                    VerticalOptions="Center"/>
                                         </Border>
+                                    </Grid>
+
+                                    <!-- Stepper de Estado Premium -->
+                                    <Grid ColumnDefinitions="*, *, *, *" Margin="0,10">
+                                        <!-- Línea de Progreso Base (Gris) -->
+                                        <BoxView Grid.ColumnSpan="4" HeightRequest="4" BackgroundColor="#F5F5F5" VerticalOptions="Center" Margin="30,0" CornerRadius="2" />
+                                        
+                                        <!-- Línea de Progreso Activa (Dinámica si fuera posible, o solo estilizada) -->
+
+                                        <!-- Paso 1: Recibido -->
+                                        <VerticalStackLayout Grid.Column="0" Spacing="5" HorizontalOptions="Center">
+                                            <Border HeightRequest="32" WidthRequest="32" StrokeShape="RoundRectangle 16" StrokeThickness="0" 
+                                                    BackgroundColor="{Binding ProgressIndex, Converter={StaticResource IndexToColorConverter}, ConverterParameter=1}">
+                                                <Label Text="🕒" FontSize="14" HorizontalOptions="Center" VerticalOptions="Center" />
+                                            </Border>
+                                            <Label Text="Recibido" FontSize="9" HorizontalOptions="Center" FontAttributes="Bold" TextColor="#757575" />
+                                        </VerticalStackLayout>
+
+                                        <!-- Paso 2: Cocina -->
+                                        <VerticalStackLayout Grid.Column="1" Spacing="5" HorizontalOptions="Center">
+                                            <Border HeightRequest="32" WidthRequest="32" StrokeShape="RoundRectangle 16" StrokeThickness="0" 
+                                                    BackgroundColor="{Binding ProgressIndex, Converter={StaticResource IndexToColorConverter}, ConverterParameter=2}">
+                                                <Label Text="🔥" FontSize="14" HorizontalOptions="Center" VerticalOptions="Center" />
+                                            </Border>
+                                            <Label Text="Cocina" FontSize="9" HorizontalOptions="Center" FontAttributes="Bold" TextColor="#757575" />
+                                        </VerticalStackLayout>
+
+                                        <!-- Paso 3: Listo -->
+                                        <VerticalStackLayout Grid.Column="2" Spacing="5" HorizontalOptions="Center">
+                                            <Border HeightRequest="32" WidthRequest="32" StrokeShape="RoundRectangle 16" StrokeThickness="0" 
+                                                    BackgroundColor="{Binding ProgressIndex, Converter={StaticResource IndexToColorConverter}, ConverterParameter=3}">
+                                                <Label Text="✅" FontSize="14" HorizontalOptions="Center" VerticalOptions="Center" />
+                                            </Border>
+                                            <Label Text="Listo" FontSize="9" HorizontalOptions="Center" FontAttributes="Bold" TextColor="#757575" />
+                                        </VerticalStackLayout>
+
+                                        <!-- Paso 4: Entregado -->
+                                        <VerticalStackLayout Grid.Column="3" Spacing="5" HorizontalOptions="Center">
+                                            <Border HeightRequest="32" WidthRequest="32" StrokeShape="RoundRectangle 16" StrokeThickness="0" 
+                                                    BackgroundColor="{Binding ProgressIndex, Converter={StaticResource IndexToColorConverter}, ConverterParameter=4}">
+                                                <Label Text="🚚" FontSize="14" HorizontalOptions="Center" VerticalOptions="Center" />
+                                            </Border>
+                                            <Label Text="Entregado" FontSize="9" HorizontalOptions="Center" FontAttributes="Bold" TextColor="#757575" />
+                                        </VerticalStackLayout>
                                     </Grid>
 
                                     <BoxView HeightRequest="1" Color="#F0F0F0" HorizontalOptions="Fill" />

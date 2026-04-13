@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PizzeriaApp.Views.SuccessOrder"
+             Title="¡Éxito!"
+             BackgroundColor="White"
+             NavigationPage.HasNavigationBar="False">
+
+    <Grid RowDefinitions="*, Auto" Padding="30">
+        
+        <VerticalStackLayout Grid.Row="0" VerticalOptions="Center" Spacing="20">
+            <!-- Icono de Celebración -->
+            <Border BackgroundColor="#E8F5E9" HeightRequest="120" WidthRequest="120" StrokeShape="RoundRectangle 60" StrokeThickness="0" HorizontalOptions="Center">
+                <Label Text="🎉" FontSize="60" HorizontalOptions="Center" VerticalOptions="Center" />
+            </Border>
+
+            <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                <Label Text="¡Pedido Recibido!" FontSize="28" FontAttributes="Bold" TextColor="#1A1A1A" HorizontalOptions="Center" />
+                <Label Text="Nuestros chefs ya están manos a la obra con tu pizza" FontSize="14" TextColor="#757575" HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+
+            <Border BackgroundColor="#F8F9FA" Padding="20" StrokeShape="RoundRectangle 20" StrokeThickness="0" Margin="0,20">
+                <VerticalStackLayout Spacing="10">
+                    <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                        <Label Text="Estado actual:" FontSize="12" TextColor="#757575" />
+                        <Label Text="PREPARANDO" FontSize="12" FontAttributes="Bold" TextColor="#FF9800" CharacterSpacing="1" />
+                    </HorizontalStackLayout>
+                    <Label Text="Tiempo estimado: 25-35 min" FontSize="16" FontAttributes="Bold" TextColor="#1A1A1A" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </Border>
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Grid.Row="1" Spacing="15" Margin="0,0,0,20">
+            <Button Text="SEGUIR MI PEDIDO" 
+                    BackgroundColor="#FF4B3A" 
+                    TextColor="White" 
+                    FontSize="16" 
+                    FontAttributes="Bold"
+                    CornerRadius="18" 
+                    HeightRequest="60" 
+                    Clicked="OnSeguirPedidoClicked">
+                <Button.Shadow>
+                    <Shadow Brush="#FF4B3A" Offset="0,8" Radius="15" Opacity="0.3" />
+                </Button.Shadow>
+            </Button>
+
+            <Button Text="Volver al inicio" 
+                    BackgroundColor="Transparent" 
+                    TextColor="#757575" 
+                    FontSize="14" 
+                    Clicked="OnVolverInicioClicked" />
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

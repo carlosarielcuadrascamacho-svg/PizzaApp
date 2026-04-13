@@ -399,3 +399,40 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# --- PIZZA APP CUSTOM IGNORES ---
+
+# Firebase & Push Notifications (Sensitive Files)
+firebase-auth.json
+google-services.json
+GoogleService-Info.plist
+*.service-account.json
+
+# Keys & Certificates
+*.pfx
+*.keystore
+*.jks
+*(keystore)
+*.p12
+
+# Mobile Build & OS
+.DS_Store
+Thumbs.db
+[Oo]bj/
+[Bb]in/
+
+# MAUI / Xamarin Specific
+.vs/
+.idea/
+*.user
+*.userprefs
+
+# Environments
+.env
+.env.*
+! .env.example
+
+# Custom Project Secrets
+Secretos.cs
+**/Config/Secretos.cs
+PizzeriaApp/Resources/Raw/firebase-auth.json

@@ -2,12 +2,14 @@ using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
 using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using Newtonsoft.Json;
 
 namespace PizzeriaApp.Models
 {
     [Table("pedidos")]
-    public class Pedido : BaseModel
+    public class Pedido : BaseModel, INotifyPropertyChanged
     {
         [PrimaryKey("id", false)]
         public string Id { get; set; }
@@ -26,8 +28,31 @@ namespace PizzeriaApp.Models
         [JsonIgnore]
         public DateTime FechaLocal => Fecha.ToLocalTime();
 
+        private string _estado;
         [Column("estado")]
-        public string Estado { get; set; }
+        public string Estado 
+        { 
+            get => _estado; 
+            set 
+            { 
+                if (_estado != value)
+                {
+                    _estado = value; 
+                    OnPropertyChanged(); 
+                    // Notificar cambios en propiedades dependientes
+                    OnPropertyChanged(nameof(IsNotCancelled));
+                    OnPropertyChanged(nameof(EsUrgente));
+                    OnPropertyChanged(nameof(ColorEstado));
+                    OnPropertyChanged(nameof(IsOrdenado));
+                    OnPropertyChanged(nameof(IsEnPreparacion));
+                    OnPropertyChanged(nameof(IsListo));
+                    OnPropertyChanged(nameof(SiguienteEstado));
+                    OnPropertyChanged(nameof(TextoBotonSiguiente));
+                    OnPropertyChanged(nameof(ProgressIndex));
+                    OnPropertyChanged(nameof(ProgressPercent));
+                }
+            } 
+        }
 
         [Column("total")]
         public decimal Total { get; set; }
@@ -55,7 +80,24 @@ namespace PizzeriaApp.Models
         public string IdVisible => !string.IsNullOrEmpty(Id) && Id.Length >= 6 ? $"#{Id.Substring(0, 6).ToUpper()}" : "#N/A";
 
         [JsonIgnore]
-        public string MesaVisible => !string.IsNullOrEmpty(Mesa) ? $"Mesa: {Mesa}" : "Delivery / Sin mesa";
+        public UsuarioPerfil Cliente { get; set; }
+
+        [JsonIgnore]
+        public bool TieneInformacionCliente => Cliente != null && !string.IsNullOrEmpty(Cliente.Nombre);
+
+        [JsonIgnore]
+        public string MesaVisible => !string.IsNullOrEmpty(Mesa) ? $"📍 {Mesa}" : "🛵 Delivery";
+
+        [JsonIgnore]
+        public bool EsUrgente => (DateTime.UtcNow - Fecha.ToUniversalTime()).TotalMinutes > 15 && Estado == "Ordenado";
+
+        private bool _isExpanded;
+        [JsonIgnore]
+        public bool IsExpanded 
+        { 
+            get => _isExpanded; 
+            set { _isExpanded = value; OnPropertyChanged(); } 
+        }
 
         [JsonIgnore]
         public string TiempoRelativo
@@ -81,13 +123,68 @@ namespace PizzeriaApp.Models
             {
                 return Estado switch
                 {
-                    "En preparación" => "#FF9800",
-                    "Listo" => "#00C853",
-                    "Entregado" => "#4CAF50",
-                    "Cancelado" => "#F44336",
+                    "Ordenado" => "#607D8B",        // Gris Azulado (Pendiente)
+                    "En preparación" => "#FF9800",  // Naranja (Cocinando)
+                    "Listo" => "#00C853",           // Verde (Para entregar)
+                    "Entregado" => "#4CAF50",       // Verde Olivo (Finalizado)
+                    "Cancelado" => "#F44336",       // Rojo
                     _ => "#FF4B3A"
                 };
             }
+        }
+
+        // Propiedades para saber qué botón mostrar en la interfaz
+        [JsonIgnore]
+        public bool IsOrdenado => Estado == "Ordenado";
+        
+        [JsonIgnore]
+        public bool IsEnPreparacion => Estado == "En preparación";
+        
+        [JsonIgnore]
+        public bool IsListo => Estado == "Listo";
+
+        [JsonIgnore]
+        public string SiguienteEstado => Estado switch
+        {
+            "Ordenado" => "En preparación",
+            "En preparación" => "Listo",
+            "Listo" => "Entregado",
+            _ => "Entregado"
+        };
+
+        [JsonIgnore]
+        public string TextoBotonSiguiente => Estado switch
+        {
+            "Ordenado" => "🔥 EMPEZAR",
+            "En preparación" => "✅ TERMINAR",
+            "Listo" => "🚚 ENTREGAR",
+            _ => "✓ OK"
+        };
+
+        // Lógica de progreso para el Stepper visual (0-3)
+        [JsonIgnore]
+        public int ProgressIndex => Estado switch
+        {
+            "Ordenado" => 1,
+            "En preparación" => 2,
+            "Listo" => 3,
+            "Entregado" => 4,
+            _ => 1
+        };
+
+        [JsonIgnore]
+        public double ProgressPercent => ProgressIndex / 4.0;
+
+        public void NotifyUrgencyChanged()
+        {
+            OnPropertyChanged(nameof(EsUrgente));
+            OnPropertyChanged(nameof(TiempoRelativo));
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

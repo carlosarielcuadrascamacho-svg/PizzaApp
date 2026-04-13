@@ -3,56 +3,112 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="PizzeriaApp.Views.Login"
              Title="Inicio de Sesión"
-             BackgroundColor="#FDF0ED">
+             NavigationPage.HasNavigationBar="False">
 
-    <ScrollView>
-        <VerticalStackLayout Spacing="25" Padding="30" VerticalOptions="Center">
+    <Grid>
+        <!-- Fondo con Gradiente Premium -->
+        <BoxView>
+            <BoxView.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#FF4B3A" Offset="0.1" />
+                    <GradientStop Color="#FF8C31" Offset="1.0" />
+                </LinearGradientBrush>
+            </BoxView.Background>
+        </BoxView>
 
-            <Image Source="pizzasteve.png" 
-                   HeightRequest="250" 
-                   HorizontalOptions="Center"
-                   Aspect="AspectFit"
-                   Margin="0,0,0,10">
-                <Image.Shadow>
-                    <Shadow Brush="Black" Offset="5,5" Radius="10" Opacity="0.2" />
-                </Image.Shadow>
-            </Image>
-            <Label Text="Pizzas Steve" 
-                   FontSize="32" 
-                   TextColor="#E63946"
-                   FontAttributes="Bold" 
-                   HorizontalOptions="Center" />
+        <!-- Círculos decorativos para efecto de profundidad (Glassmorphism style) -->
+        <Ellipse Fill="White" Opacity="0.1" WidthRequest="200" HeightRequest="200" HorizontalOptions="Start" VerticalOptions="Start" Margin="-50,-50,0,0" />
+        <Ellipse Fill="White" Opacity="0.1" WidthRequest="150" HeightRequest="150" HorizontalOptions="End" VerticalOptions="End" Margin="0,0,-30,-30" />
 
-            <Label Text="¡Bienvenido!" 
-                   FontSize="32" 
-                   TextColor="#E63946"
-                   FontAttributes="Bold" 
-                   HorizontalOptions="Center" />
+        <ScrollView VerticalOptions="Center">
+            <VerticalStackLayout Spacing="30" Padding="30" VerticalOptions="Center">
 
-            <Label Text="Pide tu pizza favorita en segundos" 
-                   TextColor="#555555"
-                   FontSize="16"
-                   HorizontalOptions="Center"
-                   HorizontalTextAlignment="Center"/>
+                <!-- Logo con sombra suave -->
+                <Image x:Name="ImgLogo"
+                       Source="pizzasteve.png" 
+                       HeightRequest="240" 
+                       HorizontalOptions="Center"
+                       Aspect="AspectFit"
+                       Opacity="0">
+                    <Image.Shadow>
+                        <Shadow Brush="Black" Offset="0,15" Radius="25" Opacity="0.4" />
+                    </Image.Shadow>
+                </Image>
 
-            <Button Text="Iniciar sesión con Google"
-                    ImageSource="googleicon.png"
-                    ContentLayout="Left, 15"
-                    BackgroundColor="White"
-                    TextColor="#333333"
-                    CornerRadius="25"
-                    HeightRequest="55"
-                    BorderColor="#DDDDDD"
-                    BorderWidth="1"
-                    Margin="0,20,0,0"
-                    Clicked="OnGoogleLoginClicked">
-                <Button.Shadow>
-                    <Shadow Brush="Black" Offset="0,2" Radius="5" Opacity="0.1" />
-                </Button.Shadow>
-            </Button>
+                <!-- Tarjeta Glassmorphism (NUEVO) -->
+                <Border Padding="25" 
+                        Margin="0,10"
+                        BackgroundColor="#20FFFFFF" 
+                        StrokeThickness="1" 
+                        Stroke="#40FFFFFF" 
+                        StrokeShape="RoundRectangle 30"
+                        x:Name="CardLogin"
+                        Opacity="0">
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Offset="0,8" Radius="20" Opacity="0.1" />
+                    </Border.Shadow>
+                    
+                    <VerticalStackLayout Spacing="20">
+                        <VerticalStackLayout x:Name="StackBranding" Spacing="5" HorizontalOptions="Center">
+                            <Label Text="Pizzas Steve" 
+                                   FontSize="40" 
+                                   TextColor="White"
+                                   FontAttributes="Bold" 
+                                   HorizontalOptions="Center" />
+                            <Label Text="El sabor que te hace volar 🍕" 
+                                   TextColor="#FFE0B2"
+                                   FontSize="16"
+                                   HorizontalOptions="Center"
+                                   HorizontalTextAlignment="Center"
+                                   CharacterSpacing="1"/>
+                        </VerticalStackLayout>
 
-           
+                        <!-- Botón de Google -->
+                        <Button x:Name="BtnGoogle"
+                                Text="Continuar con Google"
+                                ImageSource="googleicon.png"
+                                ContentLayout="Left, 15"
+                                BackgroundColor="White"
+                                TextColor="#333333"
+                                CornerRadius="28"
+                                HeightRequest="58"
+                                FontAttributes="Bold"
+                                FontSize="16"
+                                Clicked="OnGoogleLoginClicked">
+                            <Button.Shadow>
+                                <Shadow Brush="Black" Offset="0,5" Radius="10" Opacity="0.2" />
+                            </Button.Shadow>
+                        </Button>
 
-        </VerticalStackLayout>
-    </ScrollView>
-</ContentPage>
+                        <Label Text="Al continuar, aceptas nuestros términos y condiciones" 
+                               TextColor="White"
+                               FontSize="11"
+                               Opacity="0.8"
+                               HorizontalOptions="Center"
+                               HorizontalTextAlignment="Center"/>
+                    </VerticalStackLayout>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Overlay de Carga (Spinner) -->
+        <Grid x:Name="LoadingOverlay" IsVisible="False" BackgroundColor="#80000000">
+            <Frame BackgroundColor="White" 
+                   CornerRadius="20" 
+                   Padding="30" 
+                   HorizontalOptions="Center" 
+                   VerticalOptions="Center"
+                   HasShadow="True">
+                <VerticalStackLayout Spacing="15" HorizontalOptions="Center">
+                    <ActivityIndicator IsRunning="True" Color="#FF4B3A" HeightRequest="50" WidthRequest="50" />
+                    <Label Text="Iniciando sesión..." 
+                           TextColor="#333333" 
+                           FontAttributes="Bold" 
+                           HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </Frame>
+        </Grid>
+
+    </Grid>
+</ContentPage>

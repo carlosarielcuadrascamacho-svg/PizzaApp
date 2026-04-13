@@ -30,19 +30,66 @@ namespace PizzeriaApp.Views
 
         private async Task LlenarReportesAsync()
         {
-            // El controlador nos da las métricas ya calculadas
             var result = await _controller.ObtenerReportesDiaAsync();
             
+            // 1. ASIGNACIÓN DE KPIs BÁSICOS
             lblIngresos.Text = result.Ingresos.ToString("C");
             lblPlatillos.Text = $"{result.Unidades} Und.";
+            lblOrdenesTotales.Text = result.Historial.Count.ToString();
 
+            // 2. CÁLCULO DE TICKET PROMEDIO (Solo pedidos no cancelados)
+            var pedidosValidos = result.Historial.Where(p => p.Estado != "Cancelado").ToList();
+            decimal ticketPromedio = pedidosValidos.Any() ? result.Ingresos / pedidosValidos.Count : 0;
+            lblTicketPromedio.Text = ticketPromedio.ToString("C");
+
+            // 3. ACTUALIZAR LISTA
             HistorialDia.Clear();
             foreach(var pedido in result.Historial)
             {
                 HistorialDia.Add(pedido);
             }
-
             dgTendencias.ItemsSource = HistorialDia;
+
+            // 4. ACTUALIZAR GRÁFICAS
+            ActualizarGraficas(result.Historial);
+        }
+
+        private void ActualizarGraficas(List<Pedido> pedidos)
+        {
+            // --- Gráfica de Distribución (Donut) ---
+            var datosDistribucion = pedidos
+                .Where(p => p.Estado != "Cancelado")
+                .SelectMany(p => p.Detalles)
+                .GroupBy(d => d.NombrePlatillo)
+                .Select(g => new ChartData { Name = g.Key, Value = (double)g.Sum(x => x.Subtotal) })
+                .OrderByDescending(x => x.Value)
+                .Take(5) // Top 5 platillos
+                .ToList();
+
+            donutSeries.ItemsSource = datosDistribucion;
+
+            // --- Gráfica de Tendencia Horaria (Area Chart) ---
+            // Agrupamos ventas por la hora de la fecha local
+            var datosTendencia = pedidos
+                .Where(p => p.Estado != "Cancelado")
+                .GroupBy(p => p.FechaLocal.Hour)
+                .Select(g => new ChartData { 
+                    Name = $"{g.Key:00}:00", 
+                    Value = (double)g.Sum(p => p.Total),
+                    Order = g.Key 
+                })
+                .OrderBy(x => x.Order)
+                .ToList();
+
+            // Si hay pocos puntos, rellenamos las horas faltantes del día para que la gráfica se vea completa
+            trendSeries.ItemsSource = datosTendencia;
+        }
+
+        public class ChartData
+        {
+            public string Name { get; set; }
+            public double Value { get; set; }
+            public int Order { get; set; }
         }
 
         private async void dgTendencias_SelectionChanged(object sender, DataGridSelectionChangedEventArgs e)

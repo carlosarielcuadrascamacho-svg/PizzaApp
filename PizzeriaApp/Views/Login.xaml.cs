@@ -14,8 +14,21 @@ public partial class Login : ContentPage
     public Login(IGoogleAuthService googleAuthService)
     {
         InitializeComponent();
-        // Inicializamos el controlador pasándole las dependencias necesarias
         _controller = new AuthController(googleAuthService, new DataBaseServices());
+    }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+
+        // Secuencia de animaciones de entrada "Fade-In" con ligeros retrasos para efecto premium
+        await Task.WhenAll(
+            ImgLogo.FadeTo(1, 800, Easing.CubicOut),
+            ImgLogo.TranslateTo(0, 0, 800, Easing.CubicOut) // Podríamos inicializarlo con un TranslationY si quisiéramos
+        );
+
+        await CardLogin.FadeTo(1, 800, Easing.CubicOut);
+        await CardLogin.TranslateTo(0, 0, 800, Easing.CubicOut);
     }
 
     // El evento principal: delegamos toda la orquestación al controlador
@@ -23,10 +36,19 @@ public partial class Login : ContentPage
     {
         try
         {
+            // Mostramos el overlay de carga y deshabilitamos el botón para evitar doble clic
+            LoadingOverlay.IsVisible = true;
+            BtnGoogle.IsEnabled = false;
+
             // El controlador se encarga de hablar con Google y Supabase
             var perfil = await _controller.LoginConGoogleAsync();
 
-            if (perfil == null) return; // Se canceló el login
+            if (perfil == null)
+            {
+                LoadingOverlay.IsVisible = false;
+                BtnGoogle.IsEnabled = true;
+                return; 
+            }
 
             // Capturamos el token para notificaciones (lógica de plataforma)
             await CapturarYGuardarTokenAsync(perfil.Id);
@@ -39,6 +61,8 @@ public partial class Login : ContentPage
         }
         catch (Exception ex)
         {
+            LoadingOverlay.IsVisible = false;
+            BtnGoogle.IsEnabled = true;
             await DisplayAlert("Error de Sesión", $"Ocurrió un problema: {ex.Message}", "Ok");
         }
     }

@@ -2,91 +2,186 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:syncfusion="clr-namespace:Syncfusion.Maui.DataGrid;assembly=Syncfusion.Maui.DataGrid"
+             xmlns:syncfusion_chart="clr-namespace:Syncfusion.Maui.Charts;assembly=Syncfusion.Maui.Charts"
              x:Class="PizzeriaApp.Views.ReportesAdmin"
              Title="Panel Directivo"
              BackgroundColor="#F4F6F8">
 
-    <Grid RowDefinitions="Auto, Auto, *">
-        <!-- Dashboard Stitch Header -->
-        <Border Grid.Row="0" Margin="15,15,15,5" Padding="20" BackgroundColor="#FFFFFF" StrokeThickness="0" StrokeShape="RoundRectangle 20">
-            <HorizontalStackLayout Spacing="15" VerticalOptions="Center">
-                <Label Text="📈" FontSize="32" VerticalOptions="Center"/>
-                <VerticalStackLayout VerticalOptions="Center">
-                    <Label Text="Desempeño Operativo" FontSize="20" FontAttributes="Bold" TextColor="#222"/>
-                    <Label Text="Métricas calculadas en tiempo real" FontSize="14" TextColor="#757575" />
-                </VerticalStackLayout>
-            </HorizontalStackLayout>
-        </Border>
-        
-        <Grid Grid.Row="1" ColumnDefinitions="*, *" ColumnSpacing="15" Margin="15,10,15,5">
-            <Border Grid.Column="0" BackgroundColor="#FFFFFF" Padding="15" StrokeThickness="0" StrokeShape="RoundRectangle 16">
-                <VerticalStackLayout>
-                    <Label Text="Ingresos Brutos" TextColor="#757575" FontSize="12" FontAttributes="Bold" />
-                    <Label x:Name="lblIngresos" Text="$0.00" TextColor="#1565C0" FontSize="20" FontAttributes="Bold" Margin="0,5,0,0"/>
-                </VerticalStackLayout>
-            </Border>
+    <ScrollView BackgroundColor="#F8F9FA">
+        <Grid RowDefinitions="Auto, Auto, Auto, Auto, *" Padding="0,0,0,30">
+            <!-- Header Stitch Moderno -->
+            <VerticalStackLayout Grid.Row="0" Margin="25,30,25,15" Spacing="4">
+                <Label Text="Intelligence Dashboard" FontSize="10" FontAttributes="Bold" TextColor="#FF4B3A" CharacterSpacing="2" />
+                <Label Text="Panel Directivo" FontSize="32" FontAttributes="Bold" TextColor="#1A1A1A" />
+                <Label Text="Métricas operativas y financieras de hoy" FontSize="14" TextColor="#757575" />
+            </VerticalStackLayout>
             
-            <Border Grid.Column="1" BackgroundColor="#FFFFFF" Padding="15" StrokeThickness="0" StrokeShape="RoundRectangle 16">
-                <VerticalStackLayout>
-                    <Label Text="Unidades Vendidas" TextColor="#757575" FontSize="12" FontAttributes="Bold" />
-                    <Label x:Name="lblPlatillos" Text="0 Und." TextColor="#2E7D32" FontSize="20" FontAttributes="Bold" Margin="0,5,0,0"/>
-                </VerticalStackLayout>
+            <!-- KPI Cards Grid (4 Cards) -->
+            <Grid Grid.Row="1" ColumnDefinitions="*, *" RowDefinitions="Auto, Auto" ColumnSpacing="15" RowSpacing="15" Margin="20,10">
+                <!-- Ingresos -->
+                <Border Grid.Row="0" Grid.Column="0" Padding="15" StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="White">
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Offset="0,4" Radius="10" Opacity="0.05" />
+                    </Border.Shadow>
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="💰 INGRESOS" TextColor="#757575" FontSize="10" FontAttributes="Bold" CharacterSpacing="1"/>
+                        <Label x:Name="lblIngresos" Text="$0.00" TextColor="#1A1A1A" FontSize="20" FontAttributes="Bold" />
+                        <Label Text="Venta total hoy" FontSize="9" TextColor="#4CAF50" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Border>
+                
+                <!-- Unidades -->
+                <Border Grid.Row="0" Grid.Column="1" Padding="15" StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="White">
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Offset="0,4" Radius="10" Opacity="0.05" />
+                    </Border.Shadow>
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="🍕 UNIDADES" TextColor="#757575" FontSize="10" FontAttributes="Bold" CharacterSpacing="1"/>
+                        <Label x:Name="lblPlatillos" Text="0 Und." TextColor="#1A1A1A" FontSize="20" FontAttributes="Bold" />
+                        <Label Text="Platillos preparados" FontSize="9" TextColor="#2196F3" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Ticket Promedio -->
+                <Border Grid.Row="1" Grid.Column="0" Padding="15" StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="White">
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Offset="0,4" Radius="10" Opacity="0.05" />
+                    </Border.Shadow>
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="🎫 TKT PROMÉDIO" TextColor="#757575" FontSize="10" FontAttributes="Bold" CharacterSpacing="1"/>
+                        <Label x:Name="lblTicketPromedio" Text="$0.00" TextColor="#1A1A1A" FontSize="20" FontAttributes="Bold" />
+                        <Label Text="Eficiencia de venta" FontSize="9" TextColor="#FF9800" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Órdenes Totales -->
+                <Border Grid.Row="1" Grid.Column="1" Padding="15" StrokeThickness="0" StrokeShape="RoundRectangle 20" BackgroundColor="White">
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Offset="0,4" Radius="10" Opacity="0.05" />
+                    </Border.Shadow>
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="📋 ÓRDENES" TextColor="#757575" FontSize="10" FontAttributes="Bold" CharacterSpacing="1"/>
+                        <Label x:Name="lblOrdenesTotales" Text="0" TextColor="#1A1A1A" FontSize="20" FontAttributes="Bold" />
+                        <Label Text="Pedidos recibidos" FontSize="9" TextColor="#673AB7" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+
+            <!-- Gráfica de Tendencia (Hourly Trend) -->
+            <Border Grid.Row="2" Margin="20,10" Padding="20" BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 24">
+                <Border.Shadow>
+                    <Shadow Brush="Black" Offset="0,6" Radius="12" Opacity="0.06" />
+                </Border.Shadow>
+                <Grid RowDefinitions="Auto, *">
+                    <Label Text="TENDENCIA DE VENTAS (POR HORA)" FontSize="10" FontAttributes="Bold" TextColor="#757575" CharacterSpacing="1" Margin="0,0,0,15" />
+                    <syncfusion_chart:SfCartesianChart Grid.Row="1" HeightRequest="200" x:Name="chartTendencia">
+                        <syncfusion_chart:SfCartesianChart.SelectionBehavior>
+                            <syncfusion_chart:SeriesSelectionBehavior SelectionBrush="#FF4B3A" />
+                        </syncfusion_chart:SfCartesianChart.SelectionBehavior>
+
+                        <syncfusion_chart:SfCartesianChart.XAxes>
+                            <syncfusion_chart:CategoryAxis ShowMajorGridLines="False" />
+                        </syncfusion_chart:SfCartesianChart.XAxes>
+                        <syncfusion_chart:SfCartesianChart.YAxes>
+                            <syncfusion_chart:NumericalAxis ShowMajorGridLines="True" />
+                        </syncfusion_chart:SfCartesianChart.YAxes>
+                        <syncfusion_chart:SfCartesianChart.Series>
+                            <syncfusion_chart:AreaSeries x:Name="trendSeries"
+                                                        XBindingPath="Name" 
+                                                        YBindingPath="Value"
+                                                        Fill="#40FF4B3A"
+                                                        Stroke="#FF4B3A"
+                                                        StrokeWidth="2"
+                                                        EnableTooltip="True">
+                            </syncfusion_chart:AreaSeries>
+                        </syncfusion_chart:SfCartesianChart.Series>
+                    </syncfusion_chart:SfCartesianChart>
+                </Grid>
+            </Border>
+
+            <!-- Gráfica de Distribución -->
+            <Border Grid.Row="3" Margin="20,10" Padding="20" BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 24">
+                <Border.Shadow>
+                    <Shadow Brush="Black" Offset="0,6" Radius="12" Opacity="0.06" />
+                </Border.Shadow>
+                <Grid RowDefinitions="Auto, *">
+                    <Label Text="DISTRIBUCIÓN POR PLATILLO" FontSize="10" FontAttributes="Bold" TextColor="#757575" CharacterSpacing="1" Margin="0,0,0,10" />
+                    <syncfusion_chart:SfCircularChart Grid.Row="1" HeightRequest="220" x:Name="chartVentas">
+                        <syncfusion_chart:SfCircularChart.Series>
+                            <syncfusion_chart:DoughnutSeries x:Name="donutSeries" 
+                                                            XBindingPath="Name" 
+                                                            YBindingPath="Value"
+                                                            ShowDataLabels="True"
+                                                            EnableTooltip="True"
+                                                            Radius="0.9"
+                                                            InnerRadius="0.6">
+                                <syncfusion_chart:DoughnutSeries.DataLabelSettings>
+                                    <syncfusion_chart:CircularDataLabelSettings LabelPlacement="Outer" LabelStyle="{syncfusion_chart:ChartDataLabelStyle FontSize=10}" />
+                                </syncfusion_chart:DoughnutSeries.DataLabelSettings>
+                            </syncfusion_chart:DoughnutSeries>
+                        </syncfusion_chart:SfCircularChart.Series>
+                        <syncfusion_chart:SfCircularChart.Legend>
+                            <syncfusion_chart:ChartLegend Placement="Bottom" />
+                        </syncfusion_chart:SfCircularChart.Legend>
+                    </syncfusion_chart:SfCircularChart>
+                </Grid>
+            </Border>
+
+            <!-- Historial en DataGrid -->
+            <Border Grid.Row="4" Margin="20,10,20,0" BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 24" Padding="0">
+                <Grid RowDefinitions="Auto, *">
+                    <HorizontalStackLayout Grid.Row="0" Margin="20,20,20,10" Spacing="10">
+                        <Label Text="📄 ACTIVIDAD RECIENTE" FontSize="12" FontAttributes="Bold" TextColor="#1A1A1A" VerticalOptions="Center" />
+                        <Border BackgroundColor="#F5F5F5" Padding="8,2" StrokeShape="RoundRectangle 10" StrokeThickness="0">
+                            <Label Text="Hoy" FontSize="10" TextColor="#757575" />
+                        </Border>
+                    </HorizontalStackLayout>
+                    
+                    <syncfusion:SfDataGrid Grid.Row="1" x:Name="dgTendencias" 
+                                           AutoGenerateColumnsMode="None" 
+                                           RowHeight="65" 
+                                           HeaderRowHeight="50"
+                                           SelectionMode="Single"
+                                           SelectionChanged="dgTendencias_SelectionChanged"
+                                           GridLinesVisibility="Horizontal"
+                                           HeaderGridLinesVisibility="None"
+                                           Margin="0,0,0,10">
+                        
+                        <syncfusion:SfDataGrid.Columns>
+                            
+                            <syncfusion:DataGridTextColumn MappingName="IdVisible" HeaderText="Orden" ColumnWidthMode="Auto">
+                                <syncfusion:DataGridTextColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <VerticalStackLayout VerticalOptions="Center" Padding="15,0">
+                                            <Label Text="{Binding IdVisible}" FontSize="14" TextColor="#1A1A1A" FontAttributes="Bold" />
+                                            <Label Text="{Binding FechaLocal, StringFormat='{0:HH:mm}'}" FontSize="11" TextColor="#757575" />
+                                        </VerticalStackLayout>
+                                    </DataTemplate>
+                                </syncfusion:DataGridTextColumn.CellTemplate>
+                            </syncfusion:DataGridTextColumn>
+                            
+                            <syncfusion:DataGridTemplateColumn MappingName="Estado" HeaderText="Estado" ColumnWidthMode="Fill">
+                                <syncfusion:DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Padding="10,5" BackgroundColor="{Binding ColorEstado}" StrokeShape="RoundRectangle 10" HorizontalOptions="Start" VerticalOptions="Center" Margin="10,0" StrokeThickness="0">
+                                            <Label Text="{Binding Estado}" FontSize="11" FontAttributes="Bold" TextColor="White" />
+                                        </Border>
+                                    </DataTemplate>
+                                </syncfusion:DataGridTemplateColumn.CellTemplate>
+                            </syncfusion:DataGridTemplateColumn>
+    
+                            <syncfusion:DataGridTextColumn MappingName="Total" HeaderText="Total" ColumnWidthMode="Auto">
+                                <syncfusion:DataGridTextColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Label Text="{Binding Total, StringFormat='{0:C}'}" FontSize="14" TextColor="#1A1A1A" FontAttributes="Bold" VerticalOptions="Center" HorizontalOptions="End" Margin="0,0,20,0"/>
+                                    </DataTemplate>
+                                </syncfusion:DataGridTextColumn.CellTemplate>
+                            </syncfusion:DataGridTextColumn>
+                            
+                        </syncfusion:SfDataGrid.Columns>
+                    </syncfusion:SfDataGrid>
+                </Grid>
             </Border>
         </Grid>
-
-        <!-- SfDataGrid Stitch -->
-        <Border Grid.Row="2" Margin="15,10,15,15" BackgroundColor="#FFFFFF" StrokeThickness="0" StrokeShape="RoundRectangle 16" Padding="0">
-            <Grid RowDefinitions="Auto, *">
-                <Label Grid.Row="0" Text="Historial de Pedidos de Hoy" FontSize="16" FontAttributes="Bold" TextColor="#424242" Margin="15,15,15,5"/>
-                
-                <syncfusion:SfDataGrid Grid.Row="1" x:Name="dgTendencias" 
-                                       AutoGenerateColumnsMode="None" 
-                                       RowHeight="60" 
-                                       HeaderRowHeight="50"
-                                       SelectionMode="Single"
-                                       SelectionChanged="dgTendencias_SelectionChanged"
-                                       GridLinesVisibility="Horizontal"
-                                       HeaderGridLinesVisibility="None">
-                    
-                    <syncfusion:SfDataGrid.Columns>
-                        
-                        <syncfusion:DataGridTextColumn MappingName="IdVisible" HeaderText="Orden" ColumnWidthMode="Auto">
-                            <syncfusion:DataGridTextColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Label Text="{Binding IdVisible}" FontSize="14" TextColor="#1565C0" FontAttributes="Bold" VerticalOptions="Center" Margin="10,0"/>
-                                </DataTemplate>
-                            </syncfusion:DataGridTextColumn.CellTemplate>
-                        </syncfusion:DataGridTextColumn>
-
-                        <syncfusion:DataGridTextColumn MappingName="FechaLocal" HeaderText="Hora" ColumnWidthMode="Auto">
-                            <syncfusion:DataGridTextColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Label Text="{Binding FechaLocal, StringFormat='{0:HH:mm}'}" FontSize="14" TextColor="#757575" VerticalOptions="Center" Margin="10,0"/>
-                                </DataTemplate>
-                            </syncfusion:DataGridTextColumn.CellTemplate>
-                        </syncfusion:DataGridTextColumn>
-                        
-                        <syncfusion:DataGridTemplateColumn MappingName="Estado" HeaderText="Estado" ColumnWidthMode="Fill">
-                            <syncfusion:DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Border Padding="8,4" BackgroundColor="{Binding ColorEstado}" StrokeShape="RoundRectangle 8" HorizontalOptions="Start" VerticalOptions="Center" Margin="10,0" StrokeThickness="0">
-                                        <Label Text="{Binding Estado}" FontSize="12" FontAttributes="Bold" TextColor="White" />
-                                    </Border>
-                                </DataTemplate>
-                            </syncfusion:DataGridTemplateColumn.CellTemplate>
-                        </syncfusion:DataGridTemplateColumn>
-
-                        <syncfusion:DataGridTextColumn MappingName="Total" HeaderText="Total" ColumnWidthMode="Auto">
-                            <syncfusion:DataGridTextColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Label Text="{Binding Total, StringFormat='{0:C}'}" FontSize="14" TextColor="#2E7D32" FontAttributes="Bold" VerticalOptions="Center" Margin="10,0"/>
-                                </DataTemplate>
-                            </syncfusion:DataGridTextColumn.CellTemplate>
-                        </syncfusion:DataGridTextColumn>
-                        
-                    </syncfusion:SfDataGrid.Columns>
-                </syncfusion:SfDataGrid>
-            </Grid>
-        </Border>
-    </Grid>
+    </ScrollView>
 </ContentPage>

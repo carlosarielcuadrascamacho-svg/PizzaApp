@@ -23,6 +23,11 @@ namespace PizzeriaApp.Services
         // Bandera simple para no reinicializar todo a cada rato
         private bool _initialized = false;
 
+        // CACHÉ: Guardamos catálogos en memoria para no saturar la red ni la base de datos
+        private static Dictionary<string, Producto> _cacheProductos = new();
+        private static Dictionary<string, UsuarioPerfil> _cachePerfiles = new();
+        private static DateTime _ultimaCargaCatalogo = DateTime.MinValue;
+
         public DataBaseServices()
         {
             // Intentamos agarrar el cliente que ya viva en el Factory (patrón Singleton para no crear mil conexiones)
@@ -278,30 +283,52 @@ namespace PizzeriaApp.Services
 
                 if (idsPedidos.Any())
                 {
-                    // Como Supabase no hace Joins complejos fácil, traemos detalles y productos para armar el modelo en memoria
-                    // Lanzamos ambas peticiones en paralelo para que la app no se sienta lenta
-                    var detallesTask = Client.From<DetallePedido>()
+                    // 1. CARGA DE PRODUCTOS (Caché por 10 minutos)
+                    if (!_cacheProductos.Any() || (DateTime.UtcNow - _ultimaCargaCatalogo).TotalMinutes > 10)
+                    {
+                        var productosRes = await Client.From<Producto>().Get();
+                        _cacheProductos = productosRes.Models.ToDictionary(p => p.Id, p => p);
+                        _ultimaCargaCatalogo = DateTime.UtcNow;
+                    }
+
+                    // 2. CARGA DE DETALLES
+                    var detallesResponse = await Client.From<DetallePedido>()
                         .Filter("pedido_id", Supabase.Postgrest.Constants.Operator.In, idsPedidos)
                         .Get();
-                    var productosTask = Client.From<Producto>().Get();
-
-                    await Task.WhenAll(detallesTask, productosTask);
-
-                    var detallesResponse = detallesTask.Result;
-                    // Creamos un diccionario de productos para buscar el nombre rápido por su ID
-                    var productosMapa = productosTask.Result.Models.ToDictionary(p => p.Id, p => p.Nombre);
 
                     foreach (var pedido in pedidosActivos)
                     {
-                        // Filtramos los detalles de este pedido específico
                         var detallesDelPedido = detallesResponse.Models.Where(d => d.PedidoId == pedido.Id).ToList();
                         foreach (var d in detallesDelPedido)
                         {
-                            // Le pegamos el nombre del platillo para que en la lista se vea \"Pizza Peperoni\" y no solo un ID feo
-                            d.NombrePlatillo = productosMapa.ContainsKey(d.ProductoId) ? productosMapa[d.ProductoId] : "Indefinido";
+                            d.NombrePlatillo = _cacheProductos.ContainsKey(d.ProductoId) ? _cacheProductos[d.ProductoId].Nombre : "Desconocido";
                         }
-                        // Usamos ObservableCollection para que el UI se refresque solito si añadimos algo (aunque aquí es carga inicial)
                         pedido.Detalles = new System.Collections.ObjectModel.ObservableCollection<DetallePedido>(detallesDelPedido);
+                    }
+
+                    // 3. CARGA DE PERFILES (Solo los que no tengamos en caché)
+                    var idsClientes = pedidosActivos.Select(p => p.ClienteId).Distinct().ToList();
+                    var idsFaltantes = idsClientes.Where(id => !_cachePerfiles.ContainsKey(id)).ToList();
+
+                    if (idsFaltantes.Any())
+                    {
+                        var perfilesResponse = await Client.From<UsuarioPerfil>()
+                            .Filter("id", Supabase.Postgrest.Constants.Operator.In, idsFaltantes)
+                            .Get();
+                        
+                        foreach (var perfil in perfilesResponse.Models)
+                        {
+                            _cachePerfiles[perfil.Id] = perfil;
+                        }
+                    }
+
+                    // 4. ASIGNACIÓN DE PERFILES
+                    foreach (var pedido in pedidosActivos)
+                    {
+                        if (_cachePerfiles.ContainsKey(pedido.ClienteId))
+                        {
+                            pedido.Cliente = _cachePerfiles[pedido.ClienteId];
+                        }
                     }
                 }
 
