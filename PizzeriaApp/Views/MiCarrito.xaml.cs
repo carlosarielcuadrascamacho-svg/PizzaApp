@@ -19,8 +19,8 @@ namespace PizzeriaApp.Views
             InitializeComponent();
             _carrito = carrito;
             _clienteActual = cliente;
-            // Inicializamos el controlador pasándole el servicio de datos
-            _controller = new OrderController(new DataBaseServices());
+            // Inicializamos el controlador pasándole los servicios especializados
+            _controller = new OrderController(new ServicioCatalogo(), new ServicioPedidos());
             
             ListaCarrito.ItemsSource = _carrito;
         }

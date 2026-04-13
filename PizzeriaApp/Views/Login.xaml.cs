@@ -14,7 +14,7 @@ public partial class Login : ContentPage
     public Login(IGoogleAuthService googleAuthService)
     {
         InitializeComponent();
-        _controller = new AuthController(googleAuthService, new DataBaseServices());
+        _controller = new AuthController(googleAuthService, new ServicioPerfiles());
     }
 
     protected override async void OnAppearing()
@@ -54,7 +54,7 @@ public partial class Login : ContentPage
             await CapturarYGuardarTokenAsync(perfil.Id);
 
             // Mandamos una notificación de bienvenida a través del servicio
-            _ = NotificationService.NotificarBienvenidaAsync(new DataBaseServices(), perfil.Id, perfil.Nombre, perfil.EsAdmin);
+            _ = NotificationService.NotificarBienvenidaAsync(perfil.Id, perfil.Nombre, perfil.EsAdmin);
 
             // La vista sólo se encarga de la navegación final
             Application.Current.MainPage = new MainNavigation(perfil);

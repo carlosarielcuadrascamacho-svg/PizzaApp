@@ -16,7 +16,8 @@ namespace PizzeriaApp.Views
         public GestionCatalogo()
         {
             InitializeComponent();
-            _controller = new AdminController(new DataBaseServices());
+            // Inicialización del controlador con servicios especializados
+            _controller = new AdminController(new ServicioReportes(), new ServicioPedidos(), new ServicioCatalogo());
         }
 
         protected override async void OnAppearing()

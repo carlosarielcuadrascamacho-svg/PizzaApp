@@ -41,7 +41,7 @@ namespace PizzeriaApp.Views
                 try
                 {
                     // Delegamos la obtención del perfil al AuthController para cumplir con MVC
-                    var authController = new Controllers.AuthController(null, new Services.DataBaseServices());
+                    var authController = new Controllers.AuthController(null, new Services.ServicioPerfiles());
                     var perfilFresco = await authController.ObtenerPerfilAsync(usuario.Id);
 
                     if (perfilFresco != null)

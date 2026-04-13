@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using PizzeriaApp.Services;
 using PizzeriaApp.Controllers;
 using PizzeriaApp.Views;
@@ -27,8 +27,11 @@ namespace PizzeriaApp
             builder.Services.AddTransient<Login>();
 
 
-            // Registro de servicios
-            builder.Services.AddSingleton<DataBaseServices>();
+            // Registro de servicios de Dominio (Arquitectura MVC Limpia)
+            builder.Services.AddSingleton<ServicioCatalogo>();
+            builder.Services.AddSingleton<ServicioPedidos>();
+            builder.Services.AddSingleton<ServicioReportes>();
+            builder.Services.AddSingleton<ServicioPerfiles>();
 
 #if DEBUG
             builder.Logging.AddDebug();

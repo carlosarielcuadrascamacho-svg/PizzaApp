@@ -19,8 +19,8 @@ namespace PizzeriaApp.Views
         public EditarProducto(Producto producto)
         {
             InitializeComponent();
-            // Inicialización del controlador administrativo
-            _controller = new AdminController(new DataBaseServices());
+            // Inicialización del controlador administrativo con servicios especializados
+            _controller = new AdminController(new ServicioReportes(), new ServicioPedidos(), new ServicioCatalogo());
             _productoOriginal = producto;
             
             CargarDatosProducto();

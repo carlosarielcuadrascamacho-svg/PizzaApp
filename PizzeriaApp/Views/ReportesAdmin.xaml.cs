@@ -17,8 +17,8 @@ namespace PizzeriaApp.Views
         public ReportesAdmin()
         {
             InitializeComponent();
-            // Inicialización del controlador
-            _controller = new AdminController(new DataBaseServices());
+            // Inicialización del controlador con servicios especializados
+            _controller = new AdminController(new ServicioReportes(), new ServicioPedidos(), new ServicioCatalogo());
             HistorialDia = new ObservableCollection<Pedido>();
         }
 
@@ -100,8 +100,8 @@ namespace PizzeriaApp.Views
 
                 if (pedidoSeleccionado != null)
                 {
-                    // Navegamos pasando el servicio (requerido por el constructor de DetalleOrden)
-                    await Navigation.PushAsync(new DetalleOrden(pedidoSeleccionado, new DataBaseServices()));
+                    // Navegamos pasando los servicios necesarios para el administrador
+                    await Navigation.PushAsync(new DetalleOrden(pedidoSeleccionado));
                 }
 
                 dgTendencias.SelectedIndex = -1;

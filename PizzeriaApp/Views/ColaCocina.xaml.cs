@@ -8,7 +8,7 @@ namespace PizzeriaApp.Views
     public partial class ColaCocina : ContentPage
     {
         private AdminController _controller;
-        private DataBaseServices _dbRaw; 
+        private ServicioPedidos _servicioPedidos; 
         private bool _isLoading = false;
         
         // Usamos ObservableCollection para que el DataGrid se entere de cambios individuales
@@ -18,8 +18,9 @@ namespace PizzeriaApp.Views
         public ColaCocina()
         {
             InitializeComponent();
-            _dbRaw = new DataBaseServices();
-            _controller = new AdminController(_dbRaw);
+            _servicioPedidos = new ServicioPedidos();
+            // El controlador requiere los 3 servicios especializados
+            _controller = new AdminController(new ServicioReportes(), _servicioPedidos, new ServicioCatalogo());
             
             // Vinculamos la colección una sola vez
             ListaPedidosGrid.ItemsSource = _pedidosEnPantalla;
@@ -33,8 +34,8 @@ namespace PizzeriaApp.Views
             base.OnAppearing();
             await CargarPedidosAsync();
 
-            // Sincronización inteligente por socket
-            await _dbRaw.SuscribirseAPedidosEnVivo(pedidoCambiado =>
+            // Sincronización inteligente por socket usando el nuevo servicio
+            await _servicioPedidos.SuscribirseAPedidosEnVivo(pedidoCambiado =>
             {
                 // Procesamos el cambio sutilmente sin recargar todo el catálogo
                 MainThread.BeginInvokeOnMainThread(() => ProcesarCambioEnVivo(pedidoCambiado));
@@ -98,7 +99,7 @@ namespace PizzeriaApp.Views
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
-            _dbRaw.DesuscribirsePedidosEnVivo();
+            _servicioPedidos.DesuscribirsePedidosEnVivo();
         }
 
         private async Task CargarPedidosAsync()

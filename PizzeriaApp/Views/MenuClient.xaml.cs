@@ -11,7 +11,7 @@ namespace PizzeriaApp.Views
     {
         private readonly UsuarioPerfil _clienteActual;
         private readonly OrderController _controller;
-        private readonly DataBaseServices _databaseService;
+        private readonly ServicioCatalogo _servicioCatalogo;
 
         // El carrito vive en memoria mientras el usuario navega
         private ObservableCollection<ItemCarrito> _carrito;
@@ -22,8 +22,8 @@ namespace PizzeriaApp.Views
         {
             InitializeComponent();
             _clienteActual = cliente;
-            _databaseService = new DataBaseServices();
-            _controller = new OrderController(_databaseService);
+            _servicioCatalogo = new ServicioCatalogo();
+            _controller = new OrderController(_servicioCatalogo, new ServicioPedidos());
             _carrito = new ObservableCollection<ItemCarrito>();
         }
 
@@ -135,7 +135,7 @@ namespace PizzeriaApp.Views
         private async Task CargarMenuAsync()
         {
             // Cargamos de DB
-            _todosLosProductos = await _databaseService.ObtenerCatalogoCompletoAsync();
+            _todosLosProductos = await _servicioCatalogo.ObtenerCatalogoCompletoAsync();
             
             CargarCategorias();
             FiltrarProductos();

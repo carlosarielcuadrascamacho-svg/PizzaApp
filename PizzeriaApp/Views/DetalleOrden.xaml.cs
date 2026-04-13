@@ -11,12 +11,12 @@ namespace PizzeriaApp.Views
         private readonly Pedido _pedido;
         private readonly AdminController _controller;
 
-        public DetalleOrden(Pedido pedido, DataBaseServices dbService)
+        public DetalleOrden(Pedido pedido)
         {
             InitializeComponent();
             _pedido = pedido;
-            // Inicialización del controlador administrativo
-            _controller = new AdminController(dbService);
+            // Inicialización del controlador administrativo con servicios especializados
+            _controller = new AdminController(new ServicioReportes(), new ServicioPedidos(), new ServicioCatalogo());
 
             CargarDatosOrden();
             _ = CargarDatosClienteAsync();

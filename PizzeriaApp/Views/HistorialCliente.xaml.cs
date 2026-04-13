@@ -17,8 +17,8 @@ namespace PizzeriaApp.Views
             InitializeComponent();
             _clienteId = clienteId;
             _nombreCliente = nombreCliente;
-            // Inicialización del controlador de pedidos
-            _controller = new OrderController(new DataBaseServices());
+            // Inicialización del controlador de pedidos con servicios especializados
+            _controller = new OrderController(new ServicioCatalogo(), new ServicioPedidos());
         }
 
         protected override async void OnAppearing()
@@ -69,7 +69,7 @@ namespace PizzeriaApp.Views
                 {
                     // Notificamos a los admins (lógica de negocio específica)
                     _ = NotificationService.NotificarCancelacionClienteAAdminsAsync(
-                        new DataBaseServices(), pedidoSeleccionado.IdVisible, _nombreCliente);
+                        pedidoSeleccionado.IdVisible, _nombreCliente);
 
                     await DisplayAlert("Éxito", "Pedido cancelado correctamente.", "OK");
                     await CargarHistorialAsync();

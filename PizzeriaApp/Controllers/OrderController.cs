@@ -11,17 +11,19 @@ namespace PizzeriaApp.Controllers
     // El Controlador de Pedidos maneja todo el flujo de compra y consulta de historial
     public class OrderController
     {
-        private readonly DataBaseServices _db;
+        private readonly ServicioCatalogo _servicioCatalogo;
+        private readonly ServicioPedidos _servicioPedidos;
 
-        public OrderController(DataBaseServices db)
+        public OrderController(ServicioCatalogo servicioCatalogo, ServicioPedidos servicioPedidos)
         {
-            _db = db;
+            _servicioCatalogo = servicioCatalogo;
+            _servicioPedidos = servicioPedidos;
         }
 
         // Obtiene el catálogo de productos activos
         public async Task<List<Producto>> ObtenerMenuAsync()
         {
-            return await _db.ObtenerProductosActivosAsync();
+            return await _servicioCatalogo.ObtenerProductosActivosAsync();
         }
 
         // Procesa la creación de un nuevo pedido
@@ -30,16 +32,15 @@ namespace PizzeriaApp.Controllers
             if (carrito == null || carrito.Count == 0) return false;
 
             decimal total = carrito.Sum(i => i.Subtotal);
-            string estadoInicial = "Ordenado";
             string mesaFinal = string.IsNullOrEmpty(mesa) ? "Mostrador" : mesa;
 
-            bool exito = await _db.CrearPedidoV2Async(cliente.Id, carrito.ToList(), total, estadoInicial, mesaFinal, comentario);
+            bool exito = await _servicioPedidos.CrearPedidoAsync(cliente.Id, carrito.ToList(), total, mesaFinal, comentario);
 
             if (exito)
             {
                 // Disparamos las notificaciones (estratégicamente desde el controlador)
-                _ = NotificationService.NotificarNuevoPedidoAAdminsAsync(_db);
-                _ = NotificationService.NotificarPedidoRecibidoAClienteAsync(_db, cliente.Id);
+                _ = NotificationService.NotificarNuevoPedidoAAdminsAsync();
+                _ = NotificationService.NotificarPedidoRecibidoAClienteAsync(cliente.Id);
             }
 
             return exito;
@@ -48,16 +49,16 @@ namespace PizzeriaApp.Controllers
         // Obtiene el historial específico de un cliente
         public async Task<List<Pedido>> ObtenerHistorialClienteAsync(string clienteId)
         {
-            return await _db.ObtenerHistorialClienteAsync(clienteId);
+            return await _servicioPedidos.ObtenerHistorialClienteAsync(clienteId);
         }
 
         // Cancela una orden desde la perspectiva del cliente o admin
         public async Task<bool> CancelarOrdenAsync(Pedido pedido)
         {
-            bool ok = await _db.ActualizarEstadoPedidoAsync(pedido.Id, "Cancelado");
+            bool ok = await _servicioPedidos.ActualizarEstadoPedidoAsync(pedido.Id, "Cancelado");
             if (ok)
             {
-                _ = NotificationService.NotificarCambioEstadoAClienteAsync(_db, pedido.ClienteId, "Cancelado", pedido.IdVisible);
+                _ = NotificationService.NotificarCambioEstadoAClienteAsync(pedido.ClienteId, "Cancelado", pedido.IdVisible);
             }
             return ok;
         }

@@ -13,8 +13,8 @@ namespace PizzeriaApp.Views
         public AltaProducto()
         {
             InitializeComponent();
-            // Inicialización del controlador
-            _controller = new AdminController(new DataBaseServices());
+            // Inicialización del controlador con servicios especializados
+            _controller = new AdminController(new ServicioReportes(), new ServicioPedidos(), new ServicioCatalogo());
         }
 
         private async void OnPickImageClicked(object sender, EventArgs e)

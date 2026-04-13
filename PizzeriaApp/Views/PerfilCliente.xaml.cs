@@ -15,8 +15,8 @@ namespace PizzeriaApp.Views
         {
             InitializeComponent();
             _usuario = usuario;
-            // Inicialización del controlador
-            _controller = new AuthController(null, new DataBaseServices());
+            // Inicialización del controlador con el servicio de perfiles
+            _controller = new AuthController(null, new ServicioPerfiles());
             
             this.BindingContext = _usuario;
         }
